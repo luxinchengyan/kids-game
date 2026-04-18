@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import useGameStore from '../store/gameStore'
+import { playSound } from '../lib/audio'
 
 export default function MicroTask({ items = [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }] }) {
-  const [lastPlayed, setLastPlayed] = useState(null);
-  const [reward, setReward] = useState(false);
+  const [lastPlayed, setLastPlayed] = useState(null)
+  const pushReward = useGameStore(state => state.pushReward)
 
   function handlePlay(id) {
-    // In a real app this would play a short audio clip.
-    setLastPlayed(id);
-    setReward(true);
-    setTimeout(() => setReward(false), 800);
+    setLastPlayed(id)
+    // global reward
+    pushReward({ type: 'star', source: id })
+    // attempt to play an audio file in public/audio/<id>.mp3, fallback to TTS inside playSound
+    playSound(`/audio/${id}.mp3`, { fallbackText: id }).catch(()=>{})
   }
 
   return (
@@ -27,13 +30,6 @@ export default function MicroTask({ items = [{ id: 'a', label: 'A' }, { id: 'b',
           </div>
         ))}
       </div>
-
-      {/* reward */}
-      {reward && (
-        <div data-testid="reward" style={{ position: 'fixed', right: 20, top: 20, background: '#fff3e0', padding: 10, borderRadius: 10, boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}>
-          ✨ +1 星
-        </div>
-      )}
     </div>
   );
 }
