@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const options = ['b', 'p', 'm']
+const SCORE_KEY = 'kids-game-score'
 
 function speak(text: string) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
@@ -11,9 +12,26 @@ function speak(text: string) {
 }
 
 export default function App() {
-  const [score, setScore] = useState(0)
+  const [score, setScore] = useState<number>(0)
   const [locked, setLocked] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SCORE_KEY)
+      if (raw) setScore(Number(raw))
+    } catch (e) {
+      // ignore
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SCORE_KEY, String(score))
+    } catch (e) {
+      // ignore
+    }
+  }, [score])
 
   const play = () => speak('b')
 
