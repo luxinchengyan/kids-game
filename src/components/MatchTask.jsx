@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import useGameStore from '../store/gameStore'
+import { createDragSession, enableDragStart, handleDrop, tolerantMatcher } from '../lib/dragdrop'
 
 function shuffle(arr){
   return arr.map(v=>({v, r:Math.random()})).sort((a,b)=>a.r-b.r).map(a=>a.v)
@@ -13,18 +14,22 @@ export default function MatchTask({ pairs = [{ id: 'a', label: '🍎' }, { id: '
   const left = useMemo(()=>shuffle(pairs),[pairs])
   const right = useMemo(()=>shuffle(pairs),[pairs])
 
+  const session = useMemo(()=>createDragSession((id, target)=>{
+    // onMatch callback: update UI state and reward
+    setMatches(m=>({ ...m, [target]: id }))
+    addScore(1)
+    pushReward({ type: 'star', source: id })
+  }), [addScore, pushReward])
+
   function onDragStart(e,id){
-    e.dataTransfer.setData('text/plain', id)
+    enableDragStart(e,id)
   }
 
   function onDrop(e, targetId){
-    const id = e.dataTransfer.getData('text/plain')
-    e.preventDefault()
-    if(!id) return
-    if(id === targetId && !matches[targetId]){
-      setMatches(m=>({ ...m, [targetId]: id }))
-      addScore(1)
-      pushReward({ type: 'star', source: id })
+    const ok = handleDrop(e, targetId, session, tolerantMatcher)
+    // optional visual feedback on mismatch
+    if(!ok){
+      // flash or shake could be implemented
     }
   }
 
