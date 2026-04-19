@@ -5,14 +5,16 @@ const typeLabels = {
   myth: '神话故事',
   poem: '古诗',
   idiom: '成语故事',
-  history: '历史典故'
+  history: '历史典故',
+  fable: '寓言故事'
 }
 
 const typeColors = {
   myth: { bg: '#FFF3E0', color: '#FF9800', border: '#FFB74D' },
   poem: { bg: '#E3F2FD', color: '#2196F3', border: '#64B5F6' },
   idiom: { bg: '#E8F5E9', color: '#4CAF50', border: '#81C784' },
-  history: { bg: '#F3E5F5', color: '#9C27B0', border: '#CE93D8' }
+  history: { bg: '#F3E5F5', color: '#9C27B0', border: '#CE93D8' },
+  fable: { bg: '#FFF9C4', color: '#F9A825', border: '#FFD54F' }
 }
 
 export default function StoryReader({ story, onComplete, onBack }) {
@@ -20,6 +22,8 @@ export default function StoryReader({ story, onComplete, onBack }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showPinyin, setShowPinyin] = useState(true)
   const [isCompleted, setIsCompleted] = useState(false)
+  // titleRead: false=未读, 'reading'=正在朗读标题, true=已完成标题朗读
+  const [titleRead, setTitleRead] = useState(false)
   const speechSynthesisRef = useRef(null)
 
   const colorScheme = typeColors[story.type] || typeColors.myth
@@ -32,16 +36,25 @@ export default function StoryReader({ story, onComplete, onBack }) {
         utterance.lang = 'zh-CN'
         utterance.rate = 0.85
         utterance.pitch = 1.1
-        
-        utterance.onend = () => {
-          resolve()
-        }
-        
+        utterance.onend = () => { resolve() }
         window.speechSynthesis.speak(utterance)
       } else {
         resolve()
       }
     })
+  }
+
+  const playTitle = async () => {
+    if (isPlaying) return
+    setIsPlaying(true)
+    setTitleRead('reading')
+    await speakText(story.title)
+    // 古诗：标题后接读朝代和作者
+    if (story.type === 'poem' && story.dynasty && story.author) {
+      await speakText(`${story.dynasty} ${story.author}`)
+    }
+    setTitleRead(true)
+    setIsPlaying(false)
   }
 
   const playCurrentLine = async () => {
@@ -60,6 +73,15 @@ export default function StoryReader({ story, onComplete, onBack }) {
     }
 
     setIsPlaying(true)
+    // 若标题未读，先朗读标题（古诗追加朝代和作者）
+    if (!titleRead) {
+      setTitleRead('reading')
+      await speakText(story.title)
+      if (story.type === 'poem' && story.dynasty && story.author) {
+        await speakText(`${story.dynasty} ${story.author}`)
+      }
+      setTitleRead(true)
+    }
     for (let i = currentLine; i < story.content.length; i++) {
       setCurrentLine(i)
       await speakText(story.content[i].text)
@@ -179,21 +201,46 @@ export default function StoryReader({ story, onComplete, onBack }) {
             fontSize: '32px', 
             fontWeight: 800, 
             color: '#3E2723',
-            marginBottom: showPinyin ? '8px' : '0'
+            marginBottom: '4px'
           }}>
             {story.title}
           </h2>
-          
+
           {showPinyin && (
             <p style={{ 
               fontSize: '18px', 
               color: '#FF9800', 
               fontWeight: 600,
-              marginBottom: '0'
+              marginBottom: '12px'
             }}>
               {story.titlePinyin}
             </p>
           )}
+
+          {/* 标题朗读按钮 */}
+          <button
+            type="button"
+            onClick={playTitle}
+            disabled={isPlaying}
+            style={{
+              padding: '10px 24px',
+              borderRadius: '999px',
+              border: 'none',
+              background: titleRead === 'reading'
+                ? 'linear-gradient(135deg, #BDBDBD, #9E9E9E)'
+                : titleRead
+                  ? `linear-gradient(135deg, ${colorScheme.color}99, ${colorScheme.border}99)`
+                  : `linear-gradient(135deg, ${colorScheme.color}, ${colorScheme.border})`,
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: isPlaying ? 'not-allowed' : 'pointer',
+              boxShadow: isPlaying ? 'none' : `0 4px 12px ${colorScheme.bg}`,
+              marginBottom: '4px'
+            }}
+          >
+            {titleRead === 'reading' ? '🔊 朗读中...' : titleRead ? '🔊 重读标题' : '🔊 先听标题'}
+          </button>
         </div>
 
         <div style={{ 
