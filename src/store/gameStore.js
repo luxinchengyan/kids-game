@@ -1,7 +1,9 @@
 import { create } from 'zustand'
+import { createInitialKnowledgeState } from '../data/learningContent'
 
 const PROFILE_KEY = 'kids-game-profile'
 const HISTORY_KEY = 'kids-game-history'
+const KNOWLEDGE_KEY = 'kids-game-knowledge'
 
 function loadJson(key, fallback) {
   if (typeof window === 'undefined') return fallback
@@ -43,6 +45,23 @@ const defaultStats = {
   history: []
 }
 
+function loadKnowledgeState() {
+  const defaults = createInitialKnowledgeState()
+  const saved = loadJson(KNOWLEDGE_KEY, {})
+  return { ...defaults, ...saved }
+}
+
+function scheduleNextReview(accuracy, previousNextReviewAt) {
+  const now = Date.now()
+  const intervals = [10 * 60 * 1000, 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000]
+  if (accuracy > 0.9 && previousNextReviewAt > now) {
+    return previousNextReviewAt + intervals[0]
+  }
+  if (accuracy > 0.85) return now + intervals[1]
+  if (accuracy > 0.6) return now + intervals[0]
+  return now + 5 * 60 * 1000
+}
+
 const useGameStore = create((set, get) => ({
   profile: loadJson(PROFILE_KEY, defaultProfile),
   mission: [],
@@ -53,6 +72,7 @@ const useGameStore = create((set, get) => ({
     ...defaultStats,
     history: loadJson(HISTORY_KEY, [])
   },
+  knowledge: loadKnowledgeState(),
 
   setProfile: (profile) => {
     const nextProfile = { ...get().profile, ...profile }
@@ -75,7 +95,7 @@ const useGameStore = create((set, get) => ({
     }))
   },
 
-  recordTaskResult: ({ taskId, success, stars = 0, skill, prompt, responseTime }) => {
+  recordTaskResult: ({ taskId, success, stars = 0, skill, prompt, responseTime, knowledgeUnitId, response }) => {
     set((state) => {
       const completedTasks = state.stats.completedTasks + 1
       const correctAnswers = state.stats.correctAnswers + (success ? 1 : 0)
@@ -86,17 +106,38 @@ const useGameStore = create((set, get) => ({
       const historyEntry = {
         taskId,
         skill,
+        knowledgeUnitId,
         prompt,
         success,
         stars,
+        response,
         responseTime,
         completedAt: new Date().toISOString()
       }
       const history = [...state.stats.history, historyEntry].slice(-30)
+      const nextKnowledge = { ...state.knowledge }
+
+      if (knowledgeUnitId && nextKnowledge[knowledgeUnitId]) {
+        const unit = nextKnowledge[knowledgeUnitId]
+        const seenCount = unit.seenCount + 1
+        const correctCount = unit.correctCount + (success ? 1 : 0)
+        const accuracy = correctCount / seenCount
+        nextKnowledge[knowledgeUnitId] = {
+          ...unit,
+          seenCount,
+          correctCount,
+          accuracy,
+          errorCount: unit.errorCount + (success ? 0 : 1),
+          lastReviewedAt: Date.now(),
+          nextReviewAt: scheduleNextReview(accuracy, unit.nextReviewAt)
+        }
+        saveJson(KNOWLEDGE_KEY, nextKnowledge)
+      }
 
       saveJson(HISTORY_KEY, history)
 
       return {
+        knowledge: nextKnowledge,
         stats: {
           ...state.stats,
           completedTasks,

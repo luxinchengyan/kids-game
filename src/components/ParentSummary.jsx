@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import useGameStore from '../store/gameStore'
 import { t } from '../lib/i18n'
+import { getWeakKnowledgePoints } from '../data/learningContent'
 
-function buildSummary(profile, stats, mission) {
+function buildSummary(profile, stats, mission, knowledge) {
   const accuracy = stats.completedTasks ? Math.round((stats.correctAnswers / stats.completedTasks) * 100) : 0
   const durationSeconds = stats.sessionStartedAt ? Math.max(45, Math.round((Date.now() - stats.sessionStartedAt) / 1000)) : mission.length * 45
+  const weakPoints = getWeakKnowledgePoints(knowledge).map((unit) => unit.content)
+  const weakText = weakPoints.length ? weakPoints.join(' / ') : '暂无'
 
   return {
     timestamp: new Date().toISOString(),
@@ -16,11 +19,12 @@ function buildSummary(profile, stats, mission) {
     stars: stats.stars,
     durationSeconds,
     level: stats.level,
-    note: `${profile.childName || '孩子'} 今天完成了 ${stats.completedTasks} 个微任务，正确率 ${accuracy}%，推荐在 10 分钟后复习一次最易错内容。`,
+    weakPoints,
+    note: `${profile.childName || '孩子'} 今天完成了 ${stats.completedTasks} 个微任务，正确率 ${accuracy}%，当前薄弱点：${weakText}。`,
     recommendation:
       accuracy >= 80
-        ? '建议明天加入一次家庭共读，巩固今天最强的知识点。'
-        : '建议晚些时候做一次 1 分钟复习，按记忆曲线再次触发同类题型。'
+        ? `建议在明天复习 ${weakText}，并继续推进新的拼音组合。`
+        : `建议今天 10 分钟后先复习 ${weakText}，重点做听音区分训练。`
   }
 }
 
@@ -28,11 +32,12 @@ export default function ParentSummary() {
   const profile = useGameStore((state) => state.profile)
   const stats = useGameStore((state) => state.stats)
   const mission = useGameStore((state) => state.mission)
+  const knowledge = useGameStore((state) => state.knowledge)
   const setParentSummary = useGameStore((state) => state.setParentSummary)
   const parentSummary = useGameStore((state) => state.parentSummary)
 
   const [copied, setCopied] = useState(false)
-  const summary = parentSummary || buildSummary(profile, stats, mission)
+  const summary = parentSummary || buildSummary(profile, stats, mission, knowledge)
 
   function handleCopy(){
     const json = JSON.stringify(summary, null, 2)
@@ -91,6 +96,7 @@ export default function ParentSummary() {
         </div>
       </div>
       <p className="summary-note">{summary.note}</p>
+      <p className="summary-note">薄弱知识点：{summary.weakPoints.length ? summary.weakPoints.join(' / ') : '暂无'}</p>
       <p className="summary-recommendation">{summary.recommendation}</p>
       <div className="summary-actions">
         <button type="button" className="secondary-button" data-testid="copy-summary" onClick={handleCopy}>复制摘要</button>

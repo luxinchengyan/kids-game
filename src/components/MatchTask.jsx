@@ -50,15 +50,25 @@ export default function MatchTask({
     }
   }
 
+  function onSelectChip(id) {
+    setSelected(id)
+    setFeedback('已选中卡片，请点击正确的目标框')
+  }
+
+  function assignSelected(targetId) {
+    if (!selected) return
+    if (tolerantMatcher(selected, targetId)) {
+      session.recordMatch(selected, targetId)
+      setSelected(null)
+    } else {
+      setFeedback('这组还不对')
+    }
+  }
+
   function onDropKey(event, targetId) {
     if ((event.key === 'Enter' || event.key === ' ') && selected) {
       event.preventDefault()
-      if (tolerantMatcher(selected, targetId)) {
-        session.recordMatch(selected, targetId)
-        setSelected(null)
-      } else {
-        setFeedback('这组还不对')
-      }
+      assignSelected(targetId)
     }
   }
 
@@ -77,6 +87,7 @@ export default function MatchTask({
               onDragStart={(event) => enableDragStart(event, pair.id)}
               data-testid={`drag-${pair.id}`}
               onKeyDown={(event) => onDragKey(event, pair.id)}
+              onClick={() => onSelectChip(pair.id)}
               className={`match-chip ${selected === pair.id ? 'is-selected' : ''}`}
             >
               {pair.left}
@@ -92,6 +103,7 @@ export default function MatchTask({
                 const ok = handleDrop(event, pair.id, session, tolerantMatcher)
                 setFeedback(ok ? '配对成功' : '这里不对，再试试')
               }}
+              onClick={() => assignSelected(pair.id)}
               data-testid={`drop-${pair.id}`}
               role="button"
               tabIndex={0}

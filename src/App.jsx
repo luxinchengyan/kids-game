@@ -3,6 +3,7 @@ import ChoiceTask from './components/ChoiceTask'
 import MatchTask from './components/MatchTask'
 import MicroTask from './components/MicroTask'
 import ParentSummary from './components/ParentSummary'
+import PinyinBattle from './components/PinyinBattle'
 import RewardToast from './components/RewardToast'
 import { createMission, getCompanion } from './data/learningContent'
 import { setLocale, t } from './lib/i18n'
@@ -75,8 +76,9 @@ function ProfileSetup({ profile, onSave }) {
   )
 }
 
-function ProgressPanel({ companion, profile, stats, missionIndex, mission }) {
+function ProgressPanel({ companion, profile, stats, missionIndex, mission, knowledge }) {
   const progress = mission.length ? Math.round((missionIndex / mission.length) * 100) : 0
+  const dueReviews = Object.values(knowledge).filter((unit) => unit.nextReviewAt && unit.nextReviewAt <= Date.now()).length
   return (
     <aside className="progress-panel">
       <div className="companion-card">
@@ -90,6 +92,8 @@ function ProgressPanel({ companion, profile, stats, missionIndex, mission }) {
         <div><strong>Lv.{stats.level}</strong><span>成长等级</span></div>
         <div><strong>{stats.streakDays}</strong><span>连续学习</span></div>
         <div><strong>{progress}%</strong><span>今日任务</span></div>
+        <div><strong>{dueReviews}</strong><span>待复习知识点</span></div>
+        <div><strong>{profile.focus === 'pinyin' ? '冒险岛' : '成长营'}</strong><span>当前世界</span></div>
       </div>
       <div className="progress-rail" aria-hidden="true">
         <div className="progress-fill" style={{ width: `${progress}%` }} />
@@ -101,6 +105,7 @@ function ProgressPanel({ companion, profile, stats, missionIndex, mission }) {
 
 function MissionStage({ task, onComplete, language }) {
   if (!task) return null
+  if (task.type === 'battle') return <PinyinBattle task={task} onComplete={onComplete} language={language} />
   if (task.type === 'choice') return <ChoiceTask task={task} onComplete={onComplete} />
   if (task.type === 'match') return <MatchTask task={task} onComplete={onComplete} />
   return <MicroTask task={task} onComplete={onComplete} language={language} />
@@ -111,6 +116,7 @@ export default function App() {
   const mission = useGameStore((state) => state.mission)
   const missionIndex = useGameStore((state) => state.missionIndex)
   const stats = useGameStore((state) => state.stats)
+  const knowledge = useGameStore((state) => state.knowledge)
   const setProfile = useGameStore((state) => state.setProfile)
   const startMission = useGameStore((state) => state.startMission)
   const nextTask = useGameStore((state) => state.nextTask)
@@ -131,7 +137,7 @@ export default function App() {
 
   function beginMission(nextProfile = profile) {
     setProfile(nextProfile)
-    const generatedMission = createMission(nextProfile)
+    const generatedMission = createMission(nextProfile, knowledge)
     startMission(generatedMission)
     setShowSummary(false)
   }
@@ -144,11 +150,13 @@ export default function App() {
       stars: result.stars,
       skill: activeTask.skill,
       prompt: activeTask.prompt,
-      responseTime: 12
+      responseTime: 12,
+      knowledgeUnitId: activeTask.knowledgeUnitId,
+      response: result.response
     })
     queueReward({
       type: result.stars > 1 ? 'badge' : 'star',
-      message: `${companion.name} 为你点亮了 ${result.stars} 颗星`,
+      message: `${companion.name} 为你点亮了 ${result.stars} 颗星，${activeTask.reviewMode ? '复习进度已更新' : '拼音岛能量上涨'}`,
       createdAt: Date.now()
     })
     nextTask()
@@ -178,12 +186,12 @@ export default function App() {
         <ProfileSetup profile={profile} onSave={beginMission} />
       ) : (
         <main className="dashboard">
-          <ProgressPanel companion={companion} profile={profile} stats={stats} missionIndex={missionIndex} mission={mission} />
+          <ProgressPanel companion={companion} profile={profile} stats={stats} missionIndex={missionIndex} mission={mission} knowledge={knowledge} />
           <section className="main-stage">
             <div className="mission-banner" data-testid="mission-banner">
               <div>
                 <p className="eyebrow">{t('mission_ready')}</p>
-                <h2>{profile.childName || '小朋友'}，和 {companion.name} 一起完成 3 个任务</h2>
+                <h2>{profile.childName || '小朋友'}，和 {companion.name} 一起探索{profile.focus === 'pinyin' ? '拼音冒险岛' : '成长练习营'}</h2>
               </div>
               <div className="mission-step">
                 第 {Math.min(missionIndex + 1, mission.length)} / {mission.length} 题
