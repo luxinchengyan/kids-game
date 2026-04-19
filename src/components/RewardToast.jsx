@@ -1,26 +1,35 @@
 import React, { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import useGameStore from '../store/gameStore'
+import { t } from '../lib/i18n'
 
-export default function RewardToast(){
-  const rewards = useGameStore(s=>s.rewards)
-  const clearRewards = useGameStore(s=>s.clearRewards)
+export default function RewardToast() {
+  const rewards = useGameStore((state) => state.rewards)
+  const clearRewards = useGameStore((state) => state.clearRewards)
 
-  useEffect(()=>{
-    if(rewards && rewards.length){
-      const t = setTimeout(()=>clearRewards(), 1000)
-      return ()=>clearTimeout(t)
-    }
-  },[rewards, clearRewards])
-
-  if(!rewards || rewards.length === 0) return null
+  useEffect(() => {
+    if (!rewards.length) return undefined
+    const timer = window.setTimeout(() => clearRewards(), 1800)
+    return () => window.clearTimeout(timer)
+  }, [rewards, clearRewards])
 
   return (
-    <div style={{ position: 'fixed', right: 20, top: 20, zIndex: 9999 }}>
+    <div className="reward-stack" aria-live="polite">
       <AnimatePresence>
-        {rewards.map((r, i) => (
-          <motion.div key={i} data-testid="reward" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} style={{ background: '#fff3e0', padding: 10, borderRadius: 8, boxShadow: '0 6px 18px rgba(0,0,0,0.12)', marginBottom: 8 }}>
-            {r.type === 'star' ? '✨ +1 星' : '✅'}
+        {rewards.map((reward, index) => (
+          <motion.div
+            key={`${reward.type}-${index}-${reward.createdAt || index}`}
+            data-testid="reward"
+            className="reward-toast"
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.92 }}
+          >
+            <div className="reward-icon">{reward.type === 'badge' ? '🏅' : '✨'}</div>
+            <div>
+              <strong>{reward.type === 'badge' ? t('reward_badge') : t('reward_star')}</strong>
+              <div>{reward.message}</div>
+            </div>
           </motion.div>
         ))}
       </AnimatePresence>

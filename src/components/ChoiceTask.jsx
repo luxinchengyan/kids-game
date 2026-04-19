@@ -1,31 +1,51 @@
 import React, { useState } from 'react'
-import useGameStore from '../store/gameStore'
 
-export default function ChoiceTask({ question = 'Which is A?', options = [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }], correct = 'a' }){
+export default function ChoiceTask({
+  task = {
+    prompt: 'Which is A?',
+    hint: 'Pick the correct answer.',
+    question: 'Which is A?',
+    options: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+    correct: 'a'
+  },
+  onComplete = () => {}
+}) {
   const [selected, setSelected] = useState(null)
-  const addScore = useGameStore(state=>state.addScore)
-  const pushReward = useGameStore(state=>state.pushReward)
+  const [feedback, setFeedback] = useState('')
 
-  function choose(id){
+  function choose(id) {
     setSelected(id)
-    if(id === correct){
-      addScore(1)
-      pushReward({ type: 'star', source: id })
+    const success = id === task.correct
+    setFeedback(success ? '答对了，继续前进' : '再试一次，我们一起做')
+    if (success) {
+      onComplete({
+        success: true,
+        stars: 1,
+        response: id
+      })
     }
   }
 
   return (
-    <div style={{ padding: 12 }}>
-      <h3>{question}</h3>
-      <div style={{ display: 'flex', gap: 12 }}>
-        {options.map(o => (
-          <button key={o.id} data-testid={`choice-${o.id}`} onClick={()=>choose(o.id)} style={{ padding: '12px 18px', borderRadius: 8 }}>
-            {o.label}
+    <section className="task-card" data-testid="choice-card">
+      <p className="eyebrow">Choice</p>
+      <h2>{task.prompt}</h2>
+      <p className="task-hint">{task.hint}</p>
+      <div className="question-box">{task.question}</div>
+      <div className="choice-grid compact">
+        {task.options.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            data-testid={`choice-${option.id}`}
+            className={`option-button ${selected === option.id ? 'is-selected' : ''}`}
+            onClick={() => choose(option.id)}
+          >
+            {option.label}
           </button>
         ))}
       </div>
-      {selected && selected === correct && <div style={{ marginTop: 8, color: '#2e7d32' }}>正确！</div>}
-      {selected && selected !== correct && <div style={{ marginTop: 8, color: '#c62828' }}>再试一次</div>}
-    </div>
+      <div className="task-feedback" aria-live="polite">{feedback}</div>
+    </section>
   )
 }

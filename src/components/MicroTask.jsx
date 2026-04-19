@@ -1,35 +1,75 @@
-import React, { useState } from 'react'
-import useGameStore from '../store/gameStore'
+import React, { useMemo, useState } from 'react'
 import { playSound } from '../lib/audio'
+import { t } from '../lib/i18n'
 
-export default function MicroTask({ items = [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }] }) {
+export default function MicroTask({
+  task = {
+    prompt: '点一点，听声母 b 的发音',
+    hint: '先听，再跟着读。',
+    narration: 'b',
+    items: [{ id: 'b', label: 'b', subtitle: '玻璃球' }],
+    targetId: 'b'
+  },
+  language = 'zh',
+  onComplete = () => {}
+}) {
   const [lastPlayed, setLastPlayed] = useState(null)
-  const pushReward = useGameStore(state => state.pushReward)
+  const [feedback, setFeedback] = useState('')
+  const lang = useMemo(() => (language === 'en' ? 'en-US' : 'zh-CN'), [language])
 
-  function handlePlay(id) {
-    setLastPlayed(id)
-    // global reward
-    pushReward({ type: 'star', source: id })
-    // attempt to play an audio file in public/audio/<id>.mp3, fallback to TTS inside playSound
-    playSound(`/audio/${id}.mp3`, { fallbackText: id }).catch(()=>{})
+  function handlePlay(item) {
+    setLastPlayed(item.id)
+    setFeedback(item.id === task.targetId ? '找到了正确声音' : '继续听一听')
+    playSound(`/audio/${item.id}.mp3`, { fallbackText: item.label, lang }).catch(() => {})
   }
 
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: 12 }}>
-      <h2 style={{ color: '#2b6ef6' }}>MicroTask — 点击听音</h2>
-      <div style={{ display: 'flex', gap: 12 }}>
-        {items.map((it) => (
-          <div key={it.id} style={{ borderRadius: 12, padding: 12, background: '#fff7f0', width: 120, textAlign: 'center', boxShadow: '0 6px 12px rgba(0,0,0,0.06)' }}>
-            <div style={{ fontSize: 28, fontWeight: 700 }}>{it.label}</div>
-            <button data-testid={`play-${it.id}`} onClick={() => handlePlay(it.id)} style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: '#ffb74d', border: 'none', cursor: 'pointer' }}>
-              Play
+    <section className="task-card" data-testid="microtask-card">
+      <div className="task-head">
+        <div>
+          <p className="eyebrow">Listen</p>
+          <h2>{task.prompt}</h2>
+        </div>
+        <button className="secondary-button" type="button" onClick={() => playSound('', { fallbackText: task.narration, lang })}>
+          {t('play_prompt')}
+        </button>
+      </div>
+      <p className="task-hint">{task.hint}</p>
+      <div className="choice-grid">
+        {task.items.map((item) => (
+          <article key={item.id} className={`learning-card ${lastPlayed === item.id ? 'is-active' : ''}`}>
+            <button
+              className="sound-button"
+              type="button"
+              data-testid={`play-${item.id}`}
+              onClick={() => handlePlay(item)}
+            >
+              {t('replay_audio')}
             </button>
-            {lastPlayed === it.id && (
-              <div aria-live="polite" style={{ marginTop: 8, color: '#2e7d32' }}>Playing…</div>
-            )}
-          </div>
+            <div className="learning-symbol">{item.label}</div>
+            <div className="learning-subtitle">{item.subtitle}</div>
+            <button
+              className="primary-button full-width"
+              type="button"
+              data-testid={`select-${item.id}`}
+              onClick={() => {
+                const success = item.id === task.targetId
+                setFeedback(success ? '太棒了，答对啦' : '这次不对，我们再试一次')
+                if (success) {
+                  onComplete({
+                    success: true,
+                    stars: 1,
+                    response: item.id
+                  })
+                }
+              }}
+            >
+              选这个
+            </button>
+          </article>
         ))}
       </div>
-    </div>
-  );
+      <div className="task-feedback" aria-live="polite">{feedback}</div>
+    </section>
+  )
 }
