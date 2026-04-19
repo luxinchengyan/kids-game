@@ -24,11 +24,11 @@ export default function MicroTask({
   }
 
   return (
-    <section className="task-card" data-testid="microtask-card">
+    <section className="task-card" data-testid="microtask-card" role="region" aria-labelledby="microtask-title">
       <div className="task-head">
         <div>
-          <p className="eyebrow">Listen</p>
-          <h2>{task.prompt}</h2>
+          <p className="eyebrow">听音练习</p>
+          <h2 id="microtask-title">{task.prompt}</h2>
         </div>
         <button className="secondary-button" type="button" onClick={() => playSound('', { fallbackText: task.narration, lang })}>
           {t('play_prompt')}

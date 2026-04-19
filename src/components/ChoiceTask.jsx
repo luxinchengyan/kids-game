@@ -28,10 +28,10 @@ export default function ChoiceTask({
   }
 
   return (
-    <section className="task-card" data-testid="choice-card">
-      <p className="eyebrow">Choice</p>
+    <section className="task-card" data-testid="choice-card" role="region" aria-labelledby="choice-task-title">
+      <p className="eyebrow">选择题</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <h2>{task.prompt}</h2>
+        <h2 id="choice-task-title">{task.prompt}</h2>
         <button
           type="button"
           className="secondary-button"

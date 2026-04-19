@@ -25,11 +25,11 @@ export default function PinyinBattle({ task, language = 'zh', onComplete = () =>
   }
 
   return (
-    <section className="task-card battle-card" data-testid="battle-card">
+    <section className="task-card battle-card" data-testid="battle-card" role="region" aria-labelledby="battle-task-title">
       <div className="task-head">
         <div>
-          <p className="eyebrow">{task.reviewMode ? 'Review Battle' : 'Pinyin Battle'}</p>
-          <h2>{task.prompt}</h2>
+          <p className="eyebrow">{task.reviewMode ? '复习挑战' : '拼音打怪'}</p>
+          <h2 id="battle-task-title">{task.prompt}</h2>
         </div>
         <button
           type="button"

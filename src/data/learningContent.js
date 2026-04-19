@@ -1,15 +1,12 @@
 const companionCatalog = {
   star: {
-    zh: { name: '星星姐姐', tone: '温柔鼓励' },
-    en: { name: 'Sister Star', tone: 'gentle coach' }
+    zh: { name: '星星姐姐', tone: '温柔鼓励' }
   },
   rocket: {
-    zh: { name: '火箭哥哥', tone: '热情带练' },
-    en: { name: 'Brother Rocket', tone: 'energetic coach' }
+    zh: { name: '火箭哥哥', tone: '热情带练' }
   },
   astro: {
-    zh: { name: '星际小探险家', tone: '好奇引导' },
-    en: { name: 'Little Space Explorer', tone: 'curious guide' }
+    zh: { name: '星际小探险家', tone: '好奇引导' }
   }
 }
 
@@ -1695,7 +1692,7 @@ const blendPairs = [
   { id: 'blend-li', initial: 'l', final: 'i', syllable: 'li', rival: '梨子怪', reward: '水果篮', example: '梨子' }
 ]
 
-function createKnowledgeMap() {
+export function createKnowledgeMap() {
   const allUnits = [...pinyinUnits, ...numberUnits, ...englishUnits, ...storyUnits]
   const knowledgeMap = allUnits.reduce((accumulator, unit) => {
     accumulator[unit.id] = {
@@ -1970,60 +1967,6 @@ const tracks = {
     stories: [
       ...storyData.map(story => buildStoryTask(story))
     ]
-  },
-  en: {
-    pinyin: [
-      {
-        ...buildPinyinBattle(pinyinUnits[0]),
-        prompt: 'Pinyin Battle: choose the sound that defeats the monster',
-        hint: 'Listen first, then attack with the correct pinyin.',
-        question: 'Which sound should the hero cast?',
-        monster: 'Fog Monster',
-        attackLabel: 'Sound Attack'
-      },
-      {
-        ...buildBlendTask(blendPairs[0]),
-        prompt: 'Blend the syllable ba',
-        hint: 'Drag the parts to build ba and defeat the bubble beast.'
-      },
-      {
-        ...buildPinyinListen(pinyinUnits[1]),
-        prompt: 'Tap the pinyin with the /p/ sound',
-        hint: 'Replay the sound and then select the correct card.'
-      }
-    ],
-    math: [
-      {
-        id: 'math-choice-en',
-        type: 'choice',
-        skill: 'math',
-        prompt: 'What is 2 + 1?',
-        hint: 'Count the stars and answer.',
-        question: '⭐ ⭐ + ⭐ = ?',
-        options: [
-          { id: '2', label: '2' },
-          { id: '3', label: '3' },
-          { id: '4', label: '4' }
-        ],
-        correct: '3'
-      }
-    ],
-    english: [
-      {
-        id: 'en-choice-cat-en',
-        type: 'choice',
-        skill: 'english',
-        prompt: 'Which one says cat?',
-        hint: 'Pick the matching word.',
-        question: '🐱 = ?',
-        options: [
-          { id: 'cat', label: 'cat' },
-          { id: 'dog', label: 'dog' },
-          { id: 'bird', label: 'bird' }
-        ],
-        correct: 'cat'
-      }
-    ]
   }
 }
 
@@ -2040,6 +1983,15 @@ function getDueReviewTasks(knowledgeState) {
     })
     .slice(0, 2)
     .map((unit) => {
+      // Handle blend type tasks
+      if (unit.type === 'blend') {
+        const blendPair = blendPairs.find(p => `pinyin_${p.initial}_${p.final}` === unit.id)
+        if (blendPair) {
+          return buildBlendTask(blendPair)
+        }
+        return null
+      }
+      
       const unitData = allUnits.find(u => u.id === unit.id)
       if (!unitData) return null
       if (unitData.type === 'number') {

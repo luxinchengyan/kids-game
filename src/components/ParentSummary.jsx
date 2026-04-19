@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import useGameStore from '../store/gameStore'
+import { useGameStore } from '../stores/useGameStore'
 import { t } from '../lib/i18n'
 import { getWeakKnowledgePoints } from '../data/learningContent'
 
@@ -67,11 +67,11 @@ export default function ParentSummary() {
   }
 
   return (
-    <section className="summary-card" data-testid="parent-summary">
+    <section className="summary-card" data-testid="parent-summary" role="region" aria-labelledby="summary-title">
       <div className="task-head">
         <div>
-          <p className="eyebrow">Report</p>
-          <h2>{t('summary_title')}</h2>
+          <p className="eyebrow">学习报告</p>
+          <h2 id="summary-title">{t('summary_title')}</h2>
         </div>
         <button type="button" className="secondary-button" onClick={handleSave} data-testid="save-summary">
           保存摘要
