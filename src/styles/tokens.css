@@ -1,0 +1,112 @@
+/* Design Tokens - 童梦乐园 · 智趣成长
+ * 基于 DESIGN.md v2.0
+ */
+
+:root {
+  /* ========================================
+   * 品牌色彩系统（魔法彩虹 Palette - 儿童友好版）
+   * ======================================== */
+  
+  /* 主色 - 更鲜艳明亮 */
+  --color-primary-1: #FF9800; /* 阳光橙 - 更鲜艳 */
+  --color-primary-1-light: #FFB74D;
+  --color-primary-1-dark: #F57C00;
+  
+  --color-primary-2: #2196F3; /* 天空蓝 - 更纯净 */
+  --color-primary-2-light: #64B5F6;
+  --color-primary-2-dark: #1976D2;
+  
+  --color-primary-3: #4CAF50; /* 草地绿 - 更清新 */
+  --color-primary-3-light: #81C784;
+  --color-primary-3-dark: #388E3C;
+  
+  /* 强调色 - 更柔和 */
+  --color-accent-1: #E91E63; /* 草莓粉 - 更柔和 */
+  --color-accent-1-light: #F48FB1;
+  --color-accent-1-dark: #C2185B;
+  
+  --color-accent-2: #9C27B0; /* 葡萄紫 - 更鲜艳 */
+  --color-accent-2-light: #CE93D8;
+  --color-accent-2-dark: #7B1FA2;
+  
+  /* 中性色 - 更高对比度 */
+  --color-neutral-1: #FFF8E1; /* 暖云朵白 */
+  --color-neutral-2: #FFECB3; /* 浅暖灰 */
+  --color-neutral-3: #5D4037; /* 深棕灰（友好阅读） */
+  --color-neutral-4: #3E2723; /* 夜空黑棕（不刺眼） */
+  
+  /* ========================================
+   * 语义色彩
+   * ======================================== */
+  --color-background: var(--color-neutral-1);
+  --color-surface: #FFFFFF;
+  --color-text-primary: var(--color-neutral-4);
+  --color-text-secondary: #6D4C41; /* 更深的二级文本 */
+  --color-border: #FFCC80;
+  
+  --color-success: var(--color-primary-3);
+  --color-warning: var(--color-primary-1);
+  --color-error: var(--color-accent-1);
+  --color-info: var(--color-primary-2);
+  
+  /* ========================================
+   * 圆角系统
+   * ======================================== */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+  
+  /* ========================================
+   * 间距系统（8px 基准
+   * ======================================== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* ========================================
+   * 字体系统（儿童友好）
+   * ======================================== */
+  --font-size-xs: 14px;
+  --font-size-sm: 16px;
+  --font-size-md: 18px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 28px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 64px;
+  
+  /* ========================================
+   * 触控目标尺寸
+   * ======================================== */
+  --touch-min: 48px;
+  --touch-primary: 64px;
+  --touch-large: 88px;
+  
+  /* ========================================
+   * 阴影系统
+   * ======================================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* ========================================
+   * 动效时长
+   * ======================================== */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-emphasis: 400ms;
+  
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

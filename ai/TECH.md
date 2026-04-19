@@ -1,5 +1,13 @@
 # Technical Design & Implementation Notes
 
+## 数据库
+
+kids_game_user
+
+219YVZeckATiGfL2
+
+mongodb+srv://kids_game_user:219YVZeckATiGfL2@cluster0.qmlo1j8.mongodb.net/?appName=Cluster0
+
 面向 3–6 岁儿童的互动学习产品技术说明，目标：快速迭代 MVP、保证触控流畅与低延迟音画同步、易于扩展题库与多语言内容。
 
 ## 技术栈（建议）

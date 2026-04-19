@@ -40,6 +40,15 @@ export default function PinyinBattle({ task, language = 'zh', onComplete = () =>
           再听一次
         </button>
       </div>
+      {task.emoji && task.example && (
+        <div className="mnemonic-card">
+          <span className="mnemonic-emoji">{task.emoji}</span>
+          <div className="mnemonic-text">
+            <span className="mnemonic-example">{task.example}</span>
+            {task.mnemonic && <span className="mnemonic-sound">{task.mnemonic}</span>}
+          </div>
+        </div>
+      )}
       <div className="battle-stage">
         <div className="battle-copy">
           <p className="task-hint">{task.hint}</p>

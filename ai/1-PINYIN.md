@@ -260,7 +260,42 @@ GET /api/review
 AI分析
 多游戏模式
 
+## 与系统架构集成
+
+### 数据模型
+- 使用 `0-DATABASE.md` 中的 `content_pinyin` 集合
+- 学习进度存入 `learning_progress.subjects.pinyin`
+- 激励数据存入 `rewards`
+
+### API 端点
+- GET /api/content/pinyin - 获取拼音内容
+- POST /api/learning/pinyin/answer - 提交答案
+- GET /api/learning/pinyin/review - 获取复习任务
+
+### 前端文件结构
+```
+features/pinyin/
+├── PinyinIsland.tsx
+├── components/
+│   ├── InitialSprite.tsx
+│   ├── ClickListenTask.tsx
+│   ├── DragCombineTask.tsx
+│   └── ChooseTask.tsx
+├── data/
+│   └── initials.ts
+└── hooks/
+    └── usePinyin.ts
+```
+
+---
+
 ## 成功关键（直说）
 
 拼音 + 游戏 + 复习系统 + 自适应
+
+---
+
+**文档维护记录**：
+- v2.0 (2026-04-19)：添加架构集成说明，与 0-DATABASE.md/0-AUTH.md 对齐
+- v1.0 (初始版本)：基础框架
 
