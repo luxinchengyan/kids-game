@@ -1,29 +1,72 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './styles/tokens.css';
-import './styles/global.css';
-import './styles.css';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from './components/Button';
 import { Card } from './components/Card';
 import { useUserStore } from './stores/useUserStore';
 import { useRewardStore } from './stores/useRewardStore';
 import { useGameStore } from './stores/useGameStore';
 import { createMission } from './data/learningContent';
-import ChoiceTask from './components/ChoiceTask';
-import PinyinBattle from './components/PinyinBattle';
-import MatchTask from './components/MatchTask';
-import MicroTask from './components/MicroTask';
-import StoryList from './components/StoryList';
-import StoryReader from './components/StoryReader';
 import { LearnProgressShare } from './components/LearnProgressShare';
 import { ParentZoneCard } from './components/ParentZoneCard';
 import { track } from './lib/analytics';
 
+const ChoiceTask = lazy(() => import('./components/ChoiceTask'));
+const PinyinBattle = lazy(() => import('./components/PinyinBattle'));
+const MatchTask = lazy(() => import('./components/MatchTask'));
+const MicroTask = lazy(() => import('./components/MicroTask'));
+const StoryList = lazy(() => import('./components/StoryList'));
+const StoryReader = lazy(() => import('./components/StoryReader'));
+
 type View = 'home' | 'pinyin' | 'math' | 'english' | 'stories' | 'story-list' | 'story-reader' | 'task';
 
+const MODULE_CARDS: readonly { id: string; label: string; icon: string; module: View }[] = [
+  { id: 'pinyin', label: '拼音冒险岛', icon: '📖', module: 'pinyin' },
+  { id: 'math', label: '数字小镇', icon: '🔢', module: 'math' },
+  { id: 'english', label: '英语游乐园', icon: '🌍', module: 'english' },
+  { id: 'stories', label: '故事王国', icon: '📚', module: 'stories' },
+];
+
+const pageShell: React.CSSProperties = {
+  width: '100%',
+  minHeight: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: '28px 24px',
+  backgroundColor: 'var(--color-background)',
+};
+
+function LazyFallback() {
+  return (
+    <div
+      style={{
+        minHeight: '40vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 'var(--font-size-lg)',
+        color: 'var(--color-text-secondary)',
+        fontWeight: 600,
+      }}
+    >
+      加载中…
+    </div>
+  );
+}
+
 const App: React.FC = () => {
-  const { currentChild } = useUserStore();
-  const { rewards, addStars, checkIn } = useRewardStore();
-  const { currentIsland, setCurrentIsland } = useGameStore();
+  const currentChild = useUserStore((s) => s.currentChild);
+  const { stars, level, streakDays } = useRewardStore(
+    useShallow((s) => ({
+      stars: s.rewards.stars,
+      level: s.rewards.level,
+      streakDays: s.rewards.streakDays,
+    }))
+  );
+  const addStars = useRewardStore((s) => s.addStars);
+  const checkIn = useRewardStore((s) => s.checkIn);
+  const currentIsland = useGameStore((s) => s.currentIsland);
+  const setCurrentIsland = useGameStore((s) => s.setCurrentIsland);
   const [currentView, setCurrentView] = useState<View>('home');
   const [currentTasks, setCurrentTasks] = useState<any[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
@@ -38,7 +81,14 @@ const App: React.FC = () => {
     if (currentIsland !== 'home' && currentIsland !== 'parent' && currentIsland !== 'stories') {
       const profile = {
         language: 'zh',
-        focus: currentIsland === 'pinyin' ? 'pinyin' : currentIsland === 'math' ? 'math' : currentIsland === 'english' ? 'english' : 'mixed',
+        focus:
+          currentIsland === 'pinyin'
+            ? 'pinyin'
+            : currentIsland === 'math'
+              ? 'math'
+              : currentIsland === 'english'
+                ? 'english'
+                : 'mixed',
         companion: 'astro',
       };
       const knowledgeState = {};
@@ -61,63 +111,72 @@ const App: React.FC = () => {
     });
   }, [currentView, currentTaskIndex, currentTasks]);
 
-  const handleModuleClick = (module: View) => {
-    track('module_click', { module });
-    if (module === 'stories') {
-      setCurrentView('story-list');
-    } else {
-      setCurrentIsland(module as any);
-    }
-  };
+  const handleModuleClick = useCallback(
+    (module: View) => {
+      track('module_click', { module });
+      if (module === 'stories') {
+        setCurrentView('story-list');
+      } else {
+        setCurrentIsland(module as 'pinyin' | 'math' | 'english' | 'parent');
+      }
+    },
+    [setCurrentIsland]
+  );
 
-  const handleSelectStory = (story: any) => {
+  const handleSelectStory = useCallback((story: any) => {
     track('story_select', { storyId: story?.id ?? '' });
     setSelectedStory(story);
     setCurrentView('story-reader');
-  };
+  }, []);
 
-  const handleStoryComplete = (result: any) => {
-    track('story_complete', { success: !!result.success, stars: result.stars ?? 0 });
-    if (result.success) {
-      addStars(result.stars);
-    }
-    setCurrentView('story-list');
-    setSelectedStory(null);
-  };
+  const handleStoryComplete = useCallback(
+    (result: any) => {
+      track('story_complete', { success: !!result.success, stars: result.stars ?? 0 });
+      if (result.success) {
+        addStars(result.stars);
+      }
+      setCurrentView('story-list');
+      setSelectedStory(null);
+    },
+    [addStars]
+  );
 
-  const handleTaskComplete = (result: any) => {
-    const durationMs = Date.now() - taskStartedAt.current;
-    const task = currentTasks[currentTaskIndex];
-    track('task_complete', {
-      success: !!result.success,
-      duration_ms: durationMs,
-      taskIndex: currentTaskIndex,
-      taskType: task?.type ?? 'unknown',
-      taskId: task?.id ?? '',
-      island: currentIsland,
-    });
-    if (result.success) {
-      addStars(result.stars);
-    }
-    if (currentTaskIndex < currentTasks.length - 1) {
-      setCurrentTaskIndex(currentTaskIndex + 1);
-    } else {
-      track('island_mission_finish', { island: currentIsland, taskCount: currentTasks.length });
-      setCurrentView('home');
-      setCurrentIsland('home');
-    }
-  };
+  const handleTaskComplete = useCallback(
+    (result: any) => {
+      const durationMs = Date.now() - taskStartedAt.current;
+      const task = currentTasks[currentTaskIndex];
+      track('task_complete', {
+        success: !!result.success,
+        duration_ms: durationMs,
+        taskIndex: currentTaskIndex,
+        taskType: task?.type ?? 'unknown',
+        taskId: task?.id ?? '',
+        island: currentIsland,
+      });
+      if (result.success) {
+        addStars(result.stars);
+      }
+      if (currentTaskIndex < currentTasks.length - 1) {
+        setCurrentTaskIndex(currentTaskIndex + 1);
+      } else {
+        track('island_mission_finish', { island: currentIsland, taskCount: currentTasks.length });
+        setCurrentView('home');
+        setCurrentIsland('home');
+      }
+    },
+    [addStars, currentTaskIndex, currentTasks, currentIsland, setCurrentIsland]
+  );
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setCurrentView('home');
     setCurrentIsland('home');
     setSelectedStory(null);
-  };
+  }, [setCurrentIsland]);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setCurrentView('story-list');
     setSelectedStory(null);
-  };
+  }, []);
 
   const renderTask = () => {
     if (currentTasks.length === 0) return null;
@@ -139,89 +198,73 @@ const App: React.FC = () => {
 
   if (currentView === 'story-list') {
     return (
-      <div style={{ 
-        width: '100%', 
-        minHeight: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '28px 24px',
-        backgroundColor: 'var(--color-background)',
-      }}>
-        <StoryList 
-          onSelectStory={handleSelectStory} 
-          onBack={handleBack}
-        />
+      <div style={pageShell}>
+        <Suspense fallback={<LazyFallback />}>
+          <StoryList onSelectStory={handleSelectStory} onBack={handleBack} />
+        </Suspense>
       </div>
     );
   }
 
   if (currentView === 'story-reader' && selectedStory) {
     return (
-      <div style={{ 
-        width: '100%', 
-        minHeight: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '28px 24px',
-        backgroundColor: 'var(--color-background)',
-      }}>
-        <StoryReader 
-          story={selectedStory}
-          onComplete={handleStoryComplete}
-          onBack={handleBackToList}
-        />
+      <div style={pageShell}>
+        <Suspense fallback={<LazyFallback />}>
+          <StoryReader story={selectedStory} onComplete={handleStoryComplete} onBack={handleBackToList} />
+        </Suspense>
       </div>
     );
   }
 
   if (currentView === 'task') {
     return (
-      <div style={{ 
-        width: '100%', 
-        minHeight: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '28px 24px',
-        backgroundColor: 'var(--color-background)',
-      }}>
+      <div style={pageShell}>
         <div style={{ width: '100%', maxWidth: '700px', marginBottom: '20px' }}>
           <Button variant="secondary" onClick={handleBack}>
             ← 返回首页
           </Button>
-          <div style={{ marginTop: '12px', fontSize: 'var(--font-size-lg)', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+          <div
+            style={{
+              marginTop: '12px',
+              fontSize: 'var(--font-size-lg)',
+              color: 'var(--color-text-secondary)',
+              fontWeight: 600,
+            }}
+          >
             📚 任务 {currentTaskIndex + 1} / {currentTasks.length}
           </div>
         </div>
         <div style={{ width: '100%', maxWidth: '700px' }}>
-          {renderTask()}
+          <Suspense fallback={<LazyFallback />}>{renderTask()}</Suspense>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      width: '100%', 
-      minHeight: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '32px 24px',
-      backgroundColor: 'var(--color-background)',
-    }}>
+    <div
+      data-testid="home"
+      style={{
+        width: '100%',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 24px',
+        backgroundColor: 'var(--color-background)',
+      }}
+    >
       <header style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <h1 style={{ 
-          background: 'linear-gradient(135deg, var(--color-primary-1), var(--color-primary-2))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: '12px',
-        }}>
+        <h1
+          style={{
+            background: 'linear-gradient(135deg, var(--color-primary-1), var(--color-primary-2))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: '12px',
+          }}
+        >
           🌈 童梦乐园 · 智趣成长
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-md)' }}>
@@ -235,28 +278,57 @@ const App: React.FC = () => {
             <p style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, marginBottom: '20px' }}>
               👋 你好，{currentChild?.nickname || '小朋友'}！
             </p>
-            <div style={{ display: 'flex', gap: '28px', justifyContent: 'center', marginBottom: '28px', flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '28px',
+                justifyContent: 'center',
+                marginBottom: '28px',
+                flexWrap: 'wrap',
+              }}
+            >
               <div style={{ textAlign: 'center', minWidth: '100px' }}>
                 <div style={{ fontSize: '48px', fontWeight: 800, color: 'var(--color-primary-1)', lineHeight: 1 }}>
-                  ⭐ {rewards.stars}
+                  ⭐ {stars}
                 </div>
-                <div style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-secondary)', marginTop: '8px', fontWeight: 600 }}>
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-md)',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '8px',
+                    fontWeight: 600,
+                  }}
+                >
                   星星
                 </div>
               </div>
               <div style={{ textAlign: 'center', minWidth: '100px' }}>
                 <div style={{ fontSize: '48px', fontWeight: 800, color: 'var(--color-primary-2)', lineHeight: 1 }}>
-                  Lv.{rewards.level}
+                  Lv.{level}
                 </div>
-                <div style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-secondary)', marginTop: '8px', fontWeight: 600 }}>
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-md)',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '8px',
+                    fontWeight: 600,
+                  }}
+                >
                   等级
                 </div>
               </div>
               <div style={{ textAlign: 'center', minWidth: '100px' }}>
                 <div style={{ fontSize: '48px', fontWeight: 800, color: 'var(--color-primary-3)', lineHeight: 1 }}>
-                  🔥 {rewards.streakDays}
+                  🔥 {streakDays}
                 </div>
-                <div style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-secondary)', marginTop: '8px', fontWeight: 600 }}>
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-md)',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '8px',
+                    fontWeight: 600,
+                  }}
+                >
                   连续天数
                 </div>
               </div>
@@ -282,36 +354,33 @@ const App: React.FC = () => {
 
         <LearnProgressShare
           childNickname={currentChild?.nickname ?? '小朋友'}
-          stars={rewards.stars}
-          level={rewards.level}
-          streakDays={rewards.streakDays}
+          stars={stars}
+          level={level}
+          streakDays={streakDays}
         />
 
         <ParentZoneCard />
 
-        <div style={{ 
-          marginTop: '40px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '20px',
-          justifyContent: 'center',
-        }}>
-          {[
-            { label: '拼音冒险岛', icon: '📖', module: 'pinyin' as View },
-            { label: '数字小镇', icon: '🔢', module: 'math' as View },
-            { label: '英语游乐园', icon: '🌍', module: 'english' as View },
-            { label: '故事王国', icon: '📚', module: 'stories' as View },
-          ].map((item, index) => (
-            <Card 
-              key={index} 
-              elevated 
+        <div
+          style={{
+            marginTop: '40px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '20px',
+            justifyContent: 'center',
+          }}
+        >
+          {MODULE_CARDS.map((item) => (
+            <Card
+              key={item.id}
+              elevated
               onClick={() => handleModuleClick(item.module)}
-              style={{ 
-                width: '160px', 
-                height: '160px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
+              style={{
+                width: '160px',
+                height: '160px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
