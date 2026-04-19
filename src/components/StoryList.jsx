@@ -106,25 +106,6 @@ export default function StoryList({ onSelectStory, onBack }) {
       maxWidth: '700px', 
       margin: '0 auto' 
     }}>
-      <div style={{ marginBottom: '20px' }}>
-        <button
-          type="button"
-          onClick={onBack}
-          style={{
-            padding: '12px 24px',
-            borderRadius: '16px',
-            border: '2px solid #2196F3',
-            background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)',
-            color: '#1976D2',
-            fontSize: '18px',
-            fontWeight: 700,
-            cursor: 'pointer'
-          }}
-        >
-          ← 返回首页
-        </button>
-      </div>
-
       <div style={{ 
         textAlign: 'center', marginBottom: '24px' }}>
         <h1 style={{ 

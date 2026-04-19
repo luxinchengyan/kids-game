@@ -1604,6 +1604,253 @@ const storyData = [
       { text: '这个故事告诉我们，每个人都有自己的长处和短处，不要骄傲自大，也不要瞧不起别人。', pinyin: 'zhè ge gù shì gào sù wǒ men, měi gè rén dōu yǒu zì jǐ de cháng chù hé duǎn chù, bù yào jiāo ào zì dà, yě bù yào qiáo bù qǐ bié rén.' }
     ],
     illustrationSlot: 'peacock'
+  },
+  {
+    id: 'myth_cangjie',
+    title: '仓颉造字',
+    titlePinyin: 'cāng jié zào zì',
+    type: 'myth',
+    example: '仓颉创造文字',
+    emoji: '✍️',
+    difficulty: 2,
+    minAge: 5,
+    content: [
+      { text: '很久很久以前，人们还没有文字，只能用绳子打结来记事。', pinyin: 'hěn jiǔ hěn jiǔ yǐ qián, rén men hái méi yǒu wén zì, zhǐ néng yòng shéng zi dǎ jié lái jì shì.' },
+      { text: '有个叫仓颉的人，非常聪明，他想创造出一种更好的记事方法。', pinyin: 'yǒu gè jiào cāng jié de rén, fēi cháng cōng míng, tā xiǎng chuàng zào chū yī zhǒng gèng hǎo de jì shì fāng fǎ.' },
+      { text: '仓颉观察天上的星星、地上的山川河流，以及各种动物的足迹。', pinyin: 'cāng jié guān chá tiān shàng de xīng xīng, dì shàng de shān chuān hé liú, yǐ jí gè zhǒng dòng wù de zú jì.' },
+      { text: '他从这些自然现象中得到启发，开始创造各种符号。', pinyin: 'tā cóng zhè xiē zì rán xiàn xiàng zhōng dé dào qǐ fā, kāi shǐ chuàng zào gè zhǒng fú hào.' },
+      { text: '这些符号就是最早的文字，人们可以用它们来记录事情。', pinyin: 'zhè xiē fú hào jiù shì zuì zǎo de wén zì, rén men kě yǐ yòng tā men lái jì lù shì qíng.' },
+      { text: '据说仓颉造字的时候，天上降下了粟米，鬼怪在夜里哭泣。', pinyin: 'jù shuō cāng jié zào zì de shí hòu, tiān shàng jiàng xià le sù mǐ, guǐ guài zài yè lǐ kū qì.' },
+      { text: '因为文字的创造是一件惊天动地的大事，让天地都为之震动。', pinyin: 'yīn wèi wén zì de chuàng zào shì yī jiàn jīng tiān dòng dì de dà shì, ràng tiān dì dōu wèi zhī zhèn dòng.' },
+      { text: '仓颉被后人尊为"字圣"，他的发明改变了人类的历史。', pinyin: 'cāng jié bèi hòu rén zūn wèi "zì shèng", tā de fā míng gǎi biàn le rén lèi de lì shǐ.' }
+    ],
+    illustrationSlot: 'cangjie'
+  },
+  {
+    id: 'story_tielian',
+    title: '铁杵磨成针',
+    titlePinyin: 'tiě chǔ mó chéng zhēn',
+    type: 'history',
+    example: '李白受到老婆婆启发',
+    emoji: '🪡',
+    difficulty: 1,
+    minAge: 4,
+    content: [
+      { text: '唐朝大诗人李白小时候很聪明，但不爱学习。', pinyin: 'táng cháo dà shī rén lǐ bái xiǎo shí hòu hěn cōng míng, dàn bù ài xué xí.' },
+      { text: '有一天，他逃学去河边玩，看见一位老婆婆在磨一根粗铁棒。', pinyin: 'yǒu yī tiān, tā táo xué qù hé biān wán, kàn jiàn yī wèi lǎo pó pó zài mó yī gēn cū tiě bàng.' },
+      { text: '李白好奇地问："老婆婆，您在做什么呀？"', pinyin: 'lǐ bái hào qí de wèn: "lǎo pó pó, nín zài zuò shén me ya?"' },
+      { text: '老婆婆说："我要把它磨成一根绣花针。"', pinyin: 'lǎo pó pó shuō: "wǒ yào bǎ tā mó chéng yī gēn xiù huā zhēn."' },
+      { text: '李白惊讶地说："这么粗的铁棒，什么时候才能磨成针啊？"', pinyin: 'lǐ bái jīng yà de shuō: "zhè me cū de tiě bàng, shén me shí hòu cái néng mó chéng zhēn a?"' },
+      { text: '老婆婆笑着说："只要功夫深，铁杵磨成针。"', pinyin: 'lǎo pó pó xiào zhe shuō: "zhǐ yào gōng fū shēn, tiě chǔ mó chéng zhēn."' },
+      { text: '李白听了很受启发，从此发奋读书，终于成为伟大的诗人。', pinyin: 'lǐ bái tīng le hěn shòu qǐ fā, cóng cǐ fā fèn dú shū, zhōng yú chéng wéi wěi dà de shī rén.' }
+    ],
+    illustrationSlot: 'tielian'
+  },
+  {
+    id: 'poem_minong2',
+    title: '悯农（其二）',
+    titlePinyin: 'mǐn nóng (qí èr)',
+    type: 'poem',
+    example: '春种一粒粟',
+    emoji: '🌱',
+    difficulty: 2,
+    minAge: 5,
+    author: '李绅',
+    dynasty: '唐',
+    content: [
+      { text: '春种一粒粟，', pinyin: 'chūn zhòng yī lì sù,' },
+      { text: '秋收万颗子。', pinyin: 'qiū shōu wàn kē zǐ.' },
+      { text: '四海无闲田，', pinyin: 'sì hǎi wú xián tián,' },
+      { text: '农夫犹饿死。', pinyin: 'nóng fū yóu è sǐ.' }
+    ],
+    illustrationSlot: 'minong2'
+  },
+  {
+    id: 'idiom_hua蛇',
+    title: '杯弓蛇影',
+    titlePinyin: 'bēi gōng shé yǐng',
+    type: 'idiom',
+    example: '杯中的弓影以为是蛇',
+    emoji: '🏹',
+    difficulty: 2,
+    minAge: 5,
+    content: [
+      { text: '东汉时候，有个人叫应彬，他请朋友杜宣来家里喝酒。', pinyin: 'dōng hàn shí hòu, yǒu gè rén jiào yīng bīn, tā qǐng péng yǒu dù xuān lái jiā lǐ hē jiǔ.' },
+      { text: '他们坐在客厅里，墙上挂着一张红色的弓。', pinyin: 'tā men zuò zài kè tīng lǐ, qiáng shàng guà zhe yī zhāng hóng sè de gōng.' },
+      { text: '杜宣端起酒杯，突然发现杯子里有一条小蛇在游动。', pinyin: 'dù xuān duān qǐ jiǔ bēi, tū rán fā xiàn bēi zi lǐ yǒu yī tiáo xiǎo shé zài yóu dòng.' },
+      { text: '他觉得很恶心，但不好意思说出来，就硬着头皮喝了下去。', pinyin: 'tā jué de hěn ě xīn, dàn bù hǎo yì si shuō chū lái, jiù yìng zhe tóu pí hē le xià qù.' },
+      { text: '回家后，杜宣越想越害怕，竟然生起病来。', pinyin: 'huí jiā hòu, dù xuān yuè xiǎng yuè hài pà, jìng rán shēng qǐ bìng lái.' },
+      { text: '应彬听说后，仔细查看，发现原来是墙上弓的影子映在杯子里。', pinyin: 'yīng bīn tīng shuō hòu, zǐ xì chá kàn, fā xiàn yuán lái shì qiáng shàng gōng de yǐng zi yìng zài bēi zi lǐ.' },
+      { text: '他请来杜宣，让他看杯子里的"蛇"，杜宣一看就明白了。', pinyin: 'tā qǐng lái dù xuān, ràng tā kàn bēi zi lǐ de "shé", dù xuān yī kàn jiù míng bái le.' },
+      { text: '杜宣的病马上就好了。这个故事告诉我们，不要疑神疑鬼，自己吓自己。', pinyin: 'dù xuān de bìng mǎ shàng jiù hǎo le. zhè ge gù shì gào sù wǒ men, bù yào yí shén yí guǐ, zì jǐ xià zì jǐ.' }
+    ],
+    illustrationSlot: 'beigongsheying'
+  },
+  {
+    id: 'fable_monkey',
+    title: '猴子捞月',
+    titlePinyin: 'hóu zi lāo yuè',
+    type: 'fable',
+    example: '猴子们想捞水中的月亮',
+    emoji: '🐒',
+    difficulty: 1,
+    minAge: 3,
+    content: [
+      { text: '一天晚上，一群猴子在树上玩耍。', pinyin: 'yī tiān wǎn shàng, yī qún hóu zi zài shù shàng wán shuǎ.' },
+      { text: '一只小猴子往井里一看，大叫："不好啦！月亮掉进井里了！"', pinyin: 'yī zhī xiǎo hóu zi wǎng jǐng lǐ yī kàn, dà jiào: "bù hǎo la! yuè liàng diào jìn jǐng lǐ le!"' },
+      { text: '老猴子跑过来一看，也说："真的，月亮掉进井里了，我们快把它捞出来！"', pinyin: 'lǎo hóu zi pǎo guò lái yī kàn, yě shuō: "zhēn de, yuè liàng diào jìn jǐng lǐ le, wǒ men kuài bǎ tā lāo chū lái!"' },
+      { text: '猴子们一个拉着一个的尾巴，倒挂在树上，伸到井里捞月亮。', pinyin: 'hóu zi men yī gè lā zhe yī gè de wěi bā, dào guà zài shù shàng, shēn dào jǐng lǐ lāo yuè liàng.' },
+      { text: '最小的猴子把手伸进水里，捞了半天什么也没捞到。', pinyin: 'zuì xiǎo de hóu zi bǎ shǒu shēn jìn shuǐ lǐ, lāo le bàn tiān shén me yě méi lāo dào.' },
+      { text: '老猴子抬头一看，月亮还好端端地挂在天上呢！', pinyin: 'lǎo hóu zi tái tóu yī kàn, yuè liàng hái hǎo duān duān de guà zài tiān shàng ne!' },
+      { text: '这个故事告诉我们，遇到事情要先观察思考，不要盲目行动。', pinyin: 'zhè ge gù shì gào sù wǒ men, yù dào shì qíng yào xiān guān chá sī kǎo, bù yào máng mù xíng dòng.' }
+    ],
+    illustrationSlot: 'monkey'
+  },
+  {
+    id: 'story_zhuge',
+    title: '诸葛亮借东风',
+    titlePinyin: 'zhū gě liàng jiè dōng fēng',
+    type: 'history',
+    example: '诸葛亮智借东风',
+    emoji: '🌬️',
+    difficulty: 3,
+    minAge: 6,
+    content: [
+      { text: '三国时期，曹操带领大军南下，准备攻打孙权。', pinyin: 'sān guó shí qī, cáo cāo dài lǐng dà jūn nán xià, zhǔn bèi dǎ sūn quán.' },
+      { text: '孙权和刘备联合起来对抗曹操，在赤壁展开大战。', pinyin: 'sūn quán hé liú bèi lián hé qǐ lái duì kàng cáo cāo, zài chì bì zhǎn kāi dà zhàn.' },
+      { text: '诸葛亮的军师想出了火攻的计策，但需要东风才能成功。', pinyin: 'zhū gě liàng de jūn shī xiǎng chū le huǒ gōng de jì cè, dàn xū yào dōng fēng cái néng chéng gōng.' },
+      { text: '可是当时正是冬天，刮的都是西北风，没有东风。', pinyin: 'kě shì dāng shí zhèng shì dōng tiān, guā de dōu shì xī běi fēng, méi yǒu dōng fēng.' },
+      { text: '诸葛亮精通天文，预测到几天后会有东风。', pinyin: 'zhū gě liàng jīng tōng tiān wén, yù cè dào jǐ tiān hòu huì yǒu dōng fēng.' },
+      { text: '他在江边筑起高台，披上法衣，假装做法借东风。', pinyin: 'tā zài jiāng biān zhù qǐ gāo tái, pī shàng fǎ yī, jiǎ zhuāng zuò fǎ jiè dōng fēng.' },
+      { text: '几天后，果然刮起了大东风，吴军的火船借着风势烧向曹军。', pinyin: 'jǐ tiān hòu, guǒ rán guā qǐ le dà dōng fēng, wú jūn de huǒ chuán jiè zhe fēng shì shāo xiàng cáo jūn.' },
+      { text: '曹军大败，赤壁之战成为历史上著名的以少胜多的战役。', pinyin: 'cáo jūn dà bài, chì bì zhī zhàn chéng wéi lì shǐ shàng zhù míng de yǐ shǎo shèng duō de zhàn yì.' },
+      { text: '诸葛亮借东风的故事，展现了他的智慧和才能。', pinyin: 'zhū gě liàng jiè dōng fēng de gù shì, zhǎn xiàn le tā de zhì huì hé cái néng.' }
+    ],
+    illustrationSlot: 'zhuge'
+  },
+  {
+    id: 'poem_yejing',
+    title: '夜雨寄北',
+    titlePinyin: 'yè yǔ jì běi',
+    type: 'poem',
+    example: '巴山夜雨涨秋池',
+    emoji: '🌧️',
+    difficulty: 3,
+    minAge: 6,
+    author: '李商隐',
+    dynasty: '唐',
+    content: [
+      { text: '君问归期未有期，', pinyin: 'jūn wèn guī qī wèi yǒu qī,' },
+      { text: '巴山夜雨涨秋池。', pinyin: 'bā shān yè yǔ zhǎng qiū chí.' },
+      { text: '何当共剪西窗烛，', pinyin: 'hé dāng gòng jiǎn xī chuāng zhú,' },
+      { text: '却话巴山夜雨时。', pinyin: 'què huà bā shān yè yǔ shí.' }
+    ],
+    illustrationSlot: 'yejing'
+  },
+  {
+    id: 'idiom_zhuoyu',
+    title: '捉襟见肘',
+    titlePinyin: 'zhuō jīn jiàn zhǒu',
+    type: 'idiom',
+    example: '衣服破烂生活贫困',
+    emoji: '👔',
+    difficulty: 3,
+    minAge: 6,
+    content: [
+      { text: '春秋时期，曾子生活非常贫困，经常吃不饱穿不暖。', pinyin: 'chūn qiū shí qī, zēng zǐ shēng huó fēi cháng pín kùn, jīng cháng chī bù bǎo chuān bù nuǎn.' },
+      { text: '他的衣服破破烂烂的，上面全是补丁。', pinyin: 'tā de yī fú pò pò làn làn de, shàng miàn quán shì bǔ dīng.' },
+      { text: '有一天，曾子的朋友来看他。', pinyin: 'yǒu yī tiān, zēng zǐ de péng yǒu lái kàn tā.' },
+      { text: '曾子起身迎接，他一拉衣襟，胳膊肘就露了出来。', pinyin: 'zēng zǐ qǐ shēn yíng jiē, tā yī lā yī jīn, gē bo zhǒu jiù lù le chū lái.' },
+      { text: '朋友看了很心疼，但曾子却毫不在意，依然谈笑风生。', pinyin: 'péng yǒu kàn le hěn xīn téng, dàn zēng zǐ què háo bù zài yì, yī rán tán xiào fēng shēng.' },
+      { text: '虽然生活困难，但曾子坚持学习，从不懈怠。', pinyin: 'suī rán shēng huó kùn nán, dàn zēng zǐ jiān chí xué xí, cóng bù xiè dài.' },
+      { text: '后来，曾子成为孔子最得意的学生之一。', pinyin: 'hòu lái, zēng zǐ chéng wéi kǒng zǐ zuì dé yì de xué shēng zhī yī.' },
+      { text: '这个成语形容生活贫困，衣服破烂，也比喻顾此失彼，应付不过来。', pinyin: 'zhè ge chéng yǔ xíng róng shēng huó pín kùn, yī fú pò làn, yě bǐ yù gù cǐ shī bǐ, yìng fù bù guò lái.' }
+    ],
+    illustrationSlot: 'zhuoyu'
+  },
+  {
+    id: 'fable_duck',
+    title: '丑小鸭',
+    titlePinyin: 'chǒu xiǎo yā',
+    type: 'fable',
+    example: '丑小鸭变成白天鹅',
+    emoji: '🦢',
+    difficulty: 2,
+    minAge: 4,
+    content: [
+      { text: '在乡下的一片芦苇丛里，鸭妈妈正在孵蛋。', pinyin: 'zài xiāng xià de yī piàn lú wěi cóng lǐ, yā mā ma zhèng zài fū dàn.' },
+      { text: '蛋壳一个个裂开，小鸭子们都出来了。', pinyin: 'dàn ké yī gè gè liè kāi, xiǎo yā zi men dōu chū lái le.' },
+      { text: '可是最大的那个蛋好久才裂开，里面是一只灰灰的大鸭子。', pinyin: 'kě shì zuì dà de nà gè dàn hǎo jiǔ cái liè kāi, lǐ miàn shì yī zhī huī huī de dà yā zi.' },
+      { text: '其他鸭子都嘲笑它长得丑，不愿意和它玩。', pinyin: 'qí tā yā zi dōu cháo xiào tā zhǎng de chǒu, bù yuàn yì hé tā wán.' },
+      { text: '丑小鸭很伤心，离开了家，独自在外面流浪。', pinyin: 'chǒu xiǎo yā hěn shāng xīn, lí kāi le jiā, dú zì zài wài miàn liú làng.' },
+      { text: '它经历了寒冷的冬天，受了很多苦。', pinyin: 'tā jīng lì le hán lěng de dōng tiān, shòu le hěn duō kǔ.' },
+      { text: '春天来了，丑小鸭飞到湖边，在水里看到了自己的倒影。', pinyin: 'chūn tiān lái le, chǒu xiǎo yā fēi dào hú biān, zài shuǐ lǐ kàn dào le zì jǐ de dào yǐng.' },
+      { text: '原来它不是丑小鸭，而是一只美丽的白天鹅！', pinyin: 'yuán lái tā bú shì chǒu xiǎo yā, ér shì yī zhī měi lì de bái tiān é!' },
+      { text: '这个故事告诉我们，是金子总会发光，不要因别人的嘲笑而自卑。', pinyin: 'zhè ge gù shì gào sù wǒ men, shì jīn zi zǒng huì fā guāng, bù yào yīn bié rén de cháo xiào ér zì bēi.' }
+    ],
+    illustrationSlot: 'duck'
+  },
+  {
+    id: 'myth_xingtian',
+    title: '刑天舞干戚',
+    titlePinyin: 'xíng tiān wǔ gān qī',
+    type: 'myth',
+    example: '刑天不屈不挠战斗',
+    emoji: '🪓',
+    difficulty: 3,
+    minAge: 6,
+    content: [
+      { text: '远古时候，有个巨人叫刑天，他非常勇敢。', pinyin: 'yuǎn gǔ shí hòu, yǒu gè jù rén jiào xíng tiān, tā fēi cháng yǒng gǎn.' },
+      { text: '刑天不服天帝的统治，拿起盾牌和斧头，冲向天庭挑战。', pinyin: 'xíng tiān bù fú tiān dì de tǒng zhì, ná qǐ dùn pái hé fǔ tou, chōng xiàng tiān tíng tiǎo zhàn.' },
+      { text: '天帝非常生气，派兵和刑天大战。', pinyin: 'tiān dì fēi cháng shēng qì, pài bīng hé xíng tiān dà zhàn.' },
+      { text: '刑天英勇无比，打败了天帝的很多兵将。', pinyin: 'xíng tiān yīng yǒng wú bǐ, dǎ bài le tiān dì de hěn duō bīng jiàng.' },
+      { text: '最后，天帝亲自出战，一剑砍下了刑天的头。', pinyin: 'zuì hòu, tiān dì qīn zì chū zhàn, yī jiàn kǎn xià le xíng tiān de tóu.' },
+      { text: '刑天的头被埋在常羊山下，但他并没有死。', pinyin: 'xíng tiān de tóu bèi mái zài cháng yáng shān xià, dàn tā bìng méi yǒu sǐ.' },
+      { text: '他把两个乳头当作眼睛，把肚脐当作嘴巴，继续挥舞着盾牌和斧头战斗。', pinyin: 'tā bǎ liǎng gè rǔ tóu dàng zuò yǎn jīng, bǎ dù qí dàng zuò zuǐ bā, jì xù huī wǔ zhe dùn pái hé fǔ tou zhàn dòu.' },
+      { text: '刑天不屈不挠的精神，感动了后人，成为勇敢的象征。', pinyin: 'xíng tiān bù qū bù náo de jīng shén, gǎn dòng le hòu rén, chéng wéi yǒng gǎn de xiàng zhēng.' }
+    ],
+    illustrationSlot: 'xingtian'
+  },
+  {
+    id: 'poem_shanxing',
+    title: '山行',
+    titlePinyin: 'shān xíng',
+    type: 'poem',
+    example: '霜叶红于二月花',
+    emoji: '🍁',
+    difficulty: 2,
+    minAge: 5,
+    author: '杜牧',
+    dynasty: '唐',
+    content: [
+      { text: '远上寒山石径斜，', pinyin: 'yuǎn shàng hán shān shí jìng xié,' },
+      { text: '白云生处有人家。', pinyin: 'bái yún shēng chù yǒu rén jiā.' },
+      { text: '停车坐爱枫林晚，', pinyin: 'tíng chē zuò ài fēng lín wǎn,' },
+      { text: '霜叶红于二月花。', pinyin: 'shuāng yè hóng yú èr yuè huā.' }
+    ],
+    illustrationSlot: 'shanxing'
+  },
+  {
+    id: 'idiom_chengmen',
+    title: '城门失火，殃及池鱼',
+    titlePinyin: 'chéng mén shī huǒ, yāng jí chí yú',
+    type: 'idiom',
+    example: '城门着火护城河鱼遭殃',
+    emoji: '🔥',
+    difficulty: 3,
+    minAge: 6,
+    content: [
+      { text: '古时候，有一座城池，城外有一条护城河。', pinyin: 'gǔ shí hòu, yǒu yī zuò chéng chí, chéng wài yǒu yī tiáo hù chéng hé.' },
+      { text: '护城河里养了很多鱼，鱼儿们生活得很快乐。', pinyin: 'hù chéng hé lǐ yǎng le hěn duō yú, yú er men shēng huó de hěn kuài lè.' },
+      { text: '有一天，城门突然着火了，火势很大。', pinyin: 'yǒu yī tiān, chéng mén tū rán zháo huǒ le, huǒ shì hěn dà.' },
+      { text: '人们纷纷赶来救火，可是附近没有水源。', pinyin: 'rén men fēn fēn gǎn lái jiù huǒ, kě shì fù jìn méi yǒu shuǐ yuán.' },
+      { text: '有人想到护城河里的水，就用盆桶舀河水来救火。', pinyin: 'yǒu rén xiǎng dào hù chéng hé lǐ de shuǐ, jiù yòng pén tǒng yǎo hé shuǐ lái jiù huǒ.' },
+      { text: '火终于扑灭了，但是护城河的水也快被舀干了。', pinyin: 'huǒ zhōng yú pū miè le, dàn shì hù chéng hé de shuǐ yě kuài bèi yǎo gān le.' },
+      { text: '河里的鱼因为没有水，都干死了。', pinyin: 'hé lǐ de yú yīn wèi méi yǒu shuǐ, dōu gān sǐ le.' },
+      { text: '鱼本来和城门失火没有关系，却无辜地受到了牵连。', pinyin: 'yú běn lái hé chéng mén shī huǒ méi yǒu guān xì, què wú gū de shòu dào le qiān lián.' },
+      { text: '这个成语比喻无辜受到牵连，遭受损失。', pinyin: 'zhè ge chéng yǔ bǐ yù wú gū shòu dào qiān lián, zāo shòu sǔn shī.' }
+    ],
+    illustrationSlot: 'chengmen'
   }
 ]
 

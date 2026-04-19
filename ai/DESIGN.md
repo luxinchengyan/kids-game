@@ -1,462 +1,739 @@
 # Design Guidelines
-# 产品名称：童梦乐园 · 智趣成长
-# 版本：v2.0
+# 产品名称:童梦飞船 · 智趣成长 (DreamShip · Smart Growth)
+# 版本：v3.0
 
 ---
 
-## 0. 设计理念与原则
+## 0. Visual Theme & Atmosphere
 
-### 0.1 核心设计哲学
-**看见即理解，触摸即学习，反馈即成长**
+### 0.1 Design Philosophy
+**看见即理解，触摸即学习，反馈即成长**  
+(See is understand, touch is learn, feedback is grow)
 
-### 0.2 设计原则（儿童优先）
-1. **简洁至上**：界面元素 ≤ 5 个/屏，无冗余信息
-2. **大而醒目**：触控目标 ≥ 64x64 dp，关键按钮 ≥ 88x88 dp
-3. **即时反馈**：交互响应 < 200ms，因果关系明确
-4. **容错设计**：误触可撤销，错误有引导，无惩罚性反馈
-5. **多感官**：视觉 + 听觉 + 触觉（震动）协同作用
-6. **正向激励**：永远鼓励，永远积极，永远有希望
+### 0.2 Visual Identity
+- **Mood**: Playful, warm, magical, child-centric
+- **Density**: Low - children need whitespace and breathing room
+- **Personality**: Like a friendly older sibling - encouraging, patient, joyful
+- **Metaphor**: A magical spaceship traveling through learning galaxies
 
----
-
-## 1. 品牌视觉系统
-
-### 1.1 品牌标识与 Logo
-- **Logo 理念**：彩虹桥 + 小星星 + 孩子的笑脸
-- **品牌色彩**：魔法彩虹色系（见下方）
-- **品牌字体**：圆润无衬线，如气泡般可爱
-
-### 1.2 核心配色系统（魔法彩虹 Palette）
-
-| 色彩层级 | 颜色名称 | Hex 值 | RGB | 使用场景 |
-|---------|---------|--------|-----|---------|
-| **主色 1** | 阳光橙 | #FFB74D | 255, 183, 77 | 主按钮、强调、积极反馈 |
-| **主色 2** | 天空蓝 | #4FC3F7 | 79, 195, 247 | 次按钮、链接、信息区 |
-| **主色 3** | 草地绿 | #81C784 | 129, 199, 132 | 正确、完成、成长 |
-| **强调色 1** | 草莓红 | #FF6F61 | 255, 111, 97 | 警告、重要提示（谨慎使用） |
-| **强调色 2** | 葡萄紫 | #BA68C8 | 186, 104, 200 | 奖励、稀有、特殊 |
-| **中性色 1** | 云朵白 | #FAFAFA | 250, 250, 250 | 背景、卡片 |
-| **中性色 2** | 浅灰 | #EEEEEE | 238, 238, 238 | 分割线、次要元素 |
-| **中性色 3** | 深灰 | #616161 | 97, 97, 97 | 正文文字 |
-| **中性色 4** | 夜空黑 | #212121 | 33, 33, 33 | 标题、重要文字 |
-
-### 1.3 色彩使用规则
-- **主色占比**：60% 背景 + 30% 主色 + 10% 强调色（黄金比例）
-- **避免组合**：红绿搭配（色盲友好）、高饱和邻近色（视觉疲劳）
-- **对比度要求**：文字与背景对比度 ≥ 4.5:1（WCAG AA 标准）
+### 0.3 Design Principles (Children First)
+1. **Simplicity**: ≤ 5 elements per screen, no clutter
+2. **Large & Bold**: Touch targets ≥ 64x64 dp, key buttons ≥ 88x88 dp
+3. **Instant Feedback**: Response < 200ms, clear cause-and-effect
+4. **Forgiving**: Undoable actions, guided errors, no punitive feedback
+5. **Multi-sensory**: Visual + Audio + Haptic synergy
+6. **Positive**: Always encourage, always celebrate, always hope
 
 ---
 
-## 2. 幼儿认知适配设计
+## 1. Color Palette & Roles
 
-### 2.1 视觉感知优化（3-6岁儿童特点）
-- **图形优先**：图标 > 文字，大图形 > 小图形
-- **色彩偏好**：暖色调 > 冷色调，高饱和度 > 低饱和度
-- **形状偏好**：圆形 > 方形 > 三角形，圆角 > 尖角
-- **运动吸引**：动态元素 > 静态元素，缓慢运动 > 快速运动
+### 1.1 Brand Identity & Logo
+- **Logo Concept**: Rainbow bridge + little star + child's smile
+- **Brand Colors**: Magic rainbow palette (see below)
+- **Brand Font**: Rounded sans-serif, cute like bubbles
 
-### 2.2 注意力与认知负荷管理
-- **单任务聚焦**：每屏只有 1 个核心任务
-- **信息分层**：视觉层级清晰，重要元素突出 30%
-- **渐进揭示**：分批展示信息，避免一次性过载
-- **休息提醒**：每 10-15 分钟自动提醒休息（根据年龄调整）
+### 1.2 Core Color System (Magic Rainbow Palette)
 
-### 2.3 记忆与学习辅助设计
-- **多感官编码**：视觉（图形）+ 听觉（语音）+ 触觉（震动）
-- **重复与强化**：关键内容在不同情境中重复出现
-- **联结与关联**：新旧知识建立可视化联结
-- **情境化学习**：知识嵌入有意义的故事/游戏场景中
+| Color Role | Name | Hex | RGB | Usage |
+|-----------|------|-----|-----|-------|
+| **Primary 1** | Sunshine Orange | #FF9800 | 255, 152, 0 | Main buttons, emphasis, positive feedback |
+| **Primary 2** | Sky Blue | #2196F3 | 33, 150, 243 | Secondary buttons, links, info areas |
+| **Primary 3** | Grass Green | #4CAF50 | 76, 175, 80 | Correct, complete, growth |
+| **Accent 1** | Strawberry Pink | #E91E63 | 233, 30, 99 | Warnings, important notes (use carefully) |
+| **Accent 2** | Grape Purple | #9C27B0 | 156, 39, 176 | Rewards, rare, special |
+| **Neutral 1** | Warm Cloud | #FFF8E1 | 255, 248, 225 | Background, cards |
+| **Neutral 2** | Warm Light | #FFECB3 | 255, 236, 179 | Dividers, secondary elements |
+| **Neutral 3** | Deep Brown | #5D4037 | 93, 64, 55 | Body text |
+| **Neutral 4** | Night Black | #3E2723 | 62, 39, 35 | Titles, important text |
 
----
+### 1.3 Category-Specific Gradients
 
-## 3. 视觉风格规范
+| Category | Gradient | Usage |
+|----------|----------|-------|
+| **Pinyin** | `linear-gradient(135deg, #FF9800, #FFB74D)` | Pinyin game cards, buttons |
+| **Math** | `linear-gradient(135deg, #2196F3, #64B5F6)` | Math game cards, buttons |
+| **English** | `linear-gradient(135deg, #4CAF50, #81C784)` | English game cards, buttons |
+| **Stories** | `linear-gradient(135deg, #9C27B0, #CE93D8)` | Stories game cards, buttons |
 
-### 3.1 插画风格
-- **风格关键词**：Q版、卡通、圆润、可爱、温暖
-- **人物比例**：2-3 头身（幼儿偏好）
-- **线条**：粗线条（≥ 3px）、无棱角、流畅
-- **阴影**：柔和、简化、无硬边
-- **质感**：平涂 + 轻微渐变，避免复杂纹理
+### 1.4 Semantic Colors
 
-### 3.2 图标设计系统
-- **尺寸规格**：
-  - 小图标：24x24 dp（仅家长端）
-  - 中图标：48x48 dp（通用）
-  - 大图标：64x64 dp（主按钮）
-  - 超大图标：96x96 dp（角色/卡片）
-- **设计规则**：
-  - 圆角统一：8px
-  - 线条粗细：2px（轮廓）
-  - 留白：图标内边距 ≥ 8px
-- **语义化**：每个图标只有 1 个含义，避免歧义
+| Semantic | Color | Hex | Usage |
+|----------|-------|-----|-------|
+| **Success** | Grass Green | #4CAF50 | Correct answers, completion |
+| **Warning** | Sunshine Orange | #FF9800 | Cautions, attention needed |
+| **Error** | Strawberry Pink | #E91E63 | Wrong answers (gentle) |
+| **Info** | Sky Blue | #2196F3 | Information, hints |
 
-### 3.3 排版与字体系统
-
-#### 字体层级
-| 层级 | 用途 | 字号（dp） | 字重 | 行高 |
-|-----|-----|-----------|-----|-----|
-| H1 | 页面标题 | 32-36 | Bold | 1.2 |
-| H2 | 区域标题 | 24-28 | Bold | 1.3 |
-| H3 | 卡片标题 | 20-22 | Semi-Bold | 1.4 |
-| Body | 正文（家长端） | 16-18 | Regular | 1.5 |
-| Child | 儿童文字 | 20-24 | Bold | 1.3 |
-| Tiny | 辅助信息 | 12-14 | Regular | 1.4 |
-
-#### 字体选择
-- **中文**：圆润无衬线字体（如：站酷快乐体、圆润体）
-- **英文/数字**：Comic Sans MS（或类似圆润字体）
-- **字体原则**：
-  - 避免细笔画
-  - 字母/数字间距适中
-  - 相似字符（如 b/d、p/q）要有明显区别
-
-#### 文案写作规范（儿童端）
-- **长度**：2-6 个字，不超过 1 行
-- **语气**：积极、鼓励、温暖、像大姐姐/大哥哥说话
-- **示例**：
-  - 正确："太棒了！" → "你真厉害！" → "继续加油！"
-  - 错误："再试一次" → "没关系，我们再来一次！"
-  - 提示："点一点" → "拖一拖" → "听一听"
+### 1.5 Color Usage Rules
+- **Ratio**: 60% background + 30% primary + 10% accent (golden ratio)
+- **Avoid**: Red-green combinations (colorblind friendly), high-saturation adjacent colors
+- **Contrast**: Text vs background ≥ 4.5:1 (WCAG AA standard)
+- **Dark Mode** (Parent section only): Use dark backgrounds (#1A1A2E) with same accent colors
 
 ---
 
-## 4. 交互设计规范
+## 2. Typography Rules
 
-### 4.1 触控目标规格
-| 元素类型 | 最小尺寸 | 推荐尺寸 | 间距 |
-|---------|---------|---------|-----|
-| 主按钮 | 64x64 dp | 88x88 dp | ≥ 16 dp |
-| 次按钮 | 48x48 dp | 64x64 dp | ≥ 12 dp |
-| 卡片/列表项 | 48x48 dp | 64x64 dp | ≥ 8 dp |
-| 图标按钮 | 44x44 dp | 56x56 dp | ≥ 8 dp |
+### 2.1 Font Families
 
-### 4.2 交互方式优先级（按儿童友好度）
-1. **点击**（最容易）：单次、明确、无需精准
-2. **拖拽**（中等难度）：大目标、自动吸附、容错范围 ± 20dp
-3. **滑动**（简单）：水平/垂直、距离短、有回弹
-4. **长按**（谨慎使用）：有视觉进度条、时间 ≤ 1s
-5. **双指/多指**（禁用）：3-6 岁儿童难以掌握
+| Language | Font Stack | Characteristics |
+|----------|-----------|-----------------|
+| **Chinese** | 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif | Rounded, child-friendly |
+| **English** | 'Comic Neue', 'Nunito', 'Quicksand', sans-serif | Rounded, playful, clear |
+| **Numbers** | Same as English | Ensure b/d, p/q distinction |
 
-### 4.3 交互流程设计
-- **步骤数**：核心任务 ≤ 3 步完成
-- **流程示例**：
-  ```
-  1. 提示（角色说话 + 语音）
-  2. 操作（点击/拖拽）
-  3. 反馈（结果 + 奖励）
-  ```
-- **容错与撤销**：
-  - 所有操作可撤销（最后一步）
-  - 误触有 500ms 缓冲期
-  - 错误后有 3 次尝试机会
+### 2.2 Type Scale (Child-Friendly)
 
----
+| Level | Usage | Size (px) | Weight | Line Height | Letter Spacing |
+|-------|-------|-----------|--------|-------------|----------------|
+| **H1** | Page titles | 48-64 | 900 | 1.2 | -0.02em |
+| **H2** | Section titles | 28-32 | 800 | 1.3 | -0.01em |
+| **H3** | Card titles | 22-24 | 700 | 1.4 | 0 |
+| **Body** | Child text | 20-24 | 700 | 1.3 | 0.01em |
+| **Parent** | Parent text | 16-18 | 400 | 1.5 | 0 |
+| **Small** |辅助 info | 14-16 | 600 | 1.4 | 0.01em |
 
-## 5. 动效与动画系统
+### 2.3 Typography Guidelines
 
-### 5.1 动效设计原则
-- **语义化**：每个动效都有意义，不是为了动而动
-- **轻量化**：时长 ≤ 600ms，避免复杂动效
-- **一致性**：相同交互用相同动效
-- **愉悦感**：弹性、弹跳、惊喜元素
+**For Children (3-6 years)**:
+- Length: 2-6 characters, max 1 line
+- Tone: Positive, encouraging, warm (like older sibling)
+- Examples:
+  - ✅ "太棒了！" → "你真厉害！" → "继续加油！"
+  - ❌ "再试一次" → ✅ "没关系，我们再来一次！"
+  - Action: "点一点" → "拖一拖" → "听一听"
 
-### 5.2 动效时长规范
-| 动效类型 | 时长范围 | 推荐值 | 缓动函数 |
-|---------|---------|-------|---------|
-| 入场动画 | 150-300ms | 200ms | ease-out |
-| 强调动画 | 300-600ms | 400ms | ease-out-back |
-| 退场动画 | 150-300ms | 200ms | ease-in |
-| 过渡动画 | 200-400ms | 300ms | ease-in-out |
-| 反馈动画 | 200-500ms | 350ms | ease-out-elastic |
+**For Parents**:
+- Professional, clear, concise
+- Standard UI patterns acceptable
+- Can use longer text when needed
 
-### 5.3 核心动效库（按场景）
-
-#### 5.3.1 入场动效
-- **弹跳进入**：scale 0 → 1 + 轻微弹跳（按钮、卡片）
-- **滑入**：从屏幕边缘滑入（侧边栏、通知）
-- **淡入**：opacity 0 → 1（背景、渐变）
-- **缩放进入**：从中心放大（弹窗、奖励）
-
-#### 5.3.2 反馈动效（最重要！）
-- **正确反馈**：
-  - 星星爆炸：星星从中心向外飞溅 + 粒子效果
-  - 弹跳庆祝：元素轻微弹跳 2-3 次
-  - 颜色变化：绿色渐变 + 发光
-  - 角色欢呼：角色跳起来 + 开心表情
-- **错误反馈**：
-  - 轻微晃动：左右晃动 1-2 次（幅度 ≤ 10°）
-  - 温柔缩回：回到原位 + 颜色稍变暗
-  - 角色鼓励：角色摇头 + "没关系"表情
-  - **绝对禁止**：红色闪烁、震动、负面音效
-
-#### 5.3.3 奖励动效
-- **宝箱打开**：宝箱震动 → 盖子飞起 → 金光四射 → 奖励出现
-- **贴纸收集**：贴纸飞入收集册 + "啵"的音效
-- **升级**：角色变大 + 光环 + 升级光效
-- **成就解锁**：徽章从地下升起 + 旋转 + 定格
-
-#### 5.3.4 角色动效
-- ** idle（待机）**：轻微呼吸（上下浮动 2-3px）+ 眨眼
-- **说话**：嘴巴张合 + 身体微动
-- **走路**：左右摇摆 + 四肢协调
-- **开心**：跳起来 + 转圈 + 星星眼
-- **思考**：手托下巴 + 转圈（问号）
-
-### 5.4 动效性能优化
-- **使用 CSS transform/opacity**：避免重排重绘
-- **硬件加速**：will-change: transform
-- **控制同时动画数**：≤ 3 个同时进行
-- **低端设备降级**：复杂动效在低端设备上简化
+### 2.4 Font Principles
+- Avoid thin strokes
+- Moderate letter/number spacing
+- Similar characters (b/d, p/q) must have clear distinction
+- Support 1.2x-1.5x font scaling for accessibility
 
 ---
 
-## 6. 声音设计系统
+## 3. Component Stylings
 
-### 6.1 声音设计原则
-- **儿童友好**：温暖、清晰、慢速、无刺耳声音
-- **分层设计**：语音 > 音效 > 背景音乐
-- **可控制**：家长可单独调节语音/音效/音乐音量
-- **不干扰**：音效短（≤ 1s）、不打断语音
+### 3.1 Button Component
+**Reference**: `src/components/Button/Button.tsx`
 
-### 6.2 语音设计
-- **声线选择**：
-  - 儿童语音（4-6岁）：亲切、有共鸣
-  - 成人女性语音（25-30岁）：温暖、像妈妈
-  - 避免：低沉男声、机械音
-- **语速**：比正常慢 20-30%
-- **发音**：标准、清晰、每个字都读清楚
-- **语气**：积极、鼓励、有起伏、不平淡
+#### Primary Button
+- **Size**: Min 88x88 dp (recommended), 64x64 dp (minimum)
+- **Style**: Round corners 24px, gradient fill, icon + text
+- **Gradient**: `linear-gradient(135deg, #FF9800, #F57C00)`
+- **Shadow**: `0 8px 20px rgba(255, 152, 0, 0.4)`
+- **States**:
+  - Default: Orange gradient
+  - Hover: Scale 1.05 (framer-motion `whileHover`)
+  - Tap: Scale 0.95 (framer-motion `whileTap`)
+  - Disabled: 50% opacity, not-allowed cursor
 
-### 6.3 音效库
-| 场景 | 音效描述 | 时长 | 情绪 |
-|-----|---------|-----|-----|
-| 点击按钮 | "叮"的一声，清脆 | 150ms | 中性 |
-| 正确答案 | 上升音阶 + 叮咚 | 500ms | 开心 |
-| 错误提示 | 温和下降音 | 300ms | 鼓励 |
-| 获得奖励 | 宝箱打开 + 金币声 | 800ms | 惊喜 |
-| 角色出现 | 魔法声 + 飘入 | 400ms | 神奇 |
-| 完成关卡 | 胜利号角 + 欢呼 | 1000ms | 成就 |
+#### Secondary Button
+- **Size**: Min 64x64 dp, 48x48 dp (minimum)
+- **Style**: Round corners 16px, outline + transparent background
+- **Background**: `linear-gradient(135deg, #E3F2FD, #BBDEFB)`
+- **Border**: 3px solid #2196F3
+- **States**: Same as primary
 
-### 6.4 背景音乐
-- **风格**：轻快、温馨、管弦乐/钢琴
-- **节奏**：60-80 BPM（平缓，不刺激）
-- **音量**：比语音低 20-30dB
-- **循环**：无缝循环，无明显断点
-- **可选**：用户可关闭背景音乐
+#### Icon Button
+- **Size**: 56x56 dp
+- **Style**: Circular, pure icon
+- **Background**: `linear-gradient(135deg, #FFFFFF, #FFF8E1)`
+- **Shadow**: `0 6px 12px rgba(0, 0, 0, 0.12)`
+
+### 3.2 Card Component
+**Reference**: `src/components/Card/Card.tsx`
+
+#### Base Card
+- **Background**: White (#FFFFFF)
+- **Radius**: 16px (`var(--radius-md)`)
+- **Padding**: 24px (`var(--spacing-lg)`)
+- **Shadow**: `var(--shadow-md)` (elevated: `var(--shadow-lg)`)
+- **Interaction** (if clickable):
+  - Hover: Scale 1.02, shadow increases
+  - Tap: Scale 0.98
+
+#### Category Card (GameCard)
+**Reference**: `src/components/GameNavigation/GameCard.tsx`
+- **Size**: Min 120x120 dp
+- **Background**: Category-specific gradient (see 1.3)
+- **Layout**: Icon (top) + Title (bottom)
+- **Progress**: Overlay indicator (top-right corner)
+- **Touch Target**: Large, child-friendly
+
+### 3.3 Modal/Dialog Component
+**Reference**: `src/components/Modal/Modal.tsx`
+
+- **Width**: 80% screen width
+- **Radius**: 24px
+- **Animation**: Scale in from center (200ms ease-out-back)
+- **Backdrop**: Semi-transparent dark overlay (rgba(0,0,0,0.5))
+- **Close Button**: Large, obvious, top-right
+- **Auto-close**: Reward modals auto-close after 2-3s
+
+### 3.4 Feedback Components
+
+#### Success Feedback
+**Reference**: `src/components/RewardToast.jsx`
+- **Visual**: Green gradient + star explosion animation
+- **Animation**: Scale up + particle effects
+- **Duration**: 1.8s auto-dismiss
+- **Sound**: "Ding" rising tone (500ms)
+
+#### Error Feedback
+**Reference**: `src/components/ChoiceTask.jsx`
+- **Visual**: Gentle shake (2x, ≤10° rotation)
+- **Message**: Warm, encouraging text
+- **Color**: Slightly darker, no red flashing
+- **Guidance**: Show retry option
+
+#### Loading State
+- **Animation**: Bouncing dots or spinner
+- **Text**: "加载中…" (Loading...)
+- **Fallback**: Skeleton screens for content
+
+### 3.5 Input Components
+
+#### Child Input
+- **Size**: Large (min 64px height)
+- **Radius**: 16px
+- **Style**: Icon prefix, large text (20px+)
+- **Focus**: Blue border highlight
+
+#### Parent Input
+- **Size**: Standard (48px height)
+- **Style**: Professional, clean
+- **Validation**: Clear error messages
 
 ---
 
-## 7. 组件库规范
+## 4. Layout Principles
 
-### 7.1 按钮组件（Button）
-#### 主按钮（Primary Button）
-- **尺寸**：88x88 dp（最小 64x64 dp）
-- **样式**：圆角 24px，渐变填充，图标 + 文字
-- **状态**：
-  - 默认：主色渐变
-  - 按下：缩小 95% + 颜色加深
-  - 禁用：灰度 50% + 不可点击
+### 4.1 Spacing Scale (8px Base)
+All spacing uses 8px multiples: 4, 8, 16, 24, 32, 48, 64
 
-#### 次按钮（Secondary Button）
-- **尺寸**：64x64 dp（最小 48x48 dp）
-- **样式**：圆角 16px，描边 + 透明背景
-- **状态**：同主按钮
+```css
+--spacing-xs: 4px
+--spacing-sm: 8px
+--spacing-md: 16px
+--spacing-lg: 24px
+--spacing-xl: 32px
+--spacing-2xl: 48px
+--spacing-3xl: 64px
+```
 
-#### 图标按钮（Icon Button）
-- **尺寸**：56x56 dp
-- **样式**：圆形，纯图标
+### 4.2 Grid System
+- **Game Grid**: 4-column layout (desktop)
+  - Tablet: 3 columns
+  - Mobile: 2 columns
+- **Content**: Single column, max-width 600px
+- **Screen Margins**: 16-24px padding
 
-### 7.2 卡片组件（Card）
-- **尺寸**：自适应，最小 120x120 dp
-- **圆角**：16-24 px
-- **阴影**：轻微阴影（elevation 2-4）
-- **内边距**：16-24 dp
-- **交互**：可点击，点击时有缩放动效
+### 4.3 Layout Philosophy
+- **Generous Whitespace**: Children need breathing room
+- **Clear Hierarchy**: Important elements 30% larger
+- **Progressive Disclosure**: Batch information, avoid overload
+- **Center-aligned**: Content centered, width ≤ 600px (tablet friendly)
 
-### 7.3 反馈弹窗（Feedback Modal）
-- **尺寸**：屏幕宽度的 80%，高度自适应
-- **圆角**：24 px
-- **动画**：从中心缩放进入
-- **自动关闭**：奖励弹窗 2-3s 自动关闭
-- **手动关闭**：有明显的"继续"按钮
+### 4.4 Page Layouts
 
-### 7.4 进度条（Progress）
-- **高度**：8-12 dp
-- **圆角**：全圆角
-- **样式**：彩色填充 + 灰色背景
-- **动画**：进度变化时有平滑过渡
-
----
-
-## 8. 页面布局规范
-
-### 8.1 栅格系统（8px 基准）
-- **间距单位**：8 dp 的倍数（8、16、24、32、48 dp）
-- **屏幕边距**：16-24 dp
-- **内容区域**：居中，宽度 ≤ 600 dp（平板适配）
-
-### 8.2 页面类型与布局
-
-#### 首页（Dashboard）
+#### Home Page (Dashboard)
 ```
 ┌─────────────────────────┐
-│   角色区域（顶部 40%）  │
-│     大头像 + 打招呼     │
+│   Hero Section (20%)    │
+│   Title + Subtitle      │
 ├─────────────────────────┤
-│  功能入口（中部 40%）   │
-│  2x2 网格，大卡片       │
+│   Stats Bar (15%)       │
+│   Stars, Level, Streak  │
 ├─────────────────────────┤
-│  底部导航（底部 20%）   │
-│  3-4 个图标按钮         │
+│   Quick Actions (10%)   │
+│   Check-in, Bonus       │
+├─────────────────────────┤
+│   Game Grid (45%)       │
+│   4-column cards        │
+├─────────────────────────┤
+│   Bottom Nav (10%)      │
+│   3-4 icon buttons      │
 └─────────────────────────┘
 ```
 
-#### 游戏页（Game）
+#### Game Page
 ```
 ┌─────────────────────────┐
-│  顶部：进度 + 暂停      │
+│  Top: Progress + Pause  │
 ├─────────────────────────┤
 │                         │
-│   核心游戏区域（70%）   │
-│      大内容展示         │
+│   Core Game Area (70%)  │
+│   Large content display │
 │                         │
 ├─────────────────────────┤
-│  底部：操作按钮         │
-└─────────────────────────┘
-```
-
-#### 家长中心（Parent）
-```
-┌─────────────────────────┐
-│  返回 + 标题            │
-├─────────────────────────┤
-│  数据卡片（可滚动）     │
-│  ┌─────────────────┐   │
-│  │  今日学习报告   │   │
-│  └─────────────────┘   │
-│  ┌─────────────────┐   │
-│  │  成长曲线       │   │
-│  └─────────────────┘   │
-│  ...                    │
+│  Bottom: Action Buttons │
 └─────────────────────────┘
 ```
 
 ---
 
-## 9. 可访问性与包容性设计
+## 5. Depth & Elevation
 
-### 9.1 视觉可访问性
-- **色盲友好**：
-  - 不单独使用颜色传递信息
-  - 红绿色盲模拟测试（使用 Coblis 工具）
-  - 关键信息使用形状 + 颜色双重标识
-- **低视力友好**：
-  - 支持 1.2x-1.5x 字体缩放
-  - 高对比度模式（可选）
-  - 大触控目标
+### 5.1 Shadow System
+**Reference**: `src/styles/tokens.css`
 
-### 9.2 听觉可访问性
-- **字幕支持**：所有语音都有文字字幕
-- **音量控制**：语音/音效/音乐独立调节
-- **静音模式**：一键静音所有声音
-- **震动反馈**：声音可替换为震动
+| Level | Name | Shadow | Usage |
+|-------|------|--------|-------|
+| **0** | None | No shadow | Background |
+| **1** | sm | `0 1px 2px rgba(0,0,0,0.05)` | Cards at rest |
+| **2** | md | `0 4px 6px -1px rgba(0,0,0,0.1)` | Elevated cards, stat bars |
+| **3** | lg | `0 10px 15px -3px rgba(0,0,0,0.1)` | Modals, dropdowns |
+| **4** | xl | `0 20px 25px -5px rgba(0,0,0,0.1)` | Toasts, popovers |
 
-### 9.3 认知可访问性
-- **简单语言**：避免复杂词汇，使用短句
-- **图示引导**：图标 + 文字，不用纯文字
-- **一致模式**：相同功能在相同位置
-- **容错设计**：误操作可撤销，错误有引导
+### 5.2 Z-Index Scale
 
-### 9.4 文化包容性
-- **角色多样性**：不同肤色、不同发型的角色
-- **文化中立**：避免宗教、政治敏感内容
-- **多语言支持**：UI 支持多语言切换（未来）
+| Layer | Value | Usage |
+|-------|-------|-------|
+| Background | 0 | Page background, decorative elements |
+| Content | 1 | Main content, cards, buttons |
+| Sticky | 10 | Fixed headers, nav bars |
+| Modal | 100 | Dialog overlays |
+| Toast | 200 | Notification toasts |
 
----
-
-## 10. 家长端专项设计
-
-### 10.1 设计原则区分
-- **儿童端**：大、圆、亮、动、简单
-- **家长端**：简洁、专业、高效、信息密度适中
-
-### 10.2 家长端视觉规范
-- **配色**：主色不变，增加专业感
-- **字体**：16-18 dp，常规字重
-- **布局**：列表/卡片，信息清晰
-- **交互**：标准移动端交互
-
-### 10.3 家长端核心页面
-- **学习报告**：数据可视化、简洁摘要、详细分析
-- **设置**：年龄/时长/音量/内容偏好
-- **成长记录**：时间轴、里程碑、作品展示
-- **家庭互动**：推荐活动、亲子任务
+### 5.3 Surface Hierarchy
+1. **Background**: Warm cloud (#FFF8E1)
+2. **Surface**: White (#FFFFFF) cards
+3. **Elevated**: Cards with shadows
+4. **Overlay**: Modal backdrops
+5. **Floating**: Toasts, tooltips
 
 ---
 
-## 11. 性能与质量标准
+## 6. Interaction Patterns
 
-### 11.1 性能指标
-- **首屏加载**：≤ 2s（3G 网络）
-- **交互响应**：≤ 200ms（点击到反馈）
-- **动画帧率**：≥ 55 FPS（稳定 60 FPS）
-- **包体大小**：≤ 100 MB（初始安装）
-- **内存占用**：≤ 200 MB（峰值）
+### 6.1 Primary Interactions
 
-### 11.2 质量标准
-- **崩溃率**：≤ 0.1%
-- **ANR 率**：≤ 0.05%
-- **兼容性**：覆盖 90% 主流设备
-- **测试覆盖**：核心功能自动化测试 ≥ 80%
+| Interaction | Usage | Feedback | Tolerance |
+|-------------|-------|----------|-----------|
+| **Click/Tap** | Primary action | Immediate (< 200ms) | N/A |
+| **Hover** | Desktop only | Scale 1.05, shadow increase | N/A |
+| **Drag & Drop** | Matching games | Snap-to-grid | ±20dp |
+| **Swipe** | Navigation | Slide transition | Horizontal/Vertical |
+| **Long Press** | Context menus | Visual progress bar | Max 1s |
+
+**Forbidden for 3-6 years**: Two-finger/multi-touch gestures
+
+### 6.2 Feedback Patterns
+
+#### Success Feedback
+1. Scale up animation (1.05x)
+2. Green flash overlay
+3. Star particle explosion
+4. "Ding" sound (rising tone, 500ms)
+5. Character celebration (jump + happy face)
+
+#### Error Feedback
+1. Gentle shake (2x, ≤10° rotation)
+2. Warm message: "没关系，我们再来一次！"
+3. Color slightly darker (no red)
+4. Character encouragement (head shake + smile)
+5. **NEVER**: Red flash, vibration, negative sounds
+
+#### Loading State
+1. Bouncing dots animation
+2. Skeleton screens for content
+3. Text: "加载中…"
+4. Max wait time: 2s (show fallback after)
+
+#### Empty State
+1. Friendly illustration
+2. Encouraging text
+3. Clear action button
+4. Character guidance
+
+### 6.3 Navigation Patterns
+
+| Transition | Direction | Duration | Easing |
+|-----------|-----------|----------|--------|
+| Forward | Slide in from right | 300ms | ease-in-out |
+| Back | Slide out to right | 300ms | ease-in-out |
+| Modal | Scale in from center | 200ms | ease-out-back |
+| Tab Switch | Fade | 200ms | ease-in-out |
+| Toast | Slide down from top | 200ms | ease-out |
+
+### 6.4 Interaction Flow Design
+- **Steps**: Core tasks ≤ 3 steps
+- **Flow Example**:
+  ```
+  1. Prompt (character speaks + voice)
+  2. Action (click/drag)
+  3. Feedback (result + reward)
+  ```
+- **Undo**: All actions reversible (last step)
+- **Buffer**: 500ms buffer for accidental taps
+- **Retries**: 3 attempts before guidance
 
 ---
 
-## 12. 设计交付与验收清单
+## 7. Animation System
 
-### 12.1 设计交付物
-- [ ] 设计系统文档（本文档）
-- [ ] UI Kit（Figma/Sketch）
-- [ ] 动效原型（Principle/Lottie）
-- [ ] 音效素材库
-- [ ] 图标/插画资源
-- [ ] 高保真原型
+### 7.1 Animation Principles
+- **Semantic**: Every animation has meaning, not just for motion
+- **Lightweight**: Duration ≤ 600ms, avoid complex animations
+- **Consistent**: Same interaction = same animation
+- **Joyful**: Elastic, bounce, surprise elements
 
-### 12.2 验收检查清单
-- [ ] 触控目标尺寸检查
-- [ ] 色彩对比度检查
-- [ ] 动效时长检查
-- [ ] 文案长度检查
-- [ ] 色盲友好检查
-- [ ] 响应速度检查
-- [ ] 儿童可用性测试（5-8 名目标用户）
-- [ ] 家长可用性测试（3-5 名目标用户）
+### 7.2 Timing Scale
+**Reference**: `src/styles/tokens.css`
+
+| Type | Duration | Usage | Easing |
+|------|----------|-------|--------|
+| Fast | 150ms | Micro-interactions | ease-out |
+| Normal | 200ms | State changes | ease-out |
+| Slow | 300ms | Page transitions | ease-in-out |
+| Emphasis | 400ms | Rewards, celebrations | ease-out-back |
+
+### 7.3 Easing Functions
+
+```css
+--ease-out: cubic-bezier(0, 0, 0.2, 1)
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)
+--ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275)
+--ease-out-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55)
+```
+
+### 7.4 Animation Library
+
+#### Entrance Animations
+- **Bounce In**: Scale 0→1 + slight bounce (buttons, cards)
+  - Framer Motion: `initial={{ scale: 0 }} animate={{ scale: 1 }}`
+- **Slide In**: From screen edge (sidebars, notifications)
+  - Framer Motion: `initial={{ x: -100 }} animate={{ x: 0 }}`
+- **Fade In**: Opacity 0→1 (backgrounds, gradients)
+  - Framer Motion: `initial={{ opacity: 0 }} animate={{ opacity: 1 }}`
+- **Scale In**: From center (modals, rewards)
+  - Framer Motion: `initial={{ scale: 0.8 }} animate={{ scale: 1 }}`
+
+#### Feedback Animations
+- **Success**: 
+  - Star explosion: Particles fly outward from center
+  - Bounce celebration: Element bounces 2-3 times
+  - Color shift: Green gradient + glow
+- **Error**:
+  - Gentle shake: Left-right 1-2 times (≤10° rotation)
+  - Soft retreat: Back to original position + slightly darker
+  - Character encouragement: Head shake + "it's okay" expression
+
+#### Reward Animations
+- **Treasure Open**: Shake → lid flies → gold rays → reward appears
+- **Sticker Collect**: Sticker flies into album + "pop" sound
+- **Level Up**: Character grows + halo + upgrade glow
+- **Achievement Unlock**: Badge rises from bottom + rotates + locks
+
+#### Character Animations
+- **Idle**: Gentle breathing (up-down 2-3px) + blink
+- **Speaking**: Mouth open/close + body slight movement
+- **Happy**: Jump + spin + star eyes
+- **Thinking**: Hand on chin + question mark circle
+
+### 7.5 Performance Rules
+- **Use CSS transform/opacity only**: Avoid reflow/repaint
+- **Hardware acceleration**: `will-change: transform`
+- **Concurrent animations**: ≤ 3 at same time
+- **Low-end devices**: Simplify complex animations
+- **Reduced motion**: Respect `prefers-reduced-motion` media query
 
 ---
 
-## 13. 设计工具与工作流
+## 8. Do's and Don'ts
 
-### 13.1 推荐工具
-- **UI 设计**：Figma（协作首选）
-- **动效设计**：Principle、After Effects + Lottie
-- **原型测试**：Figma 原型、InVision
-- **用户研究**：Lookback、UserTesting（儿童版）
-- **色彩工具**：Coolors、Color Safe、Coblis（色盲模拟）
+### 8.1 Design Guardrails
 
-### 13.2 设计评审流程
-1. 设计初稿 → 内部评审
-2. 修改完善 → 儿童/家长测试
-3. 根据反馈迭代 → 最终评审
-4. 开发交付 → 走查验收
+#### ✅ DO
+- Use large touch targets (≥64x64dp)
+- Provide immediate feedback for all interactions (< 200ms)
+- Use icons + text together (dual coding)
+- Keep screens simple (≤5 elements per screen)
+- Use warm, encouraging language
+- Test with colorblind simulators
+- Support keyboard navigation
+- Use positive reinforcement always
+- Make errors forgiving and guided
+- Animate with purpose, not decoration
+
+#### ❌ DON'T
+- Use red/green as sole indicators (colorblind accessibility)
+- Show punitive error messages or negative feedback
+- Overwhelm with information or cluttered layouts
+- Use fast, jarring animations (> 600ms or rapid flashing)
+- Require precise gestures (±20dp tolerance minimum)
+- Use small text (<16px for children, <14px for parents)
+- Auto-play sounds without user control
+- Punish mistakes or create anxiety
+- Use complex multi-finger gestures
+- Ignore performance (maintain 60fps)
+
+### 8.2 Accessibility Requirements
+- **Colorblind Friendly**: Use shape + color双重标识
+- **Low Vision**: Support 1.2x-1.5x font scaling
+- **Motor Impairment**: Large touch targets, simple gestures
+- **Hearing Impairment**: Subtitles for all audio, visual alternatives
+- **Cognitive**: Simple language, consistent patterns, clear hierarchy
 
 ---
 
-**核心设计箴言**：
-> 对于孩子，一个好的设计不是他们能理解的设计，
-> 而是他们根本不需要"理解"就能使用的设计。
+## 9. Responsive Behavior
+
+### 9.1 Breakpoints
+
+| Device | Width | Grid Columns | Touch Target | Font Scale |
+|--------|-------|--------------|--------------|------------|
+| Mobile | < 768px | 2 columns | ≥ 64px | 1.0x |
+| Tablet | 768-1024px | 3 columns | ≥ 64px | 1.1x |
+| Desktop | > 1024px | 4 columns | ≥ 64px | 1.2x |
+
+### 9.2 Responsive Strategy
+- **Mobile-First**: Design for mobile, enhance for larger screens
+- **Grid Collapse**: 4 cols → 3 cols → 2 cols → 1 col
+- **Touch Targets**: Always ≥ 48px, ideally 64px (all devices)
+- **Font Scaling**: Support 1.2x-1.5x for accessibility
+- **Safe Areas**: Respect notched devices (env(safe-area-inset-*))
+- **Orientation**: Lock games to portrait mode
+
+### 9.3 Implementation
+```css
+/* Mobile First */
+.game-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .game-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .game-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+```
 
 ---
 
-**文档维护记录**：
-- v2.0 (2026-04-19)：全面升级，增加品牌系统、幼儿认知适配、动效库、声音系统、可访问性等
-- v1.0 (初始版本)：基础框架
+## 10. Data Flow & State Management
 
+### 10.1 Architecture Overview
+
+**State Management**: Zustand (lightweight, performant)
+
+| Store | File | Purpose |
+|-------|------|---------|
+| **useUserStore** | `src/stores/useUserStore.ts` | Child profiles, preferences, settings |
+| **useRewardStore** | `src/stores/useRewardStore.ts` | Stars, levels, badges, streaks |
+| **useGameStore** | `src/stores/useGameStore.ts` | Current game, progress, rewards queue |
+
+### 10.2 Data Flow Pattern
+
+```
+User Action → Store Update → UI Re-render → Analytics Track
+```
+
+**Example Flow**:
+```typescript
+// 1. User clicks button
+<Button onClick={() => addStars(1)} />
+
+// 2. Store updates
+const addStars = useRewardStore((s) => s.addStars)
+
+// 3. UI re-renders automatically
+const stars = useRewardStore((s) => s.rewards.stars)
+
+// 4. Analytics tracked
+track('add_stars', { count: 1 })
+```
+
+### 10.3 Game Flow
+
+```
+Home → Game Select → Task 1 → Task 2 → Task 3 → Complete → Reward → Home
+```
+
+**Implementation**:
+- Game selection: `gameRegistry` in `src/games/registry.ts`
+- Task progression: `currentTaskIndex` state in game components
+- Completion: `useGameCompletion` hook
+- Reward display: `RewardToast` component
+
+### 10.4 Reward System
+
+| Reward Type | Trigger | Frequency | Storage |
+|------------|---------|-----------|---------|
+| **Stars** | Task completion | Immediate (1-3 per task) | useRewardStore |
+| **Level Up** | Every 50 stars | Milestone | useRewardStore |
+| **Streak** | Daily check-in | Daily | useRewardStore |
+| **Badges** | Achievements | Milestone | useRewardStore |
+
+### 10.5 Analytics Integration
+
+**Function**: `track()` from `src/lib/analytics.ts`
+
+| Event | When | Data |
+|-------|------|------|
+| `game_select` | User selects game | gameId, gameName |
+| `game_start` | Game begins | gameId, taskCount |
+| `task_complete` | Task finished | success, duration_ms, taskType |
+| `check_in` | Daily check-in | date, streakDays |
+
+**Privacy**: 
+- No PII (Personally Identifiable Information)
+- Local processing preferred
+- Analytics opt-out available
+
+---
+
+## 11. Child Cognitive Adaptation
+
+### 11.1 Visual Perception (3-6 years)
+- **Graphics First**: Icons > text, large graphics > small graphics
+- **Color Preference**: Warm tones > cool tones, high saturation > low saturation
+- **Shape Preference**: Circles > squares > triangles, rounded > sharp
+- **Motion Attraction**: Dynamic > static, slow motion > fast motion
+
+### 11.2 Attention & Cognitive Load Management
+- **Single Task Focus**: Only 1 core task per screen
+- **Information Layering**: Clear visual hierarchy, important elements 30% larger
+- **Progressive Disclosure**: Batch information, avoid overload
+- **Break Reminders**: Auto-remind every 10-15 minutes (age-adjusted)
+
+### 11.3 Memory & Learning Support
+- **Multi-Sensory Encoding**: Visual (graphics) + Audio (voice) + Haptic (vibration)
+- **Repetition & Reinforcement**: Key content repeats in different contexts
+- **Connection & Association**: Visual connections between old and new knowledge
+- **Contextual Learning**: Knowledge embedded in meaningful story/game scenarios
+
+---
+
+## 12. Agent Prompt Guide
+
+### 12.1 Quick Color Reference
+
+```markdown
+## Primary Colors
+- Primary button gradient: linear-gradient(135deg, #FF9800, #F57C00)
+- Secondary button background: linear-gradient(135deg, #E3F2FD, #BBDEFB)
+- Secondary button border: 3px solid #2196F3
+- Success: #4CAF50
+- Background: #FFF8E1
+- Text primary: #3E2723
+- Text secondary: #6D4C41
+
+## Category Gradients
+- Pinyin: linear-gradient(135deg, #FF9800, #FFB74D)
+- Math: linear-gradient(135deg, #2196F3, #64B5F6)
+- English: linear-gradient(135deg, #4CAF50, #81C784)
+- Stories: linear-gradient(135deg, #9C27B0, #CE93D8)
+```
+
+### 12.2 Ready-to-Use Prompts
+
+```markdown
+## Component Creation
+- "Create a child-friendly primary button with orange gradient, 88x88dp min size, 24px radius, using framer-motion for hover (scale 1.05) and tap (scale 0.95) animations"
+
+- "Build a game card with category-specific gradient background, large icon, title, and progress indicator. Min size 120x120dp, responsive grid layout"
+
+- "Design a reward modal that scales in from center (200ms ease-out-back), 80% screen width, 24px radius, with star explosion animation and auto-close after 1.8s"
+
+## Layout & Styling
+- "Create a responsive 4-column game grid using CSS Grid that collapses to 3 columns on tablet (768px) and 2 columns on mobile (<768px)"
+
+- "Style a stats bar with three metrics (stars, level, streak) using flexbox, centered layout, with large emoji icons and child-friendly typography (20-24px, weight 700)"
+
+## Animation
+- "Add framer-motion entrance animation to component: initial y: -30, opacity: 0, animate to y: 0, opacity: 1, duration 0.6s"
+
+- "Create celebration animation with star burst particles using framer-motion AnimatePresence, ease-out-elastic easing, 400ms duration"
+```
+
+### 12.3 Design Token Usage
+
+```css
+/* Always use design tokens, not hardcoded values */
+✅ var(--color-primary-1)
+✅ var(--spacing-lg)
+✅ var(--radius-md)
+✅ var(--shadow-md)
+
+❌ #FF9800
+❌ 24px
+❌ 16px
+```
+
+### 12.4 Accessibility Checklist
+
+When creating any component:
+- [ ] Touch target ≥ 64x64dp
+- [ ] Color contrast ≥ 4.5:1
+- [ ] Icon + text (not text-only)
+- [ ] Keyboard accessible (focus-visible styles)
+- [ ] ARIA labels where needed
+- [ ] Reduced motion support
+- [ ] Error messages are encouraging
+
+---
+
+## 13. Performance & Quality Standards
+
+### 13.1 Performance Metrics
+- **First Screen Load**: ≤ 2s (3G network)
+- **Interaction Response**: ≤ 200ms (click to feedback)
+- **Animation Frame Rate**: ≥ 55 FPS (stable 60 FPS)
+- **Bundle Size**: ≤ 100 MB (initial install)
+- **Memory Usage**: ≤ 200 MB (peak)
+
+### 13.2 Quality Standards
+- **Crash Rate**: ≤ 0.1%
+- **ANR Rate**: ≤ 0.05%
+- **Compatibility**: Cover 90% mainstream devices
+- **Test Coverage**: Core features automated tests ≥ 80%
+
+---
+
+## 14. Design Delivery & Acceptance
+
+### 14.1 Design Deliverables
+- [x] Design system document (this document)
+- [ ] UI Kit (Figma/Sketch)
+- [ ] Animation prototypes (Principle/Lottie)
+- [ ] Sound effect library
+- [ ] Icon/illustration resources
+- [ ] High-fidelity prototypes
+
+### 14.2 Acceptance Checklist
+- [ ] Touch target size check (≥64x64dp)
+- [ ] Color contrast check (≥4.5:1)
+- [ ] Animation duration check (≤600ms)
+- [ ] Text length check (≤6 chars for children)
+- [ ] Colorblind friendly check
+- [ ] Response speed check (<200ms)
+- [ ] Child usability testing (5-8 target users)
+- [ ] Parent usability testing (3-5 target users)
+
+---
+
+**Core Design Mantra**:
+> For children, good design is not design they can understand,
+> but design they don't need to "understand" to use.
+
+---
+
+**Document Maintenance Record**:
+- v3.0 (2026-04-19): Complete restructure following awesome-design-md format, added component specs, interaction patterns, data flow, agent prompts
+- v2.0 (2026-04-19): Comprehensive upgrade with brand system, cognitive adaptation, animation library, sound system, accessibility
+- v1.0 (Initial): Basic framework

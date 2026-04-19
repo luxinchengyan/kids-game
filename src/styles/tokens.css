@@ -1,4 +1,4 @@
-/* Design Tokens - 童梦乐园 · 智趣成长
+/* Design Tokens - 童梦飞船 · 智趣成长
  * 基于 DESIGN.md v2.0
  */
 
@@ -109,4 +109,35 @@
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* ========================================
+   * 分类渐变（游戏类型）
+   * ======================================== */
+  --gradient-pinyin: linear-gradient(135deg, #FF9800, #FFB74D);
+  --gradient-math: linear-gradient(135deg, #2196F3, #64B5F6);
+  --gradient-english: linear-gradient(135deg, #4CAF50, #81C784);
+  --gradient-stories: linear-gradient(135deg, #9C27B0, #CE93D8);
+  
+  /* ========================================
+   * Z-Index 层级
+   * ======================================== */
+  --z-background: 0;
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-modal: 100;
+  --z-toast: 200;
+  
+  /* ========================================
+   * 响应式断点
+   * ======================================== */
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1280px;
+  
+  /* ========================================
+   * 动画预设
+   * ======================================== */
+  --animation-bounce-in: scale 0.3s var(--ease-out-back);
+  --animation-fade-out: opacity 0.2s ease-in;
 }

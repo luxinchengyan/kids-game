@@ -264,3 +264,34 @@ export interface StoryQuestion {
   answer: string;
   explanation?: string;
 }
+
+// ==========================
+// 游戏相关类型
+// ==========================
+export interface GameResult {
+  gameId: string;
+  success: boolean;
+  stars: number;
+  xp: number;
+  tasksCompleted: number;
+  accuracy: number;
+  timeSpent: number;
+  completedAt: string;
+}
+
+export interface GameProgress {
+  gameId: string;
+  totalSessions: number;
+  completedSessions: number;
+  bestStars: number;
+  totalStars: number;
+  lastPlayedAt: string;
+}
+
+export interface TaskResult {
+  success: boolean;
+  stars: number;
+  xp?: number;
+  response?: string;
+  responseTime?: number;
+}

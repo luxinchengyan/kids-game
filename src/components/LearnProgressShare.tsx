@@ -14,7 +14,7 @@ export function LearnProgressShare({ childNickname, stars, level, streakDays }: 
 
   const buildText = () => {
     const name = childNickname?.trim() || '小朋友'
-    return `【童梦乐园】${name} 最近在坚持学习：⭐${stars} 颗星星 · Lv.${level} · 连续 ${streakDays} 天。一起来玩中学吧！`
+    return `【童梦飞船】${name} 最近在坚持学习：⭐${stars} 颗星星 · Lv.${level} · 连续 ${streakDays} 天。一起来玩中学吧！`
   }
 
   const handleShare = async () => {
@@ -22,7 +22,7 @@ export function LearnProgressShare({ childNickname, stars, level, streakDays }: 
     track('share_click', { channel: 'native_or_clipboard' })
     try {
       if (navigator.share) {
-        await navigator.share({ title: '童梦乐园 · 学习进度', text })
+        await navigator.share({ title: '童梦飞船 · 学习进度', text })
         setHint('已分享')
       } else {
         await navigator.clipboard.writeText(text)

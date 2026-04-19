@@ -1,5 +1,5 @@
 # AI Development Rules
-# 产品名称：童梦乐园 · 智趣成长
+# 产品名称:童梦飞船 · 智趣成长
 # 版本：v2.0
 
 ---
@@ -114,21 +114,58 @@
 - **Props 默认值**：使用解构赋值默认值，或 `defaultProps`
 
 ### 3.3 样式规范
-- **设计系统优先**：必须使用 DESIGN.md 中定义的设计令牌
-- **Styled Components 示例**：
+- **设计系统优先**：必须使用 DESIGN.md v3.0 中定义的设计令牌
+- **CSS 自定义属性**：使用 `var(--token-name)` 而非硬编码值
+- **示例**：
   ```tsx
+  // ✅ 正确：使用设计令牌
   const Button = styled.button`
-    width: 88px;
-    height: 88px;
+    min-height: var(--touch-large);
+    border-radius: var(--radius-lg);
+    background: var(--gradient-pinyin);
+    box-shadow: var(--shadow-lg);
+    /* 遵循 DESIGN.md v3.0 的触控目标规范 */
+  `;
+  
+  // ❌ 错误：硬编码值
+  const Button = styled.button`
+    min-height: 88px;
     border-radius: 24px;
-    background: linear-gradient(135deg, #FFB74D, #FFA726);
-    /* 遵循 DESIGN.md 的触控目标规范 */
+    background: linear-gradient(135deg, #FF9800, #FFB74D);
   `;
   ```
 - **响应式**：移动优先，使用 `min-width` 媒体查询
-- **动画**：优先 CSS transform/opacity，避免重排重绘
+- **动画**：优先 CSS transform/opacity，使用 framer-motion 实现复杂交互
 
-### 3.4 文件结构规范
+### 3.4 动画最佳实践
+**参考**: DESIGN.md v3.0 Section 7 - Animation System
+
+#### 性能优化
+- 只使用 `transform` 和 `opacity` 属性（GPU 加速）
+- 限制并发动画数量 ≤ 3
+- 复杂动画使用 `will-change: transform`
+- 避免触发布局重排的属性（width, height, top, left）
+
+#### 无障碍支持
+```tsx
+import { useReducedMotion } from 'framer-motion';
+
+const prefersReducedMotion = useReducedMotion();
+
+<motion.div
+  animate={!prefersReducedMotion ? { scale: [1, 1.05, 1] } : {}}
+>
+  Content
+</motion.div>
+```
+
+#### 常用动画模式
+- **按钮交互**: `whileHover={{ scale: 1.05 }}` + `whileTap={{ scale: 0.95 }}`
+- **页面入场**: `initial={{ y: -30, opacity: 0 }}` → `animate={{ y: 0, opacity: 1 }}`
+- **模态框**: `initial={{ scale: 0.8 }}` → `animate={{ scale: 1 }}` (ease-out-back)
+- **奖励庆祝**: ease-out-elastic, 弹簧动画
+
+### 3.5 文件结构规范
 ```
 src/
 ├── components/          # 通用组件

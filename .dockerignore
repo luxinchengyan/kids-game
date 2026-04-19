@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docs
+*.md
+ai/
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env*
+!.env.example
+
+# Tests
+tests/
+test-results/
+coverage/
+playwright.config.ts
+
+# CI/CD
+.github/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+.cache/
