@@ -19,9 +19,14 @@ import { serverConfig } from '../config';
 
 const router = Router();
 
-// 手机号格式验证
+// 手机号格式验证（支持 +86 前缀或纯11位）
 function isValidPhone(phone: string): boolean {
-  return /^1[3-9]\d{9}$/.test(phone);
+  return /^(\+?86)?1[3-9]\d{9}$/.test(phone);
+}
+
+// 规范化手机号（去掉 +86 前缀，只保留11位）
+function normalizePhone(phone: string): string {
+  return phone.replace(/^\+?86/, '');
 }
 
 /**
@@ -29,10 +34,11 @@ function isValidPhone(phone: string): boolean {
  * Body: { phone: string }
  */
 router.post('/send-otp', async (req: Request, res: Response) => {
-  const { phone } = req.body as { phone?: string };
-  if (!phone || !isValidPhone(phone)) {
+  const rawPhone = (req.body as { phone?: string }).phone;
+  if (!rawPhone || !isValidPhone(rawPhone)) {
     return res.status(400).json({ code: 'INVALID_PHONE', message: '手机号格式不正确' });
   }
+  const phone = normalizePhone(rawPhone);
 
   try {
     const db = await getDatabase();
@@ -58,10 +64,11 @@ router.post('/send-otp', async (req: Request, res: Response) => {
  * Body: { phone: string, code: string, deviceInfo?: string }
  */
 router.post('/verify-otp', async (req: Request, res: Response) => {
-  const { phone, code, deviceInfo } = req.body as { phone?: string; code?: string; deviceInfo?: string };
-  if (!phone || !code) {
+  const { phone: rawPhone, code, deviceInfo } = req.body as { phone?: string; code?: string; deviceInfo?: string };
+  if (!rawPhone || !code) {
     return res.status(400).json({ code: 'MISSING_PARAMS', message: '参数不完整' });
   }
+  const phone = normalizePhone(rawPhone);
 
   try {
     const db = await getDatabase();
