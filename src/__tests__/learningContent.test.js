@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createKnowledgeMap, createMission, getWeakKnowledgePoints } from '../data/learningContent'
+import { createKnowledgeMap, createMission, getLearningContentSummary, getWeakKnowledgePoints } from '../data/learningContent'
 
 describe('Knowledge Map', () => {
   it('should create initial knowledge state with all units', () => {
@@ -90,6 +90,25 @@ describe('Mission Creation', () => {
     expect(mission.length).toBeGreaterThan(0)
     expect(mission[0].knowledgeUnitId).toBe('pinyin_b')
   })
+
+  it('builds subject-focused missions from real focus areas instead of a static tiny pool', () => {
+    const knowledgeState = createKnowledgeMap()
+    const mission = createMission(
+      {
+        language: 'zh',
+        focus: 'math',
+        companion: 'astro',
+        age: 5,
+      },
+      knowledgeState
+    )
+
+    expect(mission.length).toBeGreaterThan(0)
+    expect(mission.every((task) => ['math', 'pinyin', 'english', 'stories'].includes(task.skill))).toBe(true)
+    expect(mission.some((task) => task.skill === 'math')).toBe(true)
+    expect(mission.some((task) => task.type === 'micro' || task.type === 'choice')).toBe(true)
+    expect(mission.every((task) => typeof task.missionRole === 'string')).toBe(true)
+  })
 })
 
 describe('Weak Knowledge Points', () => {
@@ -135,5 +154,16 @@ describe('Weak Knowledge Points', () => {
     const weakPoints = getWeakKnowledgePoints(knowledgeState)
     
     expect(weakPoints.length).toBeLessThanOrEqual(3)
+  })
+})
+
+describe('Learning content coverage', () => {
+  it('exposes a broader content summary for the adaptive planner', () => {
+    const summary = getLearningContentSummary()
+
+    expect(summary.pinyin).toBeGreaterThan(40)
+    expect(summary.math).toBeGreaterThan(15)
+    expect(summary.english).toBeGreaterThan(20)
+    expect(summary.total).toBeGreaterThan(80)
   })
 })

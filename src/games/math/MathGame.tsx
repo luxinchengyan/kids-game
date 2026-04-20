@@ -1,9 +1,11 @@
-import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useState, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { createMission } from '../../data/learningContent';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { useGameStore } from '../../stores/useGameStore';
+import { useUserStore } from '../../stores/useUserStore';
 
 const ChoiceTask = lazy(() => import('../../components/ChoiceTask'));
 const MatchTask = lazy(() => import('../../components/MatchTask'));
@@ -30,28 +32,48 @@ function LazyFallback() {
 export default function MathGame() {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion('math');
+  const profile = useGameStore((state) => state.profile);
+  const knowledge = useGameStore((state) => state.knowledge);
+  const startMission = useGameStore((state) => state.startMission);
+  const recordTaskResult = useGameStore((state) => state.recordTaskResult);
+  const currentChild = useUserStore((state) => state.currentChild);
   
   const [currentTasks, setCurrentTasks] = useState<any[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
-  const taskStartedAt = useState<number>(Date.now())[0];
+  const taskStartedAt = useRef<number>(Date.now());
+  const sessionStatsRef = useRef({ correctCount: 0, totalStars: 0 });
+  const missionContextRef = useRef({
+    language: profile.language,
+    companion: profile.companion,
+    knowledgeState: knowledge,
+    age: currentChild?.age ?? 5,
+  });
 
   useEffect(() => {
-    const profile = {
-      language: 'zh',
-      focus: 'math',
-      companion: 'astro',
-    };
-    const knowledgeState = {};
-    const mission = createMission(profile, knowledgeState);
+    const mission = createMission(
+      {
+        language: missionContextRef.current.language,
+        focus: 'math',
+        companion: missionContextRef.current.companion,
+        age: missionContextRef.current.age,
+      },
+      missionContextRef.current.knowledgeState
+    );
     setCurrentTasks(mission);
     setCurrentTaskIndex(0);
+    sessionStatsRef.current = { correctCount: 0, totalStars: 0 };
+    taskStartedAt.current = Date.now();
+    startMission(mission);
     track('game_start', { gameId: 'math', taskCount: mission.length });
-  }, []);
+  }, [startMission]);
 
   const handleTaskComplete = useCallback(
     (result: any) => {
-      const durationMs = Date.now() - taskStartedAt;
+      const durationMs = Date.now() - taskStartedAt.current;
       const task = currentTasks[currentTaskIndex];
+      const nextCorrectCount = sessionStatsRef.current.correctCount + (result.success ? 1 : 0);
+      const nextTotalStars = sessionStatsRef.current.totalStars + (result.stars || 0);
+      sessionStatsRef.current = { correctCount: nextCorrectCount, totalStars: nextTotalStars };
       
       track('task_complete', {
         success: !!result.success,
@@ -61,21 +83,33 @@ export default function MathGame() {
         taskId: task?.id ?? '',
         gameId: 'math',
       });
+      recordTaskResult({
+        taskId: task?.id ?? `math-task-${currentTaskIndex}`,
+        success: !!result.success,
+        stars: result.stars || 0,
+        skill: task?.skill ?? 'math',
+        prompt: task?.prompt,
+        responseTime: durationMs,
+        knowledgeUnitId: task?.knowledgeUnitId,
+        response: result.response,
+      });
 
       if (currentTaskIndex < currentTasks.length - 1) {
         setCurrentTaskIndex(currentTaskIndex + 1);
+        taskStartedAt.current = Date.now();
       } else {
-        // Game complete
+        const accuracy = currentTasks.length > 0 ? nextCorrectCount / currentTasks.length : 0;
+        const sessionStars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : accuracy >= 0.5 ? 1 : 0;
         handleGameComplete({
-          success: result.success,
-          stars: result.stars || 0,
+          success: accuracy >= 0.5,
+          stars: sessionStars,
           tasksCompleted: currentTasks.length,
-          accuracy: result.success ? 1 : 0,
+          accuracy,
         });
         navigate('/');
       }
     },
-    [currentTaskIndex, currentTasks, handleGameComplete, navigate, taskStartedAt]
+    [currentTaskIndex, currentTasks, handleGameComplete, navigate, recordTaskResult]
   );
 
   const handleBack = useCallback(() => {
@@ -102,23 +136,18 @@ export default function MathGame() {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '700px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Button variant="secondary" onClick={handleBack}>
-          ← 返回首页
-        </Button>
-        <div
-          style={{
-            marginTop: '12px',
-            fontSize: 'var(--font-size-lg)',
-            color: 'var(--color-text-secondary)',
-            fontWeight: 600,
-          }}
-        >
-          🔢 任务 {currentTaskIndex + 1} / {currentTasks.length}
-        </div>
-      </div>
+    <PageLayout maxWidth="700px">
+      <GamePageHeader
+        title="数字冒险"
+        icon="🔢"
+        subtitle="挑战数学，变聪明！✨"
+        gradient="linear-gradient(135deg, #2196F3, #64B5F6, #2196F3)"
+        currentTask={currentTaskIndex + 1}
+        totalTasks={currentTasks.length}
+        progressColor="#2196F3"
+        onBack={handleBack}
+      />
       <Suspense fallback={<LazyFallback />}>{renderTask()}</Suspense>
-    </div>
+    </PageLayout>
   );
 }

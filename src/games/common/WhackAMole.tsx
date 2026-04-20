@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { track } from '../../lib/analytics';
+import { PageLayout } from '../../components/PageLayout';
 
 // ==========================
 // 类型定义
@@ -399,7 +400,7 @@ export function WhackAMole({
   // ==========================
   if (phase === 'start') {
     return (
-      <div style={{ width: '100%', maxWidth: '700px' }}>
+      <PageLayout maxWidth="700px">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -454,7 +455,7 @@ export function WhackAMole({
             ← 返回
           </Button>
         </motion.div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -463,7 +464,7 @@ export function WhackAMole({
   // ==========================
   if (phase === 'results') {
     return (
-      <div style={{ width: '100%', maxWidth: '700px' }}>
+      <PageLayout maxWidth="700px">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -527,7 +528,7 @@ export function WhackAMole({
             </Button>
           </div>
         </motion.div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -535,7 +536,7 @@ export function WhackAMole({
   // 渲染：游戏界面
   // ==========================
   return (
-    <div style={{ width: '100%', maxWidth: '700px' }}>
+    <PageLayout maxWidth="700px">
       {/* HUD */}
       <div
         style={{
@@ -655,7 +656,7 @@ export function WhackAMole({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageLayout>
   );
 }
 

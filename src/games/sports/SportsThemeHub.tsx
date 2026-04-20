@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../../components/Button';
 import { sportsData, type SportCategory } from '../../data/sports';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
 
 // Function to speak text using Web Speech API
 function speakText(text: string) {
@@ -407,13 +407,7 @@ export default function SportsThemeHub() {
   });
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '800px',
-        padding: '0 var(--spacing-md)',
-      }}
-    >
+    <PageLayout maxWidth="800px">
       <AnimatePresence mode="wait">
         {selectedCategory ? (
           <SportDetailView
@@ -429,45 +423,14 @@ export default function SportsThemeHub() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Hero Section */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              style={{ textAlign: 'center', marginBottom: '32px' }}
-            >
-              <motion.h1
-                style={{
-                  fontSize: '48px',
-                  fontWeight: 900,
-                  background: 'linear-gradient(135deg, #E91E63, #F06292, #E91E63)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  marginBottom: '12px',
-                }}
-                animate={{
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-              >
-                🏅 体育健将
-              </motion.h1>
-              <p style={{ fontSize: '20px', color: '#880E4F', fontWeight: 600 }}>
-                探索各种运动项目，了解著名运动员！✨
-              </p>
-            </motion.div>
-
-            {/* Back Button */}
-            <div style={{ marginBottom: '24px' }}>
-              <Button variant="secondary" onClick={handleBack}>
-                ← 返回首页
-              </Button>
-            </div>
+            <GamePageHeader
+              title="体育健将"
+              icon="🏅"
+              subtitle="探索各种运动项目，了解著名运动员！✨"
+              gradient="linear-gradient(135deg, #E91E63, #F06292, #E91E63)"
+              progressColor="#E91E63"
+              onBack={handleBack}
+            />
 
             {/* Search Bar */}
             <SearchBar value={searchTerm} onChange={setSearchTerm} />
@@ -513,6 +476,6 @@ export default function SportsThemeHub() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageLayout>
   );
 }

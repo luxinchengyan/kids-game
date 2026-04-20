@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameProgress } from '../../hooks/useGameProgress';
+import { getAgeRangeLabel } from '../../games/registry';
 import type { GameConfig } from '../../games/registry';
 
 interface GameCardProps {
@@ -10,14 +11,25 @@ interface GameCardProps {
 }
 
 // Category-based gradient backgrounds
-const categoryGradients = {
+const categoryGradients: Record<string, string> = {
   pinyin: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
   math: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)',
   english: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
   stories: 'linear-gradient(135deg, #9C27B0 0%, #CE93D8 100%)',
   poetry: 'linear-gradient(135deg, #673AB7 0%, #9575CD 100%)',
   sports: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)',
-  other: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)',
+  other: 'linear-gradient(135deg, #FF6F00 0%, #FFAB40 100%)',
+};
+
+// Per-hub overrides — ensures each hub card has a distinct color
+const hubGradients: Record<string, string> = {
+  'geography-hub':    'linear-gradient(135deg, #00897B 0%, #4DB6AC 100%)',
+  'history-hub':      'linear-gradient(135deg, #6D4C41 0%, #A1887F 100%)',
+  'chemistry-hub':    'linear-gradient(135deg, #7B1FA2 0%, #CE93D8 100%)',
+  'physics-hub':      'linear-gradient(135deg, #283593 0%, #7986CB 100%)',
+  'biology-hub':      'linear-gradient(135deg, #2E7D32 0%, #81C784 100%)',
+  'ai-hub':           'linear-gradient(135deg, #00695C 0%, #26C6DA 55%, #7E57C2 100%)',
+  'encyclopedia-hub': 'linear-gradient(135deg, #01579B 0%, #29B6F6 100%)',
 };
 
 // Function to speak text using Web Speech API
@@ -35,8 +47,10 @@ function speakText(text: string) {
 export function GameCard({ game, onClick, index }: GameCardProps) {
   const { completedSessions, totalSessions } = useGameProgress(game.id);
   const completionRate = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
-  const gradient = categoryGradients[game.category] || categoryGradients.other;
+  const gradient = hubGradients[game.id] ?? categoryGradients[game.category] ?? categoryGradients.other;
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const ageRangeLabel = getAgeRangeLabel(game);
+  const assessmentLabel = game.learningPath?.assessmentScope.slice(0, 2).join(' · ');
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the card click
@@ -55,6 +69,15 @@ export function GameCard({ game, onClick, index }: GameCardProps) {
       whileTap={{ scale: 0.95 }}
       style={{ width: '100%', height: '100%', minHeight: '280px' }}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`进入${game.name}`}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick();
+        }
+      }}
     >
       <div
         style={{
@@ -71,6 +94,7 @@ export function GameCard({ game, onClick, index }: GameCardProps) {
           cursor: 'pointer',
           position: 'relative',
           overflow: 'hidden',
+          outline: 'none',
         }}
       >
         {/* Decorative corner */}
@@ -99,7 +123,43 @@ export function GameCard({ game, onClick, index }: GameCardProps) {
         </div>
 
         {/* Game Info */}
-        <div style={{ textAlign: 'center', zIndex: 1 }}>
+        <div style={{ textAlign: 'center', zIndex: 1, width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '8px',
+              marginBottom: '10px',
+            }}
+          >
+            {game.learningPath?.levelLabel && (
+              <span
+                style={{
+                  background: 'rgba(255,255,255,0.24)',
+                  color: '#FFFFFF',
+                  borderRadius: '999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                }}
+              >
+                {game.learningPath.levelLabel}
+              </span>
+            )}
+            <span
+              style={{
+                background: 'rgba(255,255,255,0.18)',
+                color: '#FFFFFF',
+                borderRadius: '999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                fontWeight: 700,
+              }}
+            >
+              适龄 {ageRangeLabel}
+            </span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
             <h3
               style={{
@@ -150,11 +210,24 @@ export function GameCard({ game, onClick, index }: GameCardProps) {
             style={{
               fontSize: 'var(--font-size-sm)',
               color: 'rgba(255,255,255,0.9)',
-              margin: 0,
+              margin: '0 0 10px 0',
             }}
           >
             {game.description}
           </p>
+          {assessmentLabel && (
+            <p
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.95)',
+                fontWeight: 700,
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
+              考察范围：{assessmentLabel}
+            </p>
+          )}
         </div>
 
         {/* Progress Bar */}

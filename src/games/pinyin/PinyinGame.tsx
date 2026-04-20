@@ -1,11 +1,11 @@
-import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useState, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShallow } from 'zustand/react/shallow';
-import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { useGameStore } from '../../stores/useGameStore';
+import { useUserStore } from '../../stores/useUserStore';
 import { createMission } from '../../data/learningContent';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
 
 const ChoiceTask = lazy(() => import('../../components/ChoiceTask'));
 const PinyinBattle = lazy(() => import('../../components/PinyinBattle'));
@@ -33,30 +33,49 @@ function LazyFallback() {
 export default function PinyinGame() {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion('pinyin');
-  const currentIsland = useGameStore((s) => s.currentIsland);
+  const profile = useGameStore((s) => s.profile);
+  const knowledge = useGameStore((s) => s.knowledge);
   const setCurrentIsland = useGameStore((s) => s.setCurrentIsland);
+  const startMission = useGameStore((s) => s.startMission);
+  const recordTaskResult = useGameStore((s) => s.recordTaskResult);
+  const currentChild = useUserStore((s) => s.currentChild);
   
   const [currentTasks, setCurrentTasks] = useState<any[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
-  const taskStartedAt = useState<number>(Date.now())[0];
+  const taskStartedAt = useRef<number>(Date.now());
+  const sessionStatsRef = useRef({ correctCount: 0, totalStars: 0 });
+  const missionContextRef = useRef({
+    language: profile.language,
+    companion: profile.companion,
+    knowledgeState: knowledge,
+    age: currentChild?.age ?? 5,
+  });
 
   useEffect(() => {
-    const profile = {
-      language: 'zh',
-      focus: 'pinyin',
-      companion: 'astro',
-    };
-    const knowledgeState = {};
-    const mission = createMission(profile, knowledgeState);
+    const mission = createMission(
+      {
+        language: missionContextRef.current.language,
+        focus: 'pinyin',
+        companion: missionContextRef.current.companion,
+        age: missionContextRef.current.age,
+      },
+      missionContextRef.current.knowledgeState
+    );
     setCurrentTasks(mission);
     setCurrentTaskIndex(0);
+    sessionStatsRef.current = { correctCount: 0, totalStars: 0 };
+    taskStartedAt.current = Date.now();
+    startMission(mission);
     track('game_start', { gameId: 'pinyin', taskCount: mission.length });
-  }, []);
+  }, [startMission]);
 
   const handleTaskComplete = useCallback(
     (result: any) => {
-      const durationMs = Date.now() - taskStartedAt;
+      const durationMs = Date.now() - taskStartedAt.current;
       const task = currentTasks[currentTaskIndex];
+      const nextCorrectCount = sessionStatsRef.current.correctCount + (result.success ? 1 : 0);
+      const nextTotalStars = sessionStatsRef.current.totalStars + (result.stars || 0);
+      sessionStatsRef.current = { correctCount: nextCorrectCount, totalStars: nextTotalStars };
       
       track('task_complete', {
         success: !!result.success,
@@ -66,21 +85,33 @@ export default function PinyinGame() {
         taskId: task?.id ?? '',
         gameId: 'pinyin',
       });
+      recordTaskResult({
+        taskId: task?.id ?? `pinyin-task-${currentTaskIndex}`,
+        success: !!result.success,
+        stars: result.stars || 0,
+        skill: task?.skill ?? 'pinyin',
+        prompt: task?.prompt,
+        responseTime: durationMs,
+        knowledgeUnitId: task?.knowledgeUnitId,
+        response: result.response,
+      });
 
       if (currentTaskIndex < currentTasks.length - 1) {
         setCurrentTaskIndex(currentTaskIndex + 1);
+        taskStartedAt.current = Date.now();
       } else {
-        // Game complete
+        const accuracy = currentTasks.length > 0 ? nextCorrectCount / currentTasks.length : 0;
+        const sessionStars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : accuracy >= 0.5 ? 1 : 0;
         handleGameComplete({
-          success: result.success,
-          stars: result.stars || 0,
+          success: accuracy >= 0.5,
+          stars: sessionStars,
           tasksCompleted: currentTasks.length,
-          accuracy: result.success ? 1 : 0,
+          accuracy,
         });
         navigate('/');
       }
     },
-    [currentTaskIndex, currentTasks, handleGameComplete, navigate, taskStartedAt]
+    [currentTaskIndex, currentTasks, handleGameComplete, navigate, recordTaskResult]
   );
 
   const handleBack = useCallback(() => {
@@ -110,23 +141,18 @@ export default function PinyinGame() {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '700px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Button variant="secondary" onClick={handleBack}>
-          ← 返回首页
-        </Button>
-        <div
-          style={{
-            marginTop: '12px',
-            fontSize: 'var(--font-size-lg)',
-            color: 'var(--color-text-secondary)',
-            fontWeight: 600,
-          }}
-        >
-          📚 任务 {currentTaskIndex + 1} / {currentTasks.length}
-        </div>
-      </div>
+    <PageLayout maxWidth="700px">
+      <GamePageHeader
+        title="拼音乐园"
+        icon="🔤"
+        subtitle="学拼音，认汉字！✨"
+        gradient="linear-gradient(135deg, #FF9800, #FFB74D, #FF9800)"
+        currentTask={currentTaskIndex + 1}
+        totalTasks={currentTasks.length}
+        progressColor="#FF9800"
+        onBack={handleBack}
+      />
       <Suspense fallback={<LazyFallback />}>{renderTask()}</Suspense>
-    </div>
+    </PageLayout>
   );
 }

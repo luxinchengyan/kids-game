@@ -1,16 +1,70 @@
 version: '3.8'
 
 services:
+  # ==============================
+  # 后端 API 服务
+  # ==============================
+  kids-game-api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: luxinchengyan/kids-game-api
+    container_name: kids-game-api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      DB_DRIVER: ${DB_DRIVER:-sqlite}
+      SQLITE_PATH: /data/kids-game.sqlite
+      MONGODB_URI: ${MONGODB_URI:-}
+      MONGODB_DB: ${MONGODB_DB:-kids_game}
+      PORT: 3001
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET required}
+      SMS_PROVIDER: ${SMS_PROVIDER:-mock}
+      SMS_MOCK_CODE: ${SMS_MOCK_CODE:-123456}
+      ALIYUN_SMS_KEY_ID: ${ALIYUN_SMS_KEY_ID:-}
+      ALIYUN_SMS_KEY_SECRET: ${ALIYUN_SMS_KEY_SECRET:-}
+      ALIYUN_SMS_SIGN_NAME: ${ALIYUN_SMS_SIGN_NAME:-童梦神舟}
+      ALIYUN_SMS_TEMPLATE_CODE: ${ALIYUN_SMS_TEMPLATE_CODE:-}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      WECHAT_REDIRECT_URI: ${WECHAT_REDIRECT_URI:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+    volumes:
+      - kids-game-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+
+  # ==============================
+  # 前端静态服务 (Nginx)
+  # ==============================
   kids-game:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - NODE_ENV=production
+        - VITE_API_BASE_URL=/api-proxy
     image: luxinchengyan/kids-game
     container_name: kids-game
     ports:
       - "8080:80"
+    depends_on:
+      kids-game-api:
+        condition: service_healthy
     restart: unless-stopped
     deploy:
       resources:
@@ -33,3 +87,30 @@ services:
         max-file: "3"
     security_opt:
       - no-new-privileges:true
+
+  # ==============================
+  # MongoDB (可选，DB_DRIVER=mongodb 时启用)
+  # ==============================
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: kids-game-mongodb
+    profiles:
+      - mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: kids_game
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  kids-game-data:
+    driver: local
+  mongodb-data:
+    driver: local

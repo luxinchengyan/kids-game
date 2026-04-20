@@ -6,6 +6,7 @@ import {
   getLevelProgress,
   achievements
 } from '../data/rewards';
+import { useDailyQuestStore } from './useDailyQuestStore';
 
 // LocalStorage keys
 const PROFILE_KEY = 'kids-game-profile';
@@ -252,9 +253,10 @@ export const useGameStore = create<GameState>()((set, get) => ({
     }));
   },
 
-  recordTaskResult: ({ taskId, success, stars = 0, skill, prompt, responseTime, knowledgeUnitId, response }) => {
-    set((state) => {
-      const completedTasks = state.stats.completedTasks + 1;
+   recordTaskResult: ({ taskId, success, stars = 0, skill, prompt, responseTime, knowledgeUnitId, response }) => {
+     useDailyQuestStore.getState().recordTaskResult(success);
+     set((state) => {
+       const completedTasks = state.stats.completedTasks + 1;
       const correctAnswers = state.stats.correctAnswers + (success ? 1 : 0);
       const mistakes = state.stats.mistakes + (success ? 0 : 1);
       const earnedStars = success ? calculateStarsEarned({ success, accuracy: 1 }) : 0;

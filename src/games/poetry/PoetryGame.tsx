@@ -1,8 +1,8 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
 
 const PoetryList = lazy(() => import('../../components/PoetryList'));
 const StoryReader = lazy(() => import('../../components/StoryReader'));
@@ -66,7 +66,15 @@ export default function PoetryGame() {
 
   if (currentView === 'reader' && selectedPoem) {
     return (
-      <div style={{ width: '100%', maxWidth: '700px' }}>
+      <PageLayout maxWidth="700px">
+        <GamePageHeader
+          title="古典诗词"
+          icon="🏛️"
+          gradient="linear-gradient(135deg, #673AB7, #9575CD, #673AB7)"
+          progressColor="#673AB7"
+          onBack={handleBackToList}
+          backLabel="← 返回诗词列表"
+        />
         <Suspense fallback={<LazyFallback />}>
           <StoryReader
             story={selectedPoem}
@@ -74,20 +82,23 @@ export default function PoetryGame() {
             onBack={handleBackToList}
           />
         </Suspense>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '700px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Button variant="secondary" onClick={handleBack}>
-          ← 返回首页
-        </Button>
-      </div>
+    <PageLayout maxWidth="700px">
+      <GamePageHeader
+        title="古典诗词"
+        icon="🏛️"
+        subtitle="感受传统文化之美！✨"
+        gradient="linear-gradient(135deg, #673AB7, #9575CD, #673AB7)"
+        progressColor="#673AB7"
+        onBack={handleBack}
+      />
       <Suspense fallback={<LazyFallback />}>
         <PoetryList onSelectPoem={handleSelectPoem} onBack={handleBack} />
       </Suspense>
-    </div>
+    </PageLayout>
   );
 }

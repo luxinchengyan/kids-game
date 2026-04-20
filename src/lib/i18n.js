@@ -1,6 +1,6 @@
 // 简体中文文案表（产品仅面向中国大陆市场）
 const zhTranslations = {
-  app_title: '童梦飞船',
+  app_title: '童梦神舟',
   app_subtitle: '面向 3～6 岁家庭的拼音、数学、英语与传统文化启蒙互动学习',
   start_mission: '开始今日任务',
   mission_ready: '今日任务已准备好',

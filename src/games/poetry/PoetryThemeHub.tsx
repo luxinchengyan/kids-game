@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '../../components/Button';
 import { getGamesByTheme } from '../registry';
 import type { GameConfig } from '../registry';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
 
 // Function to speak text using Web Speech API
 function speakText(text: string) {
@@ -42,8 +42,8 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
         borderRadius: '24px',
         padding: '24px',
         cursor: 'pointer',
-        border: '3px solid #64B5F6',
-        boxShadow: '0 6px 16px rgba(33, 150, 243, 0.15)',
+        border: '3px solid #9575CD',
+        boxShadow: '0 6px 16px rgba(149, 117, 205, 0.15)',
         transition: 'all 0.3s ease',
         position: 'relative',
         overflow: 'hidden',
@@ -57,7 +57,7 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
           right: 0,
           width: '100px',
           height: '100px',
-          background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1), transparent)',
+          background: 'linear-gradient(135deg, rgba(103, 58, 183, 0.1), transparent)',
           borderRadius: '0 24px 0 100%',
         }}
       />
@@ -73,7 +73,7 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)',
+            background: 'linear-gradient(135deg, #EDE7F6, #D1C4E9)',
             borderRadius: '20px',
           }}
         >
@@ -87,7 +87,7 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
               style={{
                 fontSize: '24px',
                 fontWeight: 800,
-                color: '#1976D2',
+                color: '#4527A0',
                 margin: 0,
               }}
             >
@@ -102,14 +102,14 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
                 border: 'none',
                 background: isSpeaking
                   ? 'linear-gradient(135deg, #BDBDBD, #9E9E9E)'
-                  : 'linear-gradient(135deg, #2196F3, #64B5F6)',
+                  : 'linear-gradient(135deg, #673AB7, #9575CD)',
                 color: 'white',
                 fontSize: '16px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+                boxShadow: '0 2px 8px rgba(103, 58, 183, 0.3)',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -132,7 +132,7 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
         <div
           style={{
             fontSize: '32px',
-            color: '#2196F3',
+            color: '#673AB7',
             fontWeight: 800,
           }}
         >
@@ -160,52 +160,15 @@ export default function PoetryThemeHub() {
   }, [navigate]);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '800px',
-        padding: '0 var(--spacing-md)',
-      }}
-    >
-      {/* Hero Section */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        style={{ textAlign: 'center', marginBottom: '32px' }}
-      >
-        <motion.h1
-          style={{
-            fontSize: '48px',
-            fontWeight: 900,
-            background: 'linear-gradient(135deg, #2196F3, #64B5F6, #2196F3)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            marginBottom: '12px',
-          }}
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        >
-          🏛️ 古典诗词
-        </motion.h1>
-        <p style={{ fontSize: '20px', color: '#6D4C41', fontWeight: 600 }}>
-          学习优美的古诗词，感受传统文化的魅力！✨
-        </p>
-      </motion.div>
-
-      {/* Back Button */}
-      <div style={{ marginBottom: '24px' }}>
-        <Button variant="secondary" onClick={handleBack}>
-          ← 返回首页
-        </Button>
-      </div>
+    <PageLayout maxWidth="800px">
+      <GamePageHeader
+        title="古典诗词"
+        icon="🏛️"
+        subtitle="学习优美的古诗词，感受传统文化的魅力！✨"
+        gradient="linear-gradient(135deg, #673AB7, #9575CD, #673AB7)"
+        progressColor="#673AB7"
+        onBack={handleBack}
+      />
 
       {/* Game List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -236,6 +199,6 @@ export default function PoetryThemeHub() {
           </p>
         </motion.div>
       )}
-    </div>
+    </PageLayout>
   );
 }

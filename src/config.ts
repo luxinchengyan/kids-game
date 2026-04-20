@@ -33,11 +33,13 @@ export const config = {
     offlineMode: import.meta.env.VITE_ENABLE_OFFLINE_MODE !== 'false',
     parentalGate: import.meta.env.VITE_ENABLE_PARENTAL_GATE !== 'false',
     shareProgress: import.meta.env.VITE_ENABLE_SHARE_PROGRESS !== 'false',
+    // 本地试用模式：跳过登录，默认本地开发开启，可通过 VITE_TRIAL_MODE=false 关闭
+    trialMode: import.meta.env.VITE_TRIAL_MODE !== 'false' && import.meta.env.DEV === true,
   },
 
   // App Info
   app: {
-    name: '童梦飞船 · 智趣成长',
+    name: '童梦神舟 · 智趣成长',
     version: '0.1.0',
   },
 } as const;

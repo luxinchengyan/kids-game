@@ -83,35 +83,186 @@ const fullPinyinData = {
 }
 
 const numberData = [
-  { id: 'number_1', content: '1', example: '一个太阳', emoji: '☀️', confusionSet: ['2', '7'] },
-  { id: 'number_2', content: '2', example: '两只鸭子', emoji: '🦆🦆', confusionSet: ['1', '5'] },
-  { id: 'number_3', content: '3', example: '三个桃子', emoji: '🍑🍑🍑', confusionSet: ['2', '8'] },
-  { id: 'number_4', content: '4', example: '四棵树', emoji: '🌲🌲🌲🌲', confusionSet: ['3', '9'] },
-  { id: 'number_5', content: '5', example: '五颗星星', emoji: '⭐⭐⭐⭐⭐', confusionSet: ['2', '6'] },
-  { id: 'number_6', content: '6', example: '六朵花', emoji: '🌸🌸🌸🌸🌸🌸', confusionSet: ['5', '9'] },
-  { id: 'number_7', content: '7', example: '七只小鸟', emoji: '🐦🐦🐦🐦🐦🐦🐦', confusionSet: ['1', '9'] },
-  { id: 'number_8', content: '8', example: '八个气球', emoji: '🎈🎈🎈🎈🎈🎈🎈🎈', confusionSet: ['3', '0'] },
-  { id: 'number_9', content: '9', example: '九条鱼', emoji: '🐟🐟🐟🐟🐟🐟🐟🐟🐟', confusionSet: ['4', '6'] },
-  { id: 'number_10', content: '10', example: '十朵云', emoji: '☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️', confusionSet: ['9'] }
+  { id: 'number_1', content: '1', example: '一个太阳', emoji: '☀️', confusionSet: ['2', '7'], minAge: 3, maxAge: 6 },
+  { id: 'number_2', content: '2', example: '两只鸭子', emoji: '🦆🦆', confusionSet: ['1', '5'], minAge: 3, maxAge: 6 },
+  { id: 'number_3', content: '3', example: '三个桃子', emoji: '🍑🍑🍑', confusionSet: ['2', '8'], minAge: 3, maxAge: 6 },
+  { id: 'number_4', content: '4', example: '四棵树', emoji: '🌲🌲🌲🌲', confusionSet: ['3', '9'], minAge: 3, maxAge: 6 },
+  { id: 'number_5', content: '5', example: '五颗星星', emoji: '⭐⭐⭐⭐⭐', confusionSet: ['2', '6'], minAge: 3, maxAge: 6 },
+  { id: 'number_6', content: '6', example: '六朵花', emoji: '🌸🌸🌸🌸🌸🌸', confusionSet: ['5', '9'], minAge: 4, maxAge: 6 },
+  { id: 'number_7', content: '7', example: '七只小鸟', emoji: '🐦🐦🐦🐦🐦🐦🐦', confusionSet: ['1', '9'], minAge: 4, maxAge: 6 },
+  { id: 'number_8', content: '8', example: '八个气球', emoji: '🎈🎈🎈🎈🎈🎈🎈🎈', confusionSet: ['3', '0'], minAge: 4, maxAge: 6 },
+  { id: 'number_9', content: '9', example: '九条鱼', emoji: '🐟🐟🐟🐟🐟🐟🐟🐟🐟', confusionSet: ['4', '6'], minAge: 4, maxAge: 6 },
+  { id: 'number_10', content: '10', example: '十朵云', emoji: '☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️', confusionSet: ['9'], minAge: 4, maxAge: 6 },
+  { id: 'number_11', content: '11', example: '十一颗纽扣', emoji: '🔘', confusionSet: ['10', '12'], minAge: 5, maxAge: 7 },
+  { id: 'number_12', content: '12', example: '十二个月', emoji: '🗓️', confusionSet: ['11', '20'], minAge: 5, maxAge: 7 }
 ]
 
 const englishData = [
-  { id: 'word_cat', content: 'cat', example: '猫咪', emoji: '🐱', category: 'animals', confusionSet: ['dog'] },
-  { id: 'word_dog', content: 'dog', example: '狗狗', emoji: '🐕', category: 'animals', confusionSet: ['cat'] },
-  { id: 'word_bird', content: 'bird', example: '小鸟', emoji: '🐦', category: 'animals', confusionSet: [] },
-  { id: 'word_fish', content: 'fish', example: '鱼', emoji: '🐟', category: 'animals', confusionSet: [] },
-  { id: 'word_red', content: 'red', example: '红色', emoji: '🔴', category: 'colors', confusionSet: ['blue'] },
-  { id: 'word_blue', content: 'blue', example: '蓝色', emoji: '🔵', category: 'colors', confusionSet: ['red'] },
-  { id: 'word_green', content: 'green', example: '绿色', emoji: '🟢', category: 'colors', confusionSet: [] },
-  { id: 'word_yellow', content: 'yellow', example: '黄色', emoji: '🟡', category: 'colors', confusionSet: [] },
-  { id: 'word_one', content: 'one', example: '一', emoji: '1️⃣', category: 'numbers', confusionSet: ['two'] },
-  { id: 'word_two', content: 'two', example: '二', emoji: '2️⃣', category: 'numbers', confusionSet: ['one'] },
-  { id: 'word_three', content: 'three', example: '三', emoji: '3️⃣', category: 'numbers', confusionSet: [] },
-  { id: 'word_four', content: 'four', example: '四', emoji: '4️⃣', category: 'numbers', confusionSet: [] },
-  { id: 'word_five', content: 'five', example: '五', emoji: '5️⃣', category: 'numbers', confusionSet: [] },
-  { id: 'word_sun', content: 'sun', example: '太阳', emoji: '☀️', category: 'nature', confusionSet: ['moon'] },
-  { id: 'word_moon', content: 'moon', example: '月亮', emoji: '🌙', category: 'nature', confusionSet: ['sun'] },
-  { id: 'word_star', content: 'star', example: '星星', emoji: '⭐', category: 'nature', confusionSet: [] }
+  { id: 'word_cat', content: 'cat', example: '猫咪', emoji: '🐱', category: 'animals', confusionSet: ['dog'], minAge: 4, maxAge: 7 },
+  { id: 'word_dog', content: 'dog', example: '狗狗', emoji: '🐕', category: 'animals', confusionSet: ['cat'], minAge: 4, maxAge: 7 },
+  { id: 'word_bird', content: 'bird', example: '小鸟', emoji: '🐦', category: 'animals', confusionSet: ['duck'], minAge: 4, maxAge: 7 },
+  { id: 'word_fish', content: 'fish', example: '鱼', emoji: '🐟', category: 'animals', confusionSet: ['bird'], minAge: 4, maxAge: 7 },
+  { id: 'word_duck', content: 'duck', example: '鸭子', emoji: '🦆', category: 'animals', confusionSet: ['bird'], minAge: 4, maxAge: 7 },
+  { id: 'word_red', content: 'red', example: '红色', emoji: '🔴', category: 'colors', confusionSet: ['blue'], minAge: 4, maxAge: 7 },
+  { id: 'word_blue', content: 'blue', example: '蓝色', emoji: '🔵', category: 'colors', confusionSet: ['red'], minAge: 4, maxAge: 7 },
+  { id: 'word_green', content: 'green', example: '绿色', emoji: '🟢', category: 'colors', confusionSet: ['yellow'], minAge: 4, maxAge: 7 },
+  { id: 'word_yellow', content: 'yellow', example: '黄色', emoji: '🟡', category: 'colors', confusionSet: ['green'], minAge: 4, maxAge: 7 },
+  { id: 'word_one', content: 'one', example: '一', emoji: '1️⃣', category: 'numbers', confusionSet: ['two'], minAge: 4, maxAge: 7 },
+  { id: 'word_two', content: 'two', example: '二', emoji: '2️⃣', category: 'numbers', confusionSet: ['one'], minAge: 4, maxAge: 7 },
+  { id: 'word_three', content: 'three', example: '三', emoji: '3️⃣', category: 'numbers', confusionSet: ['four'], minAge: 4, maxAge: 7 },
+  { id: 'word_four', content: 'four', example: '四', emoji: '4️⃣', category: 'numbers', confusionSet: ['three'], minAge: 4, maxAge: 7 },
+  { id: 'word_five', content: 'five', example: '五', emoji: '5️⃣', category: 'numbers', confusionSet: ['four'], minAge: 4, maxAge: 7 },
+  { id: 'word_sun', content: 'sun', example: '太阳', emoji: '☀️', category: 'objects', confusionSet: ['moon'], minAge: 4, maxAge: 7 },
+  { id: 'word_moon', content: 'moon', example: '月亮', emoji: '🌙', category: 'objects', confusionSet: ['sun'], minAge: 4, maxAge: 7 },
+  { id: 'word_star', content: 'star', example: '星星', emoji: '⭐', category: 'objects', confusionSet: ['sun'], minAge: 4, maxAge: 7 },
+  { id: 'word_book', content: 'book', example: '书本', emoji: '📚', category: 'objects', confusionSet: ['bag'], minAge: 4, maxAge: 7 },
+  { id: 'word_ball', content: 'ball', example: '球', emoji: '⚽', category: 'objects', confusionSet: ['car'], minAge: 4, maxAge: 7 },
+  { id: 'word_car', content: 'car', example: '小汽车', emoji: '🚗', category: 'objects', confusionSet: ['bus'], minAge: 4, maxAge: 7 },
+  { id: 'word_bag', content: 'bag', example: '书包', emoji: '🎒', category: 'objects', confusionSet: ['book'], minAge: 4, maxAge: 7 },
+  { id: 'word_bus', content: 'bus', example: '公交车', emoji: '🚌', category: 'places', confusionSet: ['car'], minAge: 4, maxAge: 7 },
+  { id: 'word_house', content: 'house', example: '房子', emoji: '🏠', category: 'places', confusionSet: ['school'], minAge: 4, maxAge: 7 },
+  { id: 'word_school', content: 'school', example: '学校', emoji: '🏫', category: 'places', confusionSet: ['house'], minAge: 4, maxAge: 7 },
+  { id: 'word_park', content: 'park', example: '公园', emoji: '🌳', category: 'places', confusionSet: ['school'], minAge: 4, maxAge: 7 },
+  { id: 'word_mom', content: 'mom', example: '妈妈', emoji: '👩', category: 'family', confusionSet: ['dad'], minAge: 4, maxAge: 7 },
+  { id: 'word_dad', content: 'dad', example: '爸爸', emoji: '👨', category: 'family', confusionSet: ['mom'], minAge: 4, maxAge: 7 },
+  { id: 'word_baby', content: 'baby', example: '宝宝', emoji: '👶', category: 'family', confusionSet: ['mom'], minAge: 4, maxAge: 7 },
+  { id: 'word_apple', content: 'apple', example: '苹果', emoji: '🍎', category: 'objects', confusionSet: ['banana'], minAge: 4, maxAge: 7 },
+  { id: 'word_banana', content: 'banana', example: '香蕉', emoji: '🍌', category: 'objects', confusionSet: ['apple'], minAge: 4, maxAge: 7 },
+  { id: 'word_milk', content: 'milk', example: '牛奶', emoji: '🥛', category: 'objects', confusionSet: ['water'], minAge: 4, maxAge: 7 },
+  { id: 'word_water', content: 'water', example: '水', emoji: '💧', category: 'objects', confusionSet: ['milk'], minAge: 4, maxAge: 7 }
+]
+
+const mathConceptData = [
+  {
+    id: 'math_add_2_1',
+    type: 'operation',
+    content: '2 + 1',
+    question: '⭐ ⭐ + ⭐ = ?',
+    answer: '3',
+    options: ['2', '3', '4'],
+    example: '两颗星再来一颗星',
+    emoji: '➕',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['2', '4'],
+  },
+  {
+    id: 'math_add_4_2',
+    type: 'operation',
+    content: '4 + 2',
+    question: '🍎🍎🍎🍎 + 🍎🍎 = ?',
+    answer: '6',
+    options: ['5', '6', '7'],
+    example: '四个苹果再加两个苹果',
+    emoji: '🍎',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['5', '7'],
+  },
+  {
+    id: 'math_sub_5_2',
+    type: 'operation',
+    content: '5 - 2',
+    question: '🍪🍪🍪🍪🍪 拿走 🍪🍪，还剩几块？',
+    answer: '3',
+    options: ['2', '3', '4'],
+    example: '把多的拿走',
+    emoji: '➖',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['2', '4'],
+  },
+  {
+    id: 'math_compare_7_4',
+    type: 'comparison',
+    content: '7 比 4 多',
+    question: '哪一边更多？ ⭐⭐⭐⭐⭐⭐⭐   VS   ⭐⭐⭐⭐',
+    answer: '7',
+    options: ['4', '7', '一样多'],
+    example: '比较哪边更多',
+    emoji: '⚖️',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['4', '一样多'],
+  },
+  {
+    id: 'math_compare_equal',
+    type: 'comparison',
+    content: '一样多',
+    question: '这两边一样多吗？ 🍓🍓🍓🍓   VS   🍒🍒🍒🍒',
+    answer: '一样多',
+    options: ['左边更多', '右边更多', '一样多'],
+    example: '看到数量相同',
+    emoji: '🤝',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['左边更多', '右边更多'],
+  },
+  {
+    id: 'math_shape_circle',
+    type: 'shape',
+    content: '圆形',
+    question: '哪个图形像太阳一样圆？',
+    answer: '○',
+    options: ['△', '○', '□'],
+    example: '圆圆的像太阳',
+    emoji: '⚪',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['△', '□'],
+  },
+  {
+    id: 'math_shape_triangle',
+    type: 'shape',
+    content: '三角形',
+    question: '哪个图形有三个角？',
+    answer: '△',
+    options: ['○', '△', '□'],
+    example: '有三个尖尖角',
+    emoji: '🔺',
+    minAge: 4,
+    maxAge: 6,
+    confusionSet: ['○', '□'],
+  },
+  {
+    id: 'math_pattern_ab',
+    type: 'pattern',
+    content: 'AB 规律',
+    question: '下一个应该是什么？ 🔴 🔵 🔴 🔵 ?',
+    answer: '🔴',
+    options: ['🔵', '🔴', '🟢'],
+    example: '一红一蓝交替',
+    emoji: '🧩',
+    minAge: 4,
+    maxAge: 7,
+    confusionSet: ['🔵', '🟢'],
+  },
+  {
+    id: 'math_pattern_123',
+    type: 'pattern',
+    content: '123 重复规律',
+    question: '1 2 3 1 2 ?',
+    answer: '3',
+    options: ['2', '3', '4'],
+    example: '重复出现的数字队伍',
+    emoji: '🔁',
+    minAge: 5,
+    maxAge: 7,
+    confusionSet: ['2', '4'],
+  },
+  {
+    id: 'math_number_12',
+    type: 'comparison',
+    content: '12 以内数量组合',
+    question: '10 个气球再来 2 个，一共有几个？',
+    answer: '12',
+    options: ['11', '12', '13'],
+    example: '十和二合起来',
+    emoji: '🎈',
+    minAge: 5,
+    maxAge: 7,
+    confusionSet: ['11', '13'],
+  },
 ]
 
 const storyData = [
@@ -183,6 +334,12 @@ const storyData = [
     minAge: 3,
     author: '骆宾王',
     dynasty: '唐',
+    region: '无',
+    season: ['无特定'],
+    themes: ['自然', '动物', '儿童', '水禽'],
+    scenery: ['水', '鹅'],
+    emotion: '喜悦',
+    form: '五言绝句',
     content: [
       { text: '鹅，鹅，鹅，', pinyin: 'é, é, é,' },
       { text: '曲项向天歌。', pinyin: 'qū xiàng xiàng tiān gē.' },
@@ -202,6 +359,12 @@ const storyData = [
     minAge: 4,
     author: '李白',
     dynasty: '唐',
+    region: '旅途',
+    season: ['秋'],
+    themes: ['思乡', '月夜', '旅途'],
+    scenery: ['月', '霜'],
+    emotion: '思念',
+    form: '五言绝句',
     content: [
       { text: '床前明月光，', pinyin: 'chuáng qián míng yuè guāng,' },
       { text: '疑是地上霜。', pinyin: 'yí shì dì shàng shuāng.' },
@@ -221,6 +384,12 @@ const storyData = [
     minAge: 4,
     author: '孟浩然',
     dynasty: '唐',
+    region: '湖北',
+    season: ['春'],
+    themes: ['自然', '晨曦', '花落'],
+    scenery: ['花', '鸟', '风雨'],
+    emotion: '惬怀',
+    form: '五言绝句',
     content: [
       { text: '春眠不觉晓，', pinyin: 'chūn mián bù jué xiǎo,' },
       { text: '处处闻啼鸟。', pinyin: 'chù chù wén tí niǎo.' },
@@ -552,6 +721,12 @@ const storyData = [
     minAge: 3,
     author: '杨万里',
     dynasty: '宋',
+    region: '无',
+    season: ['夏'],
+    themes: ['自然', '池塘', '荷花'],
+    scenery: ['池塘', '荷花', '虑蜓', '泉水'],
+    emotion: '喜悦',
+    form: '七言绝句',
     content: [
       { text: '泉眼无声惜细流，', pinyin: 'quán yǎn wú shēng xī xì liú,' },
       { text: '树阴照水爱晴柔。', pinyin: 'shù yīn zhào shuǐ ài qíng róu.' },
@@ -571,6 +746,12 @@ const storyData = [
     minAge: 4,
     author: '孟浩然',
     dynasty: '唐',
+    region: '浙江',
+    season: ['秋'],
+    themes: ['思乡', '江河', '夜景', '旅途'],
+    scenery: ['江', '月', '夜'],
+    emotion: '惆怀',
+    form: '五言绝句',
     content: [
       { text: '移舟泊烟渚，', pinyin: 'yí zhōu bó yān zhǔ,' },
       { text: '日暮客愁新。', pinyin: 'rì mù kè chóu xīn.' },
@@ -754,6 +935,12 @@ const storyData = [
     minAge: 4,
     author: '杜甫',
     dynasty: '唐',
+    region: '四川',
+    season: ['春'],
+    themes: ['自然', '鸟', '山水'],
+    scenery: ['鸟', '山', '江河', '雪'],
+    emotion: '喜悦',
+    form: '七言绝句',
     content: [
       { text: '两个黄鹂鸣翠柳，', pinyin: 'liǎng gè huáng lí míng cuì liǔ,' },
       { text: '一行白鹭上青天。', pinyin: 'yī xíng bái lù shàng qīng tiān.' },
@@ -773,6 +960,12 @@ const storyData = [
     minAge: 4,
     author: '胡令能',
     dynasty: '唐',
+    region: '无',
+    season: ['无特定'],
+    themes: ['儿童', '田园', '垂钓'],
+    scenery: ['水', '草地'],
+    emotion: '趣味',
+    form: '七言绝句',
     content: [
       { text: '蓬头稚子学垂纶，', pinyin: 'péng tóu zhì zǐ xué chuí lún,' },
       { text: '侧坐莓苔草映身。', pinyin: 'cè zuò méi tāi cǎo yìng shēn.' },
@@ -1099,6 +1292,12 @@ const storyData = [
     minAge: 3,
     author: '李白',
     dynasty: '唐',
+    region: '江西',
+    season: ['无特定'],
+    themes: ['山水', '瀑布', '壮观'],
+    scenery: ['山', '瀑布', '云雾'],
+    emotion: '赞叹',
+    form: '七言绝句',
     content: [
       { text: '日照香炉生紫烟，', pinyin: 'rì zhào xiāng lú shēng zǐ yān,' },
       { text: '遥看瀑布挂前川。', pinyin: 'yáo kàn pù bù guà qián chuān.' },
@@ -1118,6 +1317,12 @@ const storyData = [
     minAge: 4,
     author: '贺知章',
     dynasty: '唐',
+    region: '浙江',
+    season: ['无特定'],
+    themes: ['思乡', '归乡', '人生感慨'],
+    scenery: ['故乡'],
+    emotion: '感慨',
+    form: '七言绝句',
     content: [
       { text: '少小离家老大回，', pinyin: 'shào xiǎo lí jiā lǎo dà huí,' },
       { text: '乡音无改鬓毛衰。', pinyin: 'xiāng yīn wú gǎi bìn máo shuāi.' },
@@ -1137,6 +1342,12 @@ const storyData = [
     minAge: 5,
     author: '王昌龄',
     dynasty: '唐',
+    region: '西北边塞',
+    season: ['无特定'],
+    themes: ['边塞', '爱国', '战争', '英雄'],
+    scenery: ['月', '边关'],
+    emotion: '豪迈',
+    form: '七言绝句',
     content: [
       { text: '秦时明月汉时关，', pinyin: 'qín shí míng yuè hàn shí guān,' },
       { text: '万里长征人未还。', pinyin: 'wàn lǐ cháng zhēng rén wèi huán.' },
@@ -1156,6 +1367,12 @@ const storyData = [
     minAge: 4,
     author: '柳宗元',
     dynasty: '唐',
+    region: '湖南',
+    season: ['冬'],
+    themes: ['雪景', '孤独', '隐逸'],
+    scenery: ['山', '雪', '江', '渔舟'],
+    emotion: '孤独',
+    form: '五言绝句',
     content: [
       { text: '千山鸟飞绝，', pinyin: 'qiān shān niǎo fēi jué,' },
       { text: '万径人踪灭。', pinyin: 'wàn jìng rén zōng miè.' },
@@ -1401,6 +1618,12 @@ const storyData = [
     minAge: 4,
     author: '王维',
     dynasty: '唐',
+    region: '南方',
+    season: ['春'],
+    themes: ['思念', '友情', '红豆'],
+    scenery: ['红豆', '树'],
+    emotion: '思念',
+    form: '五言绝句',
     content: [
       { text: '红豆生南国，', pinyin: 'hóng dòu shēng nán guó,' },
       { text: '春来发几枝。', pinyin: 'chūn lái fā jǐ zhī.' },
@@ -1420,6 +1643,12 @@ const storyData = [
     minAge: 5,
     author: '杜甫',
     dynasty: '唐',
+    region: '四川',
+    season: ['春'],
+    themes: ['自然', '春雨', '夜景'],
+    scenery: ['雨', '夜'],
+    emotion: '喜悦',
+    form: '五言绝句',
     content: [
       { text: '好雨知时节，', pinyin: 'hǎo yǔ zhī shí jié,' },
       { text: '当春乃发生。', pinyin: 'dāng chūn nǎi fā shēng.' },
@@ -1739,6 +1968,12 @@ const storyData = [
     minAge: 6,
     author: '李商隐',
     dynasty: '唐',
+    region: '四川',
+    season: ['秋'],
+    themes: ['思念', '友情', '夜雨', '旅途'],
+    scenery: ['雨', '夜', '山'],
+    emotion: '思念',
+    form: '七言绝句',
     content: [
       { text: '君问归期未有期，', pinyin: 'jūn wèn guī qī wèi yǒu qī,' },
       { text: '巴山夜雨涨秋池。', pinyin: 'bā shān yè yǔ zhǎng qiū chí.' },
@@ -1822,6 +2057,12 @@ const storyData = [
     minAge: 5,
     author: '杜牧',
     dynasty: '唐',
+    region: '无',
+    season: ['秋'],
+    themes: ['山水', '秋景', '果叶'],
+    scenery: ['山', '果叶', '云'],
+    emotion: '喜悦',
+    form: '七言绝句',
     content: [
       { text: '远上寒山石径斜，', pinyin: 'yuǎn shàng hán shān shí jìng xié,' },
       { text: '白云生处有人家。', pinyin: 'bái yún shēng chù yǒu rén jiā.' },
@@ -1876,7 +2117,9 @@ function createPinyinUnit(data, type) {
     emoji: data.emoji,
     audio: `${data.content}.mp3`,
     difficulty: 1,
-    confusionSet: data.confusionSet
+    confusionSet: data.confusionSet,
+    minAge: data.minAge || 4,
+    maxAge: data.maxAge || 7,
   }
 }
 
@@ -1888,8 +2131,27 @@ function createNumberUnit(data) {
     example: data.example,
     emoji: data.emoji,
     audio: `${data.content}.mp3`,
-    difficulty: 1,
-    confusionSet: data.confusionSet
+    difficulty: data.difficulty || 1,
+    confusionSet: data.confusionSet,
+    minAge: data.minAge || 3,
+    maxAge: data.maxAge || 7,
+  }
+}
+
+function createMathConceptUnit(data) {
+  return {
+    id: data.id,
+    type: data.type,
+    content: data.content,
+    question: data.question,
+    answer: data.answer,
+    options: data.options,
+    example: data.example,
+    emoji: data.emoji,
+    difficulty: data.difficulty || 2,
+    confusionSet: data.confusionSet,
+    minAge: data.minAge || 4,
+    maxAge: data.maxAge || 7,
   }
 }
 
@@ -1903,7 +2165,9 @@ function createEnglishUnit(data) {
     category: data.category,
     audio: `${data.content}.mp3`,
     difficulty: 1,
-    confusionSet: data.confusionSet
+    confusionSet: data.confusionSet,
+    minAge: data.minAge || 4,
+    maxAge: data.maxAge || 7,
   }
 }
 
@@ -1914,6 +2178,8 @@ const pinyinUnits = [
 ]
 
 const numberUnits = numberData.map(n => createNumberUnit(n))
+const mathConceptUnits = mathConceptData.map(item => createMathConceptUnit(item))
+const mathUnits = [...numberUnits, ...mathConceptUnits]
 const englishUnits = englishData.map(e => createEnglishUnit(e))
 
 const blendPairs = [
@@ -1940,7 +2206,7 @@ const blendPairs = [
 ]
 
 export function createKnowledgeMap() {
-  const allUnits = [...pinyinUnits, ...numberUnits, ...englishUnits, ...storyUnits]
+  const allUnits = [...pinyinUnits, ...mathUnits, ...englishUnits, ...storyUnits]
   const knowledgeMap = allUnits.reduce((accumulator, unit) => {
     accumulator[unit.id] = {
       id: unit.id,
@@ -1957,7 +2223,13 @@ export function createKnowledgeMap() {
       accuracy: 0,
       correctCount: 0,
       seenCount: 0,
-      confusionSet: unit.confusionSet
+      confusionSet: unit.confusionSet,
+      question: unit.question,
+      answer: unit.answer,
+      options: unit.options,
+      minAge: unit.minAge,
+      maxAge: unit.maxAge,
+      category: unit.category,
     }
     return accumulator
   }, {})
@@ -2072,6 +2344,33 @@ function buildNumberTask(unit) {
   }
 }
 
+function buildMathConceptTask(unit) {
+  const options = unit.options || [unit.answer, ...(unit.confusionSet || [])].slice(0, 3)
+  return {
+    id: `math-${unit.id}`,
+    type: 'choice',
+    skill: 'math',
+    knowledgeUnitId: unit.id,
+    prompt: `数字小镇：${unit.content} 训练`,
+    hint: `${unit.example}，先观察再作答。`,
+    question: unit.question,
+    answer: unit.answer,
+    options: options.map((value) => ({ id: value, label: value })),
+    correct: unit.answer,
+    emoji: unit.emoji,
+    example: unit.example,
+    conceptType: unit.type,
+  }
+}
+
+function buildMathTask(unit) {
+  if (unit.type === 'number') {
+    return buildNumberTask(unit)
+  }
+
+  return buildMathConceptTask(unit)
+}
+
 function buildEnglishTask(unit) {
   const confusions = unit.confusionSet || ['cat', 'dog']
   const options = [unit.content, ...confusions].slice(0, 3)
@@ -2122,7 +2421,8 @@ function buildStoryTask(story) {
     myth: '神话故事',
     poem: '古诗',
     idiom: '成语故事',
-    history: '历史典故'
+    history: '历史典故',
+    fable: '寓言故事',
   }
   
   return {
@@ -2154,73 +2454,180 @@ const storyUnits = storyData.map(story => ({
   example: story.example,
   emoji: story.emoji,
   difficulty: story.difficulty,
-  confusionSet: []
+  confusionSet: [],
+  minAge: story.minAge || 3,
+  maxAge: 8,
 }))
 
-const tracks = {
-  zh: {
-    pinyin: [
-      ...pinyinUnits.slice(0, 10).map(unit => buildPinyinBattle(unit)),
-      ...blendPairs.slice(0, 8).map(pair => buildBlendTask(pair)),
-      ...pinyinUnits.slice(0, 10).map(unit => buildPinyinListen(unit))
-    ],
-    math: [
-      ...numberUnits.slice(0, 6).map(unit => buildNumberTask(unit)),
-      {
-        id: 'math-listen-3',
-        type: 'micro',
-        skill: 'math',
-        prompt: '找到数字 3',
-        hint: '点中正确数字就会得到星星。',
-        narration: '3',
-        items: [
-          { id: '1', label: '1', subtitle: '一个太阳 ☀️' },
-          { id: '3', label: '3', subtitle: '三颗星星 ⭐⭐⭐' },
-          { id: '5', label: '5', subtitle: '五只小鸟 🐦🐦🐦🐦🐦' }
-        ],
-        targetId: '3'
-      },
-      {
-        id: 'math-add-1',
-        type: 'choice',
-        skill: 'math',
-        prompt: '2 + 1 等于几？',
-        hint: '数一数星星，再选答案。',
-        question: '⭐ ⭐ + ⭐ = ?',
-        options: [
-          { id: '2', label: '2' },
-          { id: '3', label: '3' },
-          { id: '4', label: '4' }
-        ],
-        correct: '3'
-      }
-    ],
-    english: [
-      ...englishUnits.slice(0, 6).map(unit => buildEnglishTask(unit)),
-      ...englishUnits.slice(0, 4).map(unit => buildEnglishMicro(unit)),
-      {
-        id: 'en-match',
-        type: 'match',
-        skill: 'english',
-        prompt: '把英语和图片连起来',
-        hint: '拖一拖，让单词找到图片。',
-        pairs: [
-          { id: 'sun', left: 'sun', right: '☀️' },
-          { id: 'moon', left: 'moon', right: '🌙' },
-          { id: 'star', left: 'star', right: '⭐' }
-        ]
-      }
-    ],
-    stories: [
-      ...storyData.map(story => buildStoryTask(story))
-    ]
+function uniqueById(items) {
+  return items.filter((item, index, list) => item && list.findIndex((candidate) => candidate.id === item.id) === index)
+}
+
+function getKnowledgeSnapshot(knowledgeState, unitId) {
+  return knowledgeState?.[unitId] || {
+    seenCount: 0,
+    correctCount: 0,
+    errorCount: 0,
+    accuracy: 0,
+    nextReviewAt: 0,
   }
+}
+
+function getWeaknessScore(unitState) {
+  if (!unitState || unitState.seenCount === 0) {
+    return 0
+  }
+
+  return unitState.errorCount * 4 + (1 - unitState.accuracy) * 10
+}
+
+function filterUnitsByAge(units, age) {
+  return units.filter((unit) => age >= (unit.minAge || 3) && age <= (unit.maxAge || 8))
+}
+
+function selectWeakUnits(units, knowledgeState, count) {
+  return [...units]
+    .filter((unit) => getKnowledgeSnapshot(knowledgeState, unit.id).seenCount > 0)
+    .sort((left, right) => {
+      const leftState = getKnowledgeSnapshot(knowledgeState, left.id)
+      const rightState = getKnowledgeSnapshot(knowledgeState, right.id)
+      return getWeaknessScore(rightState) - getWeaknessScore(leftState)
+    })
+    .slice(0, count)
+}
+
+function selectFreshUnits(units, knowledgeState, count) {
+  return [...units]
+    .sort((left, right) => {
+      const leftState = getKnowledgeSnapshot(knowledgeState, left.id)
+      const rightState = getKnowledgeSnapshot(knowledgeState, right.id)
+
+      if (leftState.seenCount !== rightState.seenCount) {
+        return leftState.seenCount - rightState.seenCount
+      }
+
+      if (left.difficulty !== right.difficulty) {
+        return (left.difficulty || 1) - (right.difficulty || 1)
+      }
+
+      return getWeaknessScore(rightState) - getWeaknessScore(leftState)
+    })
+    .slice(0, count)
+}
+
+function buildNumberMicro(unit) {
+  return {
+    id: `math-micro-${unit.id}`,
+    type: 'micro',
+    skill: 'math',
+    knowledgeUnitId: unit.id,
+    prompt: `听一听，找到数字 ${unit.content}`,
+    hint: `点中和声音一样的数字，巩固数量感觉。`,
+    narration: unit.content,
+    items: [unit.content, ...(unit.confusionSet || ['1', '2'])].slice(0, 3).map((value) => ({
+      id: value,
+      label: value,
+      subtitle: value === unit.content ? `${unit.example} ${unit.emoji}` : '相邻数量',
+    })),
+    targetId: unit.content,
+  }
+}
+
+function buildEnglishCategoryMatch(units, categoryLabel) {
+  if (units.length < 3) {
+    return null
+  }
+
+  return {
+    id: `english-match-${categoryLabel}`,
+    type: 'match',
+    skill: 'english',
+    prompt: `英语游乐园：${categoryLabel}配对`,
+    hint: '拖一拖，把单词送回正确的图片。',
+    pairs: units.slice(0, 3).map((unit) => ({
+      id: unit.id,
+      left: unit.content,
+      right: `${unit.emoji} ${unit.example}`,
+    })),
+  }
+}
+
+function buildAdaptivePinyinTrack(knowledgeState, age) {
+  const baseUnits = filterUnitsByAge(
+    pinyinUnits.filter((unit) => age >= 5 || unit.type !== 'overall'),
+    age
+  )
+  const weakUnits = selectWeakUnits(baseUnits, knowledgeState, 1)
+  const freshUnits = selectFreshUnits(baseUnits, knowledgeState, 3)
+  const masteredSet = new Set(
+    baseUnits
+      .filter((unit) => {
+        const state = getKnowledgeSnapshot(knowledgeState, unit.id)
+        return state.seenCount >= 1 && state.accuracy >= 0.65
+      })
+      .map((unit) => unit.content)
+  )
+  const blendCandidates = blendPairs
+    .filter((pair) => age >= 5 && masteredSet.has(pair.initial) && masteredSet.has(pair.final))
+    .slice(0, 2)
+
+  return uniqueById([
+    ...weakUnits.map((unit) => buildPinyinBattle(unit, true)),
+    ...freshUnits.slice(0, 1).map((unit) => buildPinyinListen(unit)),
+    ...freshUnits.slice(1, 3).map((unit) => buildPinyinBattle(unit)),
+    ...blendCandidates.map((pair) => buildBlendTask(pair)),
+    ...selectFreshUnits(filterUnitsByAge(pinyinUnits.filter((unit) => unit.type === 'overall'), age), knowledgeState, 1).map((unit) =>
+      buildPinyinBattle(unit)
+    ),
+  ])
+}
+
+function buildAdaptiveMathTrack(knowledgeState, age) {
+  const eligibleUnits = filterUnitsByAge(mathUnits, age)
+  const weakUnits = selectWeakUnits(eligibleUnits, knowledgeState, 1)
+  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4)
+  const numberFresh = freshUnits.filter((unit) => unit.type === 'number')
+  const conceptFresh = freshUnits.filter((unit) => unit.type !== 'number')
+
+  return uniqueById([
+    ...weakUnits.map((unit) => buildMathTask(unit)),
+    ...numberFresh.slice(0, 1).map((unit) => buildNumberMicro(unit)),
+    ...numberFresh.slice(0, 2).map((unit) => buildNumberTask(unit)),
+    ...conceptFresh.slice(0, 3).map((unit) => buildMathTask(unit)),
+  ])
+}
+
+function buildAdaptiveEnglishTrack(knowledgeState, age) {
+  const eligibleUnits = filterUnitsByAge(englishUnits, age)
+  const weakUnits = selectWeakUnits(eligibleUnits, knowledgeState, 1)
+  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4)
+  const categoryBuckets = freshUnits.reduce((accumulator, unit) => {
+    const key = unit.category || 'mixed'
+    if (!accumulator[key]) {
+      accumulator[key] = []
+    }
+    accumulator[key].push(unit)
+    return accumulator
+  }, {})
+  const richestCategory = Object.entries(categoryBuckets).sort((left, right) => right[1].length - left[1].length)[0]
+  const matchTask = richestCategory ? buildEnglishCategoryMatch(richestCategory[1], richestCategory[0]) : null
+
+  return uniqueById([
+    ...weakUnits.map((unit) => buildEnglishTask(unit)),
+    ...freshUnits.slice(0, 2).map((unit) => buildEnglishTask(unit)),
+    ...freshUnits.slice(2, 4).map((unit) => buildEnglishMicro(unit)),
+    matchTask,
+  ])
+}
+
+function buildAdaptiveStoryTrack(age) {
+  return filterUnitsByAge(storyData, age).slice(0, 2).map((story) => buildStoryTask(story))
 }
 
 function getDueReviewTasks(knowledgeState) {
   if (!knowledgeState) return []
   const now = Date.now()
-  const allUnits = [...pinyinUnits, ...numberUnits, ...englishUnits]
+  const allUnits = [...pinyinUnits, ...mathUnits, ...englishUnits]
   return Object.values(knowledgeState)
     .filter((unit) => unit.nextReviewAt && unit.nextReviewAt <= now)
     .sort((left, right) => {
@@ -2241,8 +2648,8 @@ function getDueReviewTasks(knowledgeState) {
       
       const unitData = allUnits.find(u => u.id === unit.id)
       if (!unitData) return null
-      if (unitData.type === 'number') {
-        return buildNumberTask(unitData)
+      if (unitData.type === 'number' || ['operation', 'comparison', 'shape', 'pattern'].includes(unitData.type)) {
+        return buildMathTask(unitData)
       } else if (unitData.type === 'english') {
         return buildEnglishTask(unitData)
       } else {
@@ -2252,32 +2659,60 @@ function getDueReviewTasks(knowledgeState) {
     .filter(Boolean)
 }
 
-function pickTrack(language, focus) {
-  const localeTracks = tracks[language] || tracks.zh
-  if (focus === 'mixed') {
-    return [
-      ...(localeTracks.pinyin || []),
-      ...(localeTracks.math || []),
-      ...(localeTracks.english || []),
-      ...(localeTracks.stories || [])
-    ]
-  }
-  return localeTracks[focus] || []
-}
-
 export function createMission(profile, knowledgeState) {
-  const missionPool = pickTrack(profile.language, profile.focus)
-  const fallbackPool = pickTrack(profile.language, 'mixed')
+  const age = profile.age || 5
   const reviewTasks = getDueReviewTasks(knowledgeState)
-  const remaining = [...missionPool, ...fallbackPool].filter((task, index, list) => list.findIndex((candidate) => candidate.id === task.id) === index)
+  const tracks = {
+    pinyin: buildAdaptivePinyinTrack(knowledgeState, age),
+    math: buildAdaptiveMathTrack(knowledgeState, age),
+    english: buildAdaptiveEnglishTrack(knowledgeState, age),
+    stories: buildAdaptiveStoryTrack(age),
+  }
+  const missionPool =
+    profile.focus === 'mixed'
+      ? [
+          ...tracks.pinyin.slice(0, 2),
+          ...tracks.math.slice(0, 2),
+          ...tracks.english.slice(0, 1),
+          ...tracks.stories.slice(0, 1),
+        ]
+      : tracks[profile.focus] || []
+  const fallbackPool = [...tracks.pinyin, ...tracks.math, ...tracks.english, ...tracks.stories]
+  const remaining = uniqueById([...missionPool, ...fallbackPool])
   const filteredRemaining = remaining.filter((task) => !reviewTasks.some((reviewTask) => reviewTask.id === task.id))
   const selected = [...reviewTasks, ...filteredRemaining].slice(0, 6)
 
   return selected.map((task, index) => ({
     ...task,
     order: index + 1,
-    recommendedIntervalMinutes: [0, 10, 60, 120, 180, 240][index] || 0
+    recommendedIntervalMinutes: [0, 10, 45, 120, 180, 240][index] || 0,
+    missionRole:
+      index < reviewTasks.length
+        ? 'review'
+        : index === reviewTasks.length
+          ? 'warmup'
+          : index >= selected.length - 2
+            ? 'checkpoint'
+            : 'core',
+    systemNote:
+      index < reviewTasks.length
+        ? '先修复薄弱点，再进入新内容，避免会做的越来越会、不会的越来越拖。'
+        : index === reviewTasks.length
+          ? '系统先安排一题热身，帮助孩子快速进入状态。'
+          : index >= selected.length - 2
+            ? '最后两题负责检查迁移和稳定度，让练习形成闭环。'
+            : '中段任务负责推进新的主线知识点，保持持续学习节奏。',
   }))
+}
+
+export function getLearningContentSummary() {
+  return {
+    pinyin: pinyinUnits.length + blendPairs.length,
+    math: mathUnits.length,
+    english: englishUnits.length,
+    stories: storyUnits.length,
+    total: pinyinUnits.length + blendPairs.length + mathUnits.length + englishUnits.length + storyUnits.length,
+  }
 }
 
 export function getWeakKnowledgePoints(knowledgeState) {

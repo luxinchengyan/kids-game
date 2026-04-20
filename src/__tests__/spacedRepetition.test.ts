@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 
 // Extract the scheduleNextReview function for testing
 // We need to duplicate it here since it's not exported from useGameStore.ts
+const TEST_NOW = 1700000000000;
+
 function scheduleNextReview(accuracy: number, previousNextReviewAt: number): number {
-  const now = Date.now();
+  const now = TEST_NOW;
   const intervals = [10 * 60 * 1000, 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000];
   if (accuracy > 0.9 && previousNextReviewAt > now) {
     return previousNextReviewAt + intervals[0];
@@ -14,7 +16,7 @@ function scheduleNextReview(accuracy: number, previousNextReviewAt: number): num
 }
 
 describe('Spaced Repetition Algorithm', () => {
-  const now = Date.now();
+  const now = TEST_NOW;
 
   describe('scheduleNextReview', () => {
     it('schedules review in 5 minutes for low accuracy (<=0.6)', () => {

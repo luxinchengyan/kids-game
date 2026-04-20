@@ -8,6 +8,8 @@ function buildSummary(profile, stats, mission, knowledge) {
   const durationSeconds = stats.sessionStartedAt ? Math.max(45, Math.round((Date.now() - stats.sessionStartedAt) / 1000)) : mission.length * 45
   const weakPoints = getWeakKnowledgePoints(knowledge).map((unit) => unit.content)
   const weakText = weakPoints.length ? weakPoints.join(' / ') : '暂无'
+  const focusName = profile.focus === 'math' ? '数学主线' : profile.focus === 'english' ? '英语主线' : profile.focus === 'stories' ? '故事主线' : profile.focus === 'mixed' ? '综合主线' : '拼音主线'
+  const recommendationTarget = weakPoints[0] || '当前主线的检查点'
 
   return {
     timestamp: new Date().toISOString(),
@@ -23,8 +25,8 @@ function buildSummary(profile, stats, mission, knowledge) {
     note: `${profile.childName || '孩子'} 今天完成了 ${stats.completedTasks} 个微任务，正确率 ${accuracy}%，当前薄弱点：${weakText}。`,
     recommendation:
       accuracy >= 80
-        ? `建议在明天复习 ${weakText}，并继续推进新的拼音组合。`
-        : `建议今天 10 分钟后先复习 ${weakText}，重点做听音区分训练。`
+        ? `建议明天先复习 ${recommendationTarget}，然后继续推进${focusName}的新任务。`
+        : `建议今天 10 分钟后先回补 ${recommendationTarget}，再用 1 个低难度任务重新建立信心。`
   }
 }
 

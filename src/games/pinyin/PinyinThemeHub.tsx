@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '../../components/Button';
 import { getGamesByTheme } from '../registry';
 import type { GameConfig } from '../registry';
 import { track } from '../../lib/analytics';
+import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { getGameSeriesSnapshot } from '../../data/gameSeriesCatalog';
 
 // Function to speak text using Web Speech API
 function speakText(text: string) {
@@ -21,6 +22,7 @@ function speakText(text: string) {
 // Game card component for theme hub
 function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: () => void; index: number }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const series = getGameSeriesSnapshot(game.id);
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -78,7 +80,7 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
           <p style={{ fontSize: '15px', color: '#6D4C41', margin: '0 0 12px 0' }}>
             {game.description}
           </p>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <span
               style={{
                 fontSize: '13px',
@@ -89,8 +91,36 @@ function ThemeGameCard({ game, onClick, index }: { game: GameConfig; onClick: ()
                 borderRadius: '12px',
               }}
             >
-              入门 - 挑战
+              {series?.ladderLabel ?? '入门 - 挑战'}
             </span>
+            {series && (
+              <>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#E65100',
+                    background: '#FFFFFF',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {series.stageLabel}
+                </span>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#E65100',
+                    background: '#FFFFFF',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {series.bankLabel}
+                </span>
+              </>
+            )}
             {game.minAge && game.maxAge && (
               <span
                 style={{
@@ -127,52 +157,15 @@ export default function PinyinThemeHub() {
   }, [navigate]);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '800px',
-        padding: '0 var(--spacing-md)',
-      }}
-    >
-      {/* Hero Section */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        style={{ textAlign: 'center', marginBottom: '32px' }}
-      >
-        <motion.h1
-          style={{
-            fontSize: '48px',
-            fontWeight: 900,
-            background: 'linear-gradient(135deg, #FF9800, #FFB74D, #FF9800)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            marginBottom: '12px',
-          }}
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        >
-          📖 拼音冒险岛
-        </motion.h1>
-        <p style={{ fontSize: '20px', color: '#6D4C41', fontWeight: 600 }}>
-          选择一个拼音游戏开始冒险吧！✨
-        </p>
-      </motion.div>
-
-      {/* Back Button */}
-      <div style={{ marginBottom: '24px' }}>
-        <Button variant="secondary" onClick={handleBack}>
-          ← 返回首页
-        </Button>
-      </div>
+    <PageLayout maxWidth="800px">
+      <GamePageHeader
+        title="拼音冒险岛"
+        icon="📖"
+        subtitle="选择一个拼音游戏开始冒险吧！✨"
+        gradient="linear-gradient(135deg, #FF9800, #FFB74D, #FF9800)"
+        progressColor="#FF9800"
+        onBack={handleBack}
+      />
 
       {/* Game List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -203,6 +196,6 @@ export default function PinyinThemeHub() {
           </p>
         </motion.div>
       )}
-    </div>
+    </PageLayout>
   );
 }
