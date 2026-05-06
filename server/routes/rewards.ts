@@ -61,6 +61,10 @@ router.post('/:childId/achievements', async (req: AuthRequest, res: Response) =>
   }
   try {
     const db = await getDatabase();
+    const child = await db.findChildById(childId);
+    if (!child || child.parentId !== req.parentId) {
+      return res.status(404).json({ code: 'NOT_FOUND', message: '孩子档案不存在' });
+    }
     await db.upsertUserAchievement(childId, achievementId, progress ?? 1);
     res.json({ success: true });
   } catch (err) {

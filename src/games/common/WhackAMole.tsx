@@ -110,22 +110,22 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export const DEFAULT_DIFFICULTY_SETTINGS: Record<DifficultyLevel, DifficultyConfig> = {
   easy: {
     moleCount: 3,
-    showTime: 3000,
-    spawnInterval: 1500,
+    showTime: 4500, // 3000 -> 4500
+    spawnInterval: 2500, // 1500 -> 2500
     roundCount: 8,
     gridSize: 3, // 3x3 grid
   },
   medium: {
     moleCount: 4,
-    showTime: 2000,
-    spawnInterval: 1200,
+    showTime: 3000, // 2000 -> 3000
+    spawnInterval: 2000, // 1200 -> 2000
     roundCount: 10,
     gridSize: 3,
   },
   hard: {
     moleCount: 5,
-    showTime: 1200,
-    spawnInterval: 900,
+    showTime: 2000, // 1200 -> 2000
+    spawnInterval: 1500, // 900 -> 1500
     roundCount: 12,
     gridSize: 4, // 4x4 grid
   },

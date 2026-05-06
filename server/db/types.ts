@@ -28,8 +28,10 @@ export interface DBChild {
   parentId: string;
   nickname: string;
   age: number;
+  birthYearMonth?: string;
   gender: 'boy' | 'girl';
   avatarId: string;
+  avatarUrl?: string;
   petId?: string;
   createdAt: string;
   updatedAt: string;

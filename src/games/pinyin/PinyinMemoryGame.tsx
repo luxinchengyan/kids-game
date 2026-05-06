@@ -1,22 +1,32 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
+import { useGameStore } from '../../stores/useGameStore';
+import { useUserStore } from '../../stores/useUserStore';
+import { getEffectiveChildAge } from '../../lib/learnerProfile';
+import { pinyinUnits, blendPairs } from '../../data/learningContent';
 import { track } from '../../lib/analytics';
-import { speak } from '../../lib/audio';
+import { speak, playSuccess, playError } from '../../lib/audio';
 
-type Pair = { syllable: string; emoji: string; hint: string };
-type Card = { id: string; pairId: number; type: 'syllable' | 'emoji'; content: string; hint: string };
+type Pair = { id: string; content: string; emoji: string; hint: string };
+type Card = { id: string; unitId: string; type: 'syllable' | 'emoji'; content: string; hint: string };
 type CardState = 'hidden' | 'revealed' | 'matched';
 
-const PAIRS: Pair[] = [
-  { syllable: 'b', emoji: '🍍', hint: '菠萝' },
-  { syllable: 'm', emoji: '👩', hint: '妈妈' },
-  { syllable: 'q', emoji: '🎈', hint: '气球' },
-  { syllable: 'x', emoji: '🍉', hint: '西瓜' },
-  { syllable: 'zh', emoji: '🕷️', hint: '蜘蛛' },
-  { syllable: 'sh', emoji: '🦁', hint: '狮子' },
+interface DifficultyLevel {
+  id: string;
+  name: string;
+  pairs: number;
+  gridCols: number;
+  color: string;
+  allowedTypes: string[];
+}
+
+const LEVELS: DifficultyLevel[] = [
+  { id: 'easy', name: '入门 (3x3)', pairs: 4, gridCols: 3, color: '#4CAF50', allowedTypes: ['initial'] },
+  { id: 'normal', name: '进阶 (3x4)', pairs: 6, gridCols: 4, color: '#FF9800', allowedTypes: ['initial', 'final'] },
+  { id: 'hard', name: '挑战 (4x4)', pairs: 8, gridCols: 4, color: '#F44336', allowedTypes: ['initial', 'final', 'overall', 'blend'] },
 ];
 
 function shuffle<T>(items: T[]) {
@@ -28,13 +38,24 @@ function shuffle<T>(items: T[]) {
   return next;
 }
 
-function buildCards() {
-  return shuffle(
-    PAIRS.flatMap((pair, pairId) => [
-      { id: `syllable-${pairId}`, pairId, type: 'syllable' as const, content: pair.syllable, hint: pair.hint },
-      { id: `emoji-${pairId}`, pairId, type: 'emoji' as const, content: pair.emoji, hint: pair.hint },
-    ])
-  );
+function buildCards(pairs: Pair[], is3x3: boolean) {
+  const baseCards = pairs.flatMap((pair) => [
+    { id: `syllable-${pair.id}`, unitId: pair.id, type: 'syllable' as const, content: pair.content, hint: pair.hint },
+    { id: `emoji-${pair.id}`, unitId: pair.id, type: 'emoji' as const, content: pair.emoji, hint: pair.hint },
+  ]);
+
+  if (is3x3 && baseCards.length === 8) {
+    // Add a lucky 9th card for 3x3 grid
+    baseCards.push({
+      id: 'lucky-star',
+      unitId: 'lucky',
+      type: 'emoji' as const,
+      content: '⭐',
+      hint: '幸运之星'
+    });
+  }
+
+  return shuffle(baseCards);
 }
 
 function FlipCard({
@@ -108,10 +129,11 @@ function FlipCard({
             color: '#6D4C41',
             fontWeight: 900,
             fontSize: card.type === 'emoji' ? '36px' : '28px',
+            padding: '4px',
           }}
         >
-          <span>{card.content}</span>
-          {card.type === 'syllable' && <span style={{ fontSize: '12px', marginTop: '4px' }}>读一读</span>}
+          <span style={{ fontSize: card.content.length > 2 ? '22px' : '28px' }}>{card.content}</span>
+          {card.type === 'syllable' && <span style={{ fontSize: '11px', marginTop: '4px', color: '#8D6E63' }}>{card.hint}</span>}
         </div>
       </motion.div>
     </motion.button>
@@ -121,36 +143,87 @@ function FlipCard({
 export default function PinyinMemoryGame() {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion('pinyin-memory');
+  const recordTaskResult = useGameStore((s) => s.recordTaskResult);
+  const currentChild = useUserStore((s) => s.currentChild);
+  const age = getEffectiveChildAge(currentChild);
 
+  const [currentLevel, setCurrentLevel] = useState<DifficultyLevel>(LEVELS[0]);
+  const [gameState, setGameState] = useState<'selecting' | 'playing' | 'completed'>('selecting');
   const [cards, setCards] = useState<Card[]>([]);
   const [cardStates, setCardStates] = useState<Record<string, CardState>>({});
   const [flipped, setFlipped] = useState<string[]>([]);
   const [wrongIds, setWrongIds] = useState<string[]>([]);
   const [matchCount, setMatchCount] = useState(0);
   const [moves, setMoves] = useState(0);
-  const [completed, setCompleted] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
 
-  const initGame = useCallback(() => {
-    const nextCards = buildCards();
+  const startLevel = useCallback((level: DifficultyLevel) => {
+    // 1. Filter pinyinUnits by level's allowed types and child's age
+    let eligibleUnits = pinyinUnits.filter(u => 
+      level.allowedTypes.includes(u.type) && 
+      age >= (u.minAge || 3) && age <= (u.maxAge || 10)
+    );
+
+    // 2. For 'hard' level, also include blends
+    if (level.allowedTypes.includes('blend') && age >= 5) {
+      const blends = blendPairs.map(p => ({
+        id: `pinyin_${p.initial}_${p.final}`,
+        type: 'blend',
+        content: p.syllable,
+        emoji: '🔗',
+        example: p.example,
+        minAge: 5,
+        maxAge: 10
+      }));
+      eligibleUnits = [...eligibleUnits, ...blends];
+    }
+
+    // 3. Fallback if not enough units
+    if (eligibleUnits.length < level.pairs) {
+      eligibleUnits = [...pinyinUnits];
+    }
+
+    const pool = shuffle(eligibleUnits).slice(0, level.pairs).map(u => ({
+      id: u.id,
+      content: u.content,
+      emoji: u.emoji || '✨',
+      hint: u.example || ''
+    }));
+
+    const nextCards = buildCards(pool, level.gridCols === 3);
     setCards(nextCards);
     setCardStates(Object.fromEntries(nextCards.map((card) => [card.id, 'hidden'])));
     setFlipped([]);
     setWrongIds([]);
     setMatchCount(0);
     setMoves(0);
-    setCompleted(false);
+    setGameState('playing');
     setStartTime(Date.now());
-    track('game_start', { gameId: 'pinyin-memory' });
-  }, []);
-
-  useEffect(() => {
-    initGame();
-  }, [initGame]);
+    track('game_start', { gameId: 'pinyin-memory', level: level.id });
+  }, [age]);
 
   const handleCardClick = useCallback(
     (card: Card) => {
-      if (completed || flipped.length >= 2 || flipped.includes(card.id)) return;
+      if (gameState !== 'playing' || flipped.length >= 2 || flipped.includes(card.id)) return;
+
+      // Special handling for Lucky Star
+      if (card.id === 'lucky-star') {
+        setCardStates((current) => ({ ...current, [card.id]: 'revealed' }));
+        speak('幸运之星');
+        window.setTimeout(() => {
+          setCardStates((current) => ({ ...current, [card.id]: 'matched' }));
+          setMatchCount((current) => {
+            const nextCount = current + 1;
+            // Note: In 3x3 mode, pairs: 4 means 8 cards + 1 lucky = 9 cards. 
+            // Total matches needed is 5 (4 pairs + 1 lucky).
+            // But we'll adjust the logic below.
+            return current; // MatchCount for real pairs only? 
+            // Actually, let's just make it work naturally.
+          });
+        }, 500);
+        return;
+      }
+
       const nextFlipped = [...flipped, card.id];
       setFlipped(nextFlipped);
       setCardStates((current) => ({ ...current, [card.id]: 'revealed' }));
@@ -164,50 +237,74 @@ export default function PinyinMemoryGame() {
 
         if (!firstCard || !secondCard) return;
 
-        if (firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type) {
+        if (firstCard.unitId === secondCard.unitId && firstCard.type !== secondCard.type) {
+          // Record success for this unit in the learning store
+          recordTaskResult({
+            taskId: `memory-${firstCard.unitId}-${Date.now()}`,
+            knowledgeUnitId: firstCard.unitId,
+            success: true,
+            skill: 'pinyin',
+            stars: 0,
+          });
+
+          playSuccess();
+
           window.setTimeout(() => {
             setCardStates((current) => ({ ...current, [firstId]: 'matched', [secondId]: 'matched' }));
             setFlipped([]);
             setMatchCount((current) => {
               const nextCount = current + 1;
-              if (nextCount === PAIRS.length) {
+              const isWin = currentLevel.gridCols === 3 
+                ? nextCount === currentLevel.pairs // 4 pairs matched
+                : nextCount === currentLevel.pairs;
+
+              // Check if all matched (including lucky star)
+              const allMatched = Object.values({ ...cardStates, [firstId]: 'matched', [secondId]: 'matched' })
+                .filter(s => s === 'matched').length === cards.length;
+
+              if (allMatched || nextCount === currentLevel.pairs) {
                 const durationMs = Date.now() - startTime;
-                const stars = moves + 1 <= PAIRS.length + 2 ? 3 : moves + 1 <= PAIRS.length * 2 ? 2 : 1;
-                setCompleted(true);
+                const stars = moves + 1 <= currentLevel.pairs + 2 ? 3 : moves + 1 <= currentLevel.pairs * 2 ? 2 : 1;
+                setGameState('completed');
                 handleGameComplete({
                   success: true,
                   stars,
-                  tasksCompleted: PAIRS.length,
+                  tasksCompleted: currentLevel.pairs,
                   accuracy: 1,
-                  xp: 24,
+                  xp: currentLevel.pairs * 6,
                 });
-                track('task_complete', { gameId: 'pinyin-memory', duration_ms: durationMs, moves: moves + 1 });
+                track('task_complete', { gameId: 'pinyin-memory', level: currentLevel.id, duration_ms: durationMs, moves: moves + 1 });
               }
               return nextCount;
             });
           }, 420);
         } else {
           setWrongIds([firstId, secondId]);
+          playError();
           window.setTimeout(() => {
-            setCardStates((current) => ({ ...current, [firstId]: 'hidden', [secondId]: 'hidden' }));
+            setCardStates((prev) => ({ ...prev, [firstId]: 'hidden', [secondId]: 'hidden' }));
             setFlipped([]);
             setWrongIds([]);
           }, 840);
         }
       }
     },
-    [cards, completed, flipped, handleGameComplete, moves, startTime]
+    [cards, gameState, flipped, handleGameComplete, moves, startTime, currentLevel, recordTaskResult, cardStates]
   );
 
   const handleBack = useCallback(() => {
-    navigate('/games/pinyin');
-  }, [navigate]);
+    if (gameState === 'playing') {
+      setGameState('selecting');
+    } else {
+      navigate('/games/pinyin');
+    }
+  }, [gameState, navigate]);
 
   return (
     <div style={{ width: '100%', maxWidth: '620px', margin: '0 auto', padding: '16px' }}>
       <div style={{ marginBottom: '20px' }}>
         <Button variant="secondary" onClick={handleBack}>
-          ← 返回拼音冒险岛
+          ← {gameState === 'playing' ? '重选难度' : '返回拼音冒险岛'}
         </Button>
       </div>
 
@@ -223,73 +320,112 @@ export default function PinyinMemoryGame() {
         }}
       >
         <h2 style={{ margin: '0 0 8px 0', fontSize: '30px', color: '#E65100' }}>🃏 拼音翻翻乐</h2>
-        <p style={{ margin: '0 0 18px 0', color: '#6D4C41', fontWeight: 600 }}>
-          翻开卡片，把拼音和对应小线索配成一对！
-        </p>
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginBottom: '20px' }}>
-          {[
-            { label: '已配对', value: matchCount, color: '#FB8C00' },
-            { label: '翻牌次数', value: moves, color: '#8E24AA' },
-            { label: '总配对', value: PAIRS.length, color: '#039BE5' },
-          ].map((item) => (
-            <div key={item.label}>
-              <div style={{ fontSize: '28px', fontWeight: 900, color: item.color }}>{item.value}</div>
-              <div style={{ color: '#8D6E63', fontWeight: 700 }}>{item.label}</div>
+        
+        {gameState === 'selecting' ? (
+          <>
+            <p style={{ margin: '0 0 24px 0', color: '#6D4C41', fontWeight: 600 }}>
+              选择一个挑战级别开始游戏吧！
+            </p>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {LEVELS.map((lvl) => (
+                <motion.button
+                  key={lvl.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setCurrentLevel(lvl);
+                    startLevel(lvl);
+                  }}
+                  style={{
+                    padding: '20px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    background: lvl.color,
+                    color: '#FFFFFF',
+                    fontSize: '20px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  {lvl.name}
+                </motion.button>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <>
+            <p style={{ margin: '0 0 18px 0', color: '#6D4C41', fontWeight: 600 }}>
+              翻开卡片，把拼音和对应小线索配成一对！
+            </p>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 86px)',
-            gap: '12px',
-            justifyContent: 'center',
-            marginBottom: '22px',
-          }}
-        >
-          {cards.map((card) => (
-            <FlipCard
-              key={card.id}
-              card={card}
-              state={cardStates[card.id] ?? 'hidden'}
-              isWrong={wrongIds.includes(card.id)}
-              onClick={() => handleCardClick(card)}
-            />
-          ))}
-        </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginBottom: '20px' }}>
+              {[
+                { label: '已配对', value: matchCount, color: '#FB8C00' },
+                { label: '翻牌次数', value: moves, color: '#8E24AA' },
+                { label: '总配对', value: currentLevel.pairs, color: '#039BE5' },
+              ].map((item) => (
+                <div key={item.label}>
+                  <div style={{ fontSize: '28px', fontWeight: 900, color: item.color }}>{item.value}</div>
+                  <div style={{ color: '#8D6E63', fontWeight: 700 }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
 
-        <AnimatePresence>
-          {completed && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
+            <div
               style={{
-                background: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)',
-                borderRadius: '20px',
-                padding: '24px',
-                border: '3px solid #FFB74D',
-                marginBottom: '18px',
+                display: 'grid',
+                gridTemplateColumns: `repeat(${currentLevel.gridCols}, 86px)`,
+                gap: '12px',
+                justifyContent: 'center',
+                marginBottom: '22px',
               }}
             >
-              <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎉</div>
-              <h3 style={{ margin: '0 0 8px 0', color: '#E65100', fontSize: '24px' }}>全部配对成功！</h3>
-              <p style={{ margin: 0, color: '#6D4C41', fontWeight: 700 }}>你一共翻了 {moves} 次，真棒！</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {cards.map((card) => (
+                <FlipCard
+                  key={card.id}
+                  card={card}
+                  state={cardStates[card.id] ?? 'hidden'}
+                  isWrong={wrongIds.includes(card.id)}
+                  onClick={() => handleCardClick(card)}
+                />
+              ))}
+            </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          {completed && (
-            <Button variant="secondary" onClick={handleBack}>
-              返回
-            </Button>
-          )}
-          <Button variant={completed ? 'primary' : 'secondary'} onClick={initGame}>
-            再来一局
-          </Button>
-        </div>
+            <AnimatePresence>
+              {gameState === 'completed' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{
+                    background: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)',
+                    borderRadius: '20px',
+                    padding: '24px',
+                    border: '3px solid #FFB74D',
+                    marginBottom: '18px',
+                  }}
+                >
+                  <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎉</div>
+                  <h3 style={{ margin: '0 0 8px 0', color: '#E65100', fontSize: '24px' }}>全部配对成功！</h3>
+                  <p style={{ margin: 0, color: '#6D4C41', fontWeight: 700 }}>
+                    你用 {moves} 次就完成了 {currentLevel.name}，真棒！
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              {gameState === 'completed' && (
+                <Button variant="secondary" onClick={() => setGameState('selecting')}>
+                  重选难度
+                </Button>
+              )}
+              <Button variant={gameState === 'completed' ? 'primary' : 'secondary'} onClick={() => startLevel(currentLevel)}>
+                再来一局
+              </Button>
+            </div>
+          </>
+        )}
       </motion.div>
     </div>
   );

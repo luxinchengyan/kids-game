@@ -1,12 +1,18 @@
 const companionCatalog = {
+  aisha: {
+    zh: { name: '艾莎', emoji: '❄️', tone: '温柔鼓励', color: '#B3E5FC' }
+  },
+  rocky: {
+    zh: { name: '罗奇', emoji: '🐶', tone: '勇敢支持', color: '#DCEDC8' }
+  },
+  peppa: {
+    zh: { name: '佩奇', emoji: '🐷', tone: '趣味社交', color: '#F8BBD0' }
+  },
+  marshall: {
+    zh: { name: '毛毛', emoji: '🚒', tone: '热血活力', color: '#FFCDD2' }
+  },
   star: {
-    zh: { name: '星星姐姐', tone: '温柔鼓励' }
-  },
-  rocket: {
-    zh: { name: '火箭哥哥', tone: '热情带练' }
-  },
-  astro: {
-    zh: { name: '星际小探险家', tone: '好奇引导' }
+    zh: { name: '星星姐姐', emoji: '✨', tone: '温柔鼓励', color: '#FFF9C4' }
   }
 }
 
@@ -2205,9 +2211,18 @@ const blendPairs = [
   { id: 'blend-li', initial: 'l', final: 'i', syllable: 'li', rival: '梨子怪', reward: '水果篮', example: '梨子' }
 ]
 
-export function createKnowledgeMap() {
+export function createKnowledgeMap(childAge = null) {
   const allUnits = [...pinyinUnits, ...mathUnits, ...englishUnits, ...storyUnits]
   const knowledgeMap = allUnits.reduce((accumulator, unit) => {
+    // Filter by age if provided
+    if (childAge !== null) {
+      const min = unit.minAge || 3
+      const max = unit.maxAge || 10
+      if (childAge < min || childAge > max) {
+        return accumulator
+      }
+    }
+
     accumulator[unit.id] = {
       id: unit.id,
       type: unit.type,
@@ -2230,33 +2245,40 @@ export function createKnowledgeMap() {
       minAge: unit.minAge,
       maxAge: unit.maxAge,
       category: unit.category,
+      easinessFactor: 2.5, // SM-2 initial value
+      interval: 0,
     }
     return accumulator
   }, {})
   
-  blendPairs.forEach(pair => {
-    const unitId = `pinyin_${pair.initial}_${pair.final}`
-    knowledgeMap[unitId] = {
-      id: unitId,
-      type: 'blend',
-      content: pair.syllable,
-      example: pair.example,
-      difficulty: 2,
-      nextReviewAt: 0,
-      lastReviewedAt: 0,
-      errorCount: 0,
-      accuracy: 0,
-      correctCount: 0,
-      seenCount: 0,
-      confusionSet: []
-    }
-  })
+  // Add blend units with age filter (typically for age 5+)
+  if (childAge === null || childAge >= 5) {
+    blendPairs.forEach(pair => {
+      const unitId = `pinyin_${pair.initial}_${pair.final}`
+      knowledgeMap[unitId] = {
+        id: unitId,
+        type: 'blend',
+        content: pair.syllable,
+        example: pair.example,
+        difficulty: 2,
+        nextReviewAt: 0,
+        lastReviewedAt: 0,
+        errorCount: 0,
+        accuracy: 0,
+        correctCount: 0,
+        seenCount: 0,
+        confusionSet: [],
+        easinessFactor: 2.5,
+        interval: 0,
+      }
+    })
+  }
   
   return knowledgeMap
 }
 
-export function createInitialKnowledgeState() {
-  return createKnowledgeMap()
+export function createInitialKnowledgeState(childAge = null) {
+  return createKnowledgeMap(childAge)
 }
 
 function buildPinyinBattle(unit, reviewMode = false) {
@@ -2414,8 +2436,6 @@ function buildEnglishMicro(unit) {
   }
 }
 
-
-
 function buildStoryTask(story) {
   const typeLabels = {
     myth: '神话故事',
@@ -2496,7 +2516,13 @@ function selectWeakUnits(units, knowledgeState, count) {
     .slice(0, count)
 }
 
-function selectFreshUnits(units, knowledgeState, count) {
+function resolveDifficultyRank(level) {
+  if (level === 'hard') return 3
+  if (level === 'medium') return 2
+  return 1
+}
+
+function selectFreshUnits(units, knowledgeState, count, preferredDifficulty = 1) {
   return [...units]
     .sort((left, right) => {
       const leftState = getKnowledgeSnapshot(knowledgeState, left.id)
@@ -2504,6 +2530,13 @@ function selectFreshUnits(units, knowledgeState, count) {
 
       if (leftState.seenCount !== rightState.seenCount) {
         return leftState.seenCount - rightState.seenCount
+      }
+
+      const leftDifficultyGap = Math.abs((left.difficulty || 1) - preferredDifficulty)
+      const rightDifficultyGap = Math.abs((right.difficulty || 1) - preferredDifficulty)
+
+      if (leftDifficultyGap !== rightDifficultyGap) {
+        return leftDifficultyGap - rightDifficultyGap
       }
 
       if (left.difficulty !== right.difficulty) {
@@ -2552,13 +2585,14 @@ function buildEnglishCategoryMatch(units, categoryLabel) {
   }
 }
 
-function buildAdaptivePinyinTrack(knowledgeState, age) {
+function buildAdaptivePinyinTrack(knowledgeState, age, recommendedDifficulty) {
+  const preferredDifficulty = resolveDifficultyRank(recommendedDifficulty)
   const baseUnits = filterUnitsByAge(
     pinyinUnits.filter((unit) => age >= 5 || unit.type !== 'overall'),
     age
   )
   const weakUnits = selectWeakUnits(baseUnits, knowledgeState, 1)
-  const freshUnits = selectFreshUnits(baseUnits, knowledgeState, 3)
+  const freshUnits = selectFreshUnits(baseUnits, knowledgeState, 3, preferredDifficulty)
   const masteredSet = new Set(
     baseUnits
       .filter((unit) => {
@@ -2576,16 +2610,17 @@ function buildAdaptivePinyinTrack(knowledgeState, age) {
     ...freshUnits.slice(0, 1).map((unit) => buildPinyinListen(unit)),
     ...freshUnits.slice(1, 3).map((unit) => buildPinyinBattle(unit)),
     ...blendCandidates.map((pair) => buildBlendTask(pair)),
-    ...selectFreshUnits(filterUnitsByAge(pinyinUnits.filter((unit) => unit.type === 'overall'), age), knowledgeState, 1).map((unit) =>
+    ...selectFreshUnits(filterUnitsByAge(pinyinUnits.filter((unit) => unit.type === 'overall'), age), knowledgeState, 1, preferredDifficulty).map((unit) =>
       buildPinyinBattle(unit)
     ),
   ])
 }
 
-function buildAdaptiveMathTrack(knowledgeState, age) {
+function buildAdaptiveMathTrack(knowledgeState, age, recommendedDifficulty) {
+  const preferredDifficulty = resolveDifficultyRank(recommendedDifficulty)
   const eligibleUnits = filterUnitsByAge(mathUnits, age)
   const weakUnits = selectWeakUnits(eligibleUnits, knowledgeState, 1)
-  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4)
+  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4, preferredDifficulty)
   const numberFresh = freshUnits.filter((unit) => unit.type === 'number')
   const conceptFresh = freshUnits.filter((unit) => unit.type !== 'number')
 
@@ -2597,10 +2632,11 @@ function buildAdaptiveMathTrack(knowledgeState, age) {
   ])
 }
 
-function buildAdaptiveEnglishTrack(knowledgeState, age) {
+function buildAdaptiveEnglishTrack(knowledgeState, age, recommendedDifficulty) {
+  const preferredDifficulty = resolveDifficultyRank(recommendedDifficulty)
   const eligibleUnits = filterUnitsByAge(englishUnits, age)
   const weakUnits = selectWeakUnits(eligibleUnits, knowledgeState, 1)
-  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4)
+  const freshUnits = selectFreshUnits(eligibleUnits, knowledgeState, 4, preferredDifficulty)
   const categoryBuckets = freshUnits.reduce((accumulator, unit) => {
     const key = unit.category || 'mixed'
     if (!accumulator[key]) {
@@ -2661,11 +2697,12 @@ function getDueReviewTasks(knowledgeState) {
 
 export function createMission(profile, knowledgeState) {
   const age = profile.age || 5
+  const recommendedDifficulty = profile.recommendedDifficulty || 'easy'
   const reviewTasks = getDueReviewTasks(knowledgeState)
   const tracks = {
-    pinyin: buildAdaptivePinyinTrack(knowledgeState, age),
-    math: buildAdaptiveMathTrack(knowledgeState, age),
-    english: buildAdaptiveEnglishTrack(knowledgeState, age),
+    pinyin: buildAdaptivePinyinTrack(knowledgeState, age, recommendedDifficulty),
+    math: buildAdaptiveMathTrack(knowledgeState, age, recommendedDifficulty),
+    english: buildAdaptiveEnglishTrack(knowledgeState, age, recommendedDifficulty),
     stories: buildAdaptiveStoryTrack(age),
   }
   const missionPool =
@@ -2730,4 +2767,21 @@ export function getWeakKnowledgePoints(knowledgeState) {
 export function getCompanion(profile) {
   const choice = companionCatalog[profile.companion] || companionCatalog.astro
   return choice[profile.language] || choice.zh
+}
+
+export {
+  buildPinyinBattle,
+  buildPinyinListen,
+  buildBlendTask,
+  buildNumberTask,
+  buildMathConceptTask,
+  buildMathTask,
+  buildEnglishTask,
+  buildEnglishMicro,
+  buildStoryTask,
+  pinyinUnits,
+  mathUnits,
+  englishUnits,
+  storyUnits,
+  blendPairs
 }

@@ -1,6 +1,22 @@
 import type { GameProgress, TaskResult } from '../types';
+import { useUserStore } from '../stores/useUserStore';
 
 const PROGRESS_KEY_PREFIX = 'kids-game-progress-';
+const LEGACY_PROGRESS_KEY_PREFIX = 'kids-game-progress-legacy-';
+
+function getCurrentChildScope() {
+  const childId = useUserStore.getState().currentChild?._id;
+  return childId || 'default';
+}
+
+function getScopedProgressKey(gameId: string, childId?: string) {
+  const scope = childId || getCurrentChildScope();
+  return `${PROGRESS_KEY_PREFIX}${scope}-${gameId}`;
+}
+
+function getLegacyProgressKey(gameId: string) {
+  return `${LEGACY_PROGRESS_KEY_PREFIX}${gameId}`;
+}
 
 /**
  * Calculate stars earned based on performance
@@ -55,7 +71,7 @@ export function getEncouragementMessage(success: boolean, streak: number = 0): s
 export function saveGameProgress(gameId: string, progress: GameProgress): void {
   if (typeof window === 'undefined') return;
   try {
-    const key = `${PROGRESS_KEY_PREFIX}${gameId}`;
+    const key = getScopedProgressKey(gameId);
     localStorage.setItem(key, JSON.stringify(progress));
   } catch {
     // Silently fail
@@ -68,9 +84,19 @@ export function saveGameProgress(gameId: string, progress: GameProgress): void {
 export function loadGameProgress(gameId: string): GameProgress | null {
   if (typeof window === 'undefined') return null;
   try {
-    const key = `${PROGRESS_KEY_PREFIX}${gameId}`;
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
+    const scopedKey = getScopedProgressKey(gameId);
+    const scopedRaw = localStorage.getItem(scopedKey);
+    if (scopedRaw) return JSON.parse(scopedRaw);
+
+    const legacyRaw = localStorage.getItem(`${PROGRESS_KEY_PREFIX}${gameId}`);
+    if (legacyRaw) {
+      localStorage.setItem(scopedKey, legacyRaw);
+      localStorage.removeItem(`${PROGRESS_KEY_PREFIX}${gameId}`);
+      localStorage.setItem(getLegacyProgressKey(gameId), legacyRaw);
+      return JSON.parse(legacyRaw);
+    }
+
+    return null;
   } catch {
     return null;
   }

@@ -6,6 +6,7 @@ import { track } from '../../lib/analytics';
 import { PageLayout, GamePageHeader } from '../../components/PageLayout';
 import { useGameStore } from '../../stores/useGameStore';
 import { useUserStore } from '../../stores/useUserStore';
+import { getEffectiveChildAge, getRecommendedDifficulty } from '../../lib/learnerProfile';
 
 const ChoiceTask = lazy(() => import('../../components/ChoiceTask'));
 const MatchTask = lazy(() => import('../../components/MatchTask'));
@@ -46,7 +47,7 @@ export default function EnglishGame() {
     language: profile.language,
     companion: profile.companion,
     knowledgeState: knowledge,
-    age: currentChild?.age ?? 5,
+    age: getEffectiveChildAge(currentChild),
   });
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function EnglishGame() {
         focus: 'english',
         companion: missionContextRef.current.companion,
         age: missionContextRef.current.age,
+        recommendedDifficulty: getRecommendedDifficulty(currentChild),
       },
       missionContextRef.current.knowledgeState
     );

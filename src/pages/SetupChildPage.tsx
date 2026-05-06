@@ -26,12 +26,13 @@ const AVATAR_EMOJIS: Record<string, string> = {
 
 export default function SetupChildPage() {
   const navigate = useNavigate();
-  const { setCurrentChild, setChildren, children, parent } = useUserStore();
+  const { setCurrentChild, setChildren, children, parent, setParent } = useUserStore();
 
   const [nickname, setNickname] = useState('');
-  const [age, setAge] = useState(5);
+  const [birthYearMonth, setBirthYearMonth] = useState('');
   const [gender, setGender] = useState<'boy' | 'girl'>('girl');
   const [avatarId, setAvatarId] = useState('star_girl');
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,26 +44,47 @@ export default function SetupChildPage() {
   const handleSubmit = async () => {
     if (!nickname.trim()) { setError('请给宝贝起个昵称 😊'); return; }
     if (nickname.trim().length > 10) { setError('昵称最多10个字'); return; }
+    if (!birthYearMonth) { setError('请选择出生年月'); return; }
 
     setLoading(true);
     setError('');
 
     try {
       const res = await api.post<{ child: any }>('/api/user/children', {
-        nickname: nickname.trim(), age, gender, avatarId,
+        nickname: nickname.trim(), birthYearMonth, gender, avatarId, avatarUrl: avatarUrl || undefined,
       });
       const child = res.child;
 
       const newChildren = [...children, {
         _id: child.id, parentId: child.parentId,
         nickname: child.nickname, age: child.age,
+        birthYearMonth: child.birthYearMonth,
         gender: child.gender, avatarId: child.avatarId,
+        avatarUrl: child.avatarUrl,
+        chronologicalAge: child.chronologicalAge,
+        inferredAge: child.inferredAge,
+        inferredDifficulty: child.inferredDifficulty,
+        ageSource: child.ageSource,
+        recommendedDifficulties: child.recommendedDifficulties,
       }];
       setChildren(newChildren);
+      if (parent) {
+        setParent({
+          ...parent,
+          children: newChildren.map((item) => item._id || '').filter(Boolean),
+        });
+      }
       setCurrentChild({
         _id: child.id, parentId: child.parentId,
         nickname: child.nickname, age: child.age,
+        birthYearMonth: child.birthYearMonth,
         gender: child.gender, avatarId: child.avatarId,
+        avatarUrl: child.avatarUrl,
+        chronologicalAge: child.chronologicalAge,
+        inferredAge: child.inferredAge,
+        inferredDifficulty: child.inferredDifficulty,
+        ageSource: child.ageSource,
+        recommendedDifficulties: child.recommendedDifficulties,
       });
       navigate('/', { replace: true });
     } catch (err: any) {
@@ -70,6 +92,28 @@ export default function SetupChildPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('请上传图片格式的头像');
+      return;
+    }
+
+    if (file.size > 600 * 1024) {
+      setError('头像图片请控制在 600KB 以内');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAvatarUrl(typeof reader.result === 'string' ? reader.result : '');
+      setError('');
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -125,28 +169,72 @@ export default function SetupChildPage() {
           </div>
         </div>
 
-        {/* 年龄 */}
+        {/* 出生年月 */}
         <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', marginBottom: 10, color: COLORS.text, fontWeight: 600, fontSize: 14 }}>年龄: <span style={{ color: COLORS.primary, fontSize: 18 }}>{age}</span> 岁</label>
+          <label style={{ display: 'block', marginBottom: 10, color: COLORS.text, fontWeight: 600, fontSize: 14 }}>出生年月 *</label>
           <input
-            type="range" min={1} max={12} value={age}
-            onChange={e => setAge(Number(e.target.value))}
-            style={{ width: '100%', accentColor: COLORS.primary }}
+            type="month"
+            value={birthYearMonth}
+            onChange={e => { setBirthYearMonth(e.target.value); setError(''); }}
+            max={new Date().toISOString().slice(0, 7)}
+            style={{
+              width: '100%',
+              border: `2px solid ${birthYearMonth ? COLORS.primary : '#E2E8F0'}`,
+              borderRadius: 12,
+              padding: '14px 16px',
+              fontSize: 16,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: COLORS.muted, fontSize: 12, marginTop: 4 }}>
-            <span>1岁</span><span>6岁</span><span>12岁</span>
-          </div>
+          <p style={{ color: COLORS.muted, fontSize: 12, margin: '8px 0 0' }}>系统会结合出生年月和后续学习表现动态判断学习年龄与难度。</p>
         </div>
 
         {/* 头像选择 */}
         <div style={{ marginBottom: 28 }}>
           <label style={{ display: 'block', marginBottom: 10, color: COLORS.text, fontWeight: 600, fontSize: 14 }}>选择头像</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                background: '#F7FAFC',
+                border: `3px solid ${COLORS.primary}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 30,
+              }}
+            >
+              {avatarUrl ? <img src={avatarUrl} alt="自定义头像预览" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : AVATAR_EMOJIS[avatarId]}
+            </div>
+            <label
+              style={{
+                flex: 1,
+                border: '1px dashed #CBD5E0',
+                borderRadius: 12,
+                padding: '12px 14px',
+                color: COLORS.muted,
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              上传头像（可选）
+              <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
+            </label>
+          </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {AVATARS[gender].map(av => (
               <motion.button
                 key={av}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => setAvatarId(av)}
+                onClick={() => {
+                  setAvatarId(av);
+                  if (!avatarUrl) return;
+                  setAvatarUrl('');
+                }}
                 style={{
                   width: 64, height: 64, borderRadius: '50%', border: `3px solid ${avatarId === av ? COLORS.primary : '#E2E8F0'}`,
                   background: avatarId === av ? '#FFF5F5' : '#F7FAFC',
@@ -169,14 +257,14 @@ export default function SetupChildPage() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSubmit}
-          disabled={loading || !nickname.trim()}
+          disabled={loading || !nickname.trim() || !birthYearMonth}
           style={{
             width: '100%', padding: '18px', borderRadius: 14,
-            background: nickname.trim() ? `linear-gradient(135deg, ${COLORS.primary}, #FF8E53)` : '#CBD5E0',
+            background: nickname.trim() && birthYearMonth ? `linear-gradient(135deg, ${COLORS.primary}, #FF8E53)` : '#CBD5E0',
             color: COLORS.white, border: 'none',
-            cursor: nickname.trim() ? 'pointer' : 'not-allowed',
+            cursor: nickname.trim() && birthYearMonth ? 'pointer' : 'not-allowed',
             fontSize: 17, fontWeight: 800,
-            boxShadow: nickname.trim() ? '0 4px 20px rgba(255,107,107,0.4)' : 'none',
+            boxShadow: nickname.trim() && birthYearMonth ? '0 4px 20px rgba(255,107,107,0.4)' : 'none',
             transition: 'all 0.2s',
           }}
         >

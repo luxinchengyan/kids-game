@@ -16,6 +16,7 @@ import { getWechatAuthUrl, getWechatUserByCode } from '../services/wechat';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../services/jwt';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { serverConfig } from '../config';
+import { serializeChildren } from '../services/childSerializer';
 
 const router = Router();
 
@@ -94,7 +95,7 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     const refreshToken = signRefreshToken(parent.id);
     await db.createSession(parent.id, refreshToken, deviceInfo);
 
-    const children = await db.findChildrenByParent(parent.id);
+    const children = await serializeChildren(db, await db.findChildrenByParent(parent.id));
 
     res.json({
       success: true,
@@ -206,7 +207,7 @@ router.get('/wechat/callback', async (req: Request, res: Response) => {
     const refreshToken = signRefreshToken(parent.id);
     await db.createSession(parent.id, refreshToken, 'wechat');
 
-    const children = await db.findChildrenByParent(parent.id);
+    const children = await serializeChildren(db, await db.findChildrenByParent(parent.id));
 
     // 对于网页端，重定向到前端并带上 token
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -231,7 +232,7 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
     const db = await getDatabase();
     const parent = await db.findParentById(req.parentId!);
     if (!parent) return res.status(404).json({ code: 'NOT_FOUND', message: '用户不存在' });
-    const children = await db.findChildrenByParent(parent.id);
+    const children = await serializeChildren(db, await db.findChildrenByParent(parent.id));
     res.json({ parent: sanitizeParent(parent), children });
   } catch (err) {
     console.error('[auth/me]', err);

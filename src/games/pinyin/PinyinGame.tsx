@@ -6,6 +6,7 @@ import { useUserStore } from '../../stores/useUserStore';
 import { createMission } from '../../data/learningContent';
 import { track } from '../../lib/analytics';
 import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { getEffectiveChildAge, getRecommendedDifficulty } from '../../lib/learnerProfile';
 
 const ChoiceTask = lazy(() => import('../../components/ChoiceTask'));
 const PinyinBattle = lazy(() => import('../../components/PinyinBattle'));
@@ -48,7 +49,7 @@ export default function PinyinGame() {
     language: profile.language,
     companion: profile.companion,
     knowledgeState: knowledge,
-    age: currentChild?.age ?? 5,
+    age: getEffectiveChildAge(currentChild),
   });
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function PinyinGame() {
         focus: 'pinyin',
         companion: missionContextRef.current.companion,
         age: missionContextRef.current.age,
+        recommendedDifficulty: getRecommendedDifficulty(currentChild),
       },
       missionContextRef.current.knowledgeState
     );

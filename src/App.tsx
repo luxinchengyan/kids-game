@@ -35,6 +35,8 @@ import './games/subjects';
 import './games/history';
 import './games/typing';
 
+const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
+
 function LazyFallback() {
   return (
     <div
@@ -80,9 +82,22 @@ const App: React.FC = () => {
             },
             children: children.map(c => c.id),
           });
-          const mapped = children.map(c => ({ _id: c.id, parentId: c.parentId, nickname: c.nickname, age: c.age, gender: c.gender, avatarId: c.avatarId }));
+          const mapped = children.map(c => ({
+            _id: c.id,
+            parentId: c.parentId,
+            nickname: c.nickname,
+            age: c.age,
+            birthYearMonth: c.birthYearMonth,
+            gender: c.gender,
+            avatarId: c.avatarId,
+            avatarUrl: c.avatarUrl,
+            chronologicalAge: c.chronologicalAge,
+            inferredAge: c.inferredAge,
+            inferredDifficulty: c.inferredDifficulty,
+            ageSource: c.ageSource,
+            recommendedDifficulties: c.recommendedDifficulties,
+          }));
           setChildren(mapped);
-          if (mapped.length > 0) setCurrentChild(mapped[0]);
           setAuthenticated(true);
         })
         .catch(() => {
@@ -90,6 +105,32 @@ const App: React.FC = () => {
           setAuthenticated(false);
         })
         .finally(() => setAuthChecked(true));
+    } else if (config.features.trialMode) {
+      // 本地开发试用模式：自动填充 Mock 数据并放行
+      console.log('[App] Trial Mode Active: Auto-initializing mock session');
+      setParent({
+        phone: '13800000000',
+        settings: { dailyTimeLimit: 60, soundEnabled: true, musicEnabled: true, notificationsEnabled: true },
+        children: ['trial-child-1'],
+        _id: 'trial-parent-1',
+      });
+      const mockChild = {
+        _id: 'trial-child-1',
+        parentId: 'trial-parent-1',
+        nickname: '试用小朋友',
+        age: 5,
+        birthYearMonth: '2020-01',
+        gender: 'girl' as const,
+        avatarId: 'star_girl',
+        chronologicalAge: 5,
+        inferredAge: 5,
+        inferredDifficulty: 'easy' as const,
+        ageSource: 'birth' as const,
+      };
+      setChildren([mockChild]);
+      setCurrentChild(mockChild);
+      setAuthenticated(true);
+      setAuthChecked(true);
     } else {
       setAuthChecked(true);
     }
@@ -110,6 +151,13 @@ const App: React.FC = () => {
           {/* 需要认证的路由 */}
           <Route path="/setup-child" element={
             <RequireAuth><SetupChildPage /></RequireAuth>
+          } />
+          <Route path="/parent" element={
+            <RequireAuth>
+              <Suspense fallback={<LazyFallback />}>
+                <ParentDashboard />
+              </Suspense>
+            </RequireAuth>
           } />
           <Route path="/" element={
             <RequireAuth><HomePage /></RequireAuth>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { speak } from '../../lib/audio';
 
 export interface FrameworkStatItem {
   label: string;
@@ -20,17 +21,8 @@ export function sampleItems<T>(items: T[], count: number): T[] {
   return shuffleArray(items).slice(0, Math.min(count, items.length));
 }
 
-export function speakText(text: string, lang = 'zh-CN'): void {
-  if (!('speechSynthesis' in window)) {
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
-  utterance.rate = 0.85;
-  utterance.pitch = 1.05;
-  window.speechSynthesis.speak(utterance);
+export function speakText(text: string, lang: 'zh-CN' | 'en-US' = 'zh-CN'): void {
+  speak(text, lang);
 }
 
 export function FrameworkPanel({

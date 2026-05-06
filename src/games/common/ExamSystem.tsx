@@ -15,6 +15,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { track } from '../../lib/analytics';
+import { useUserStore } from '../../stores/useUserStore';
+import { useGameStore } from '../../stores/useGameStore';
+import { getRecommendedDifficulty } from '../../lib/learnerProfile';
 
 // ==========================
 // 类型定义
@@ -173,6 +176,7 @@ export function ExamSystem({
 }: ExamSystemProps) {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion(gameId);
+  const currentChild = useUserStore((state) => state.currentChild);
   
   const mergedDifficultySettings = {
     ...DEFAULT_EXAM_DIFFICULTY,
@@ -181,7 +185,9 @@ export function ExamSystem({
 
   // 考试状态
   const [phase, setPhase] = useState<ExamPhase>('start');
-  const [difficulty, setDifficulty] = useState<ExamDifficulty>('easy');
+  const [difficulty, setDifficulty] = useState<ExamDifficulty>(
+    getRecommendedDifficulty(currentChild, 'easy') as ExamDifficulty
+  );
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerStatus[]>([]);
@@ -240,6 +246,8 @@ export function ExamSystem({
     };
   }, [phase, timeRemaining]);
 
+  const recordTaskResult = useGameStore((state) => state.recordTaskResult);
+
   // 提交答案
   const submitAnswer = useCallback(() => {
     if (!selectedAnswer || showFeedback) return;
@@ -259,6 +267,15 @@ export function ExamSystem({
     };
     
     setAnswers(prev => [...prev, answerStatus]);
+
+    // Track in learning engine
+    recordTaskResult({
+      taskId: currentQuestion.id,
+      success: correct,
+      knowledgeUnitId: currentQuestion.metadata?.knowledgeUnitId || currentQuestion.id,
+      responseTime,
+      skill: currentQuestion.metadata?.skill || 'exam',
+    });
     
     track('exam_answer', {
       gameId,

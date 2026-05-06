@@ -77,8 +77,10 @@ export class SQLiteAdapter implements IDatabase {
         parent_id TEXT NOT NULL REFERENCES parents(id) ON DELETE CASCADE,
         nickname TEXT NOT NULL,
         age INTEGER NOT NULL DEFAULT 5,
+        birth_year_month TEXT,
         gender TEXT NOT NULL DEFAULT 'girl',
         avatar_id TEXT NOT NULL DEFAULT 'star_girl',
+        avatar_url TEXT,
         pet_id TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -151,6 +153,16 @@ export class SQLiteAdapter implements IDatabase {
       );
       CREATE INDEX IF NOT EXISTS idx_plans_child ON study_plans(child_id);
     `);
+
+    this.ensureColumnExists('children', 'birth_year_month', 'TEXT');
+    this.ensureColumnExists('children', 'avatar_url', 'TEXT');
+  }
+
+  private ensureColumnExists(table: string, column: string, definition: string): void {
+    const rows = this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    if (!rows.some((row) => row.name === column)) {
+      this.db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    }
   }
 
   // ---- Helpers ----
@@ -182,8 +194,10 @@ export class SQLiteAdapter implements IDatabase {
       parentId: row.parent_id as string,
       nickname: row.nickname as string,
       age: row.age as number,
+      birthYearMonth: (row.birth_year_month as string) ?? undefined,
       gender: row.gender as 'boy' | 'girl',
       avatarId: row.avatar_id as string,
+      avatarUrl: (row.avatar_url as string) ?? undefined,
       petId: (row.pet_id as string) ?? undefined,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
@@ -379,9 +393,21 @@ export class SQLiteAdapter implements IDatabase {
     const id = this.uuid();
     const now = this.now();
     this.db.prepare(`
-      INSERT INTO children (id, parent_id, nickname, age, gender, avatar_id, pet_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, input.parentId, input.nickname, input.age, input.gender, input.avatarId, input.petId ?? null, now, now);
+      INSERT INTO children (id, parent_id, nickname, age, birth_year_month, gender, avatar_id, avatar_url, pet_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      input.parentId,
+      input.nickname,
+      input.age,
+      input.birthYearMonth ?? null,
+      input.gender,
+      input.avatarId,
+      input.avatarUrl ?? null,
+      input.petId ?? null,
+      now,
+      now
+    );
     return (await this.findChildById(id))!;
   }
 
@@ -390,8 +416,10 @@ export class SQLiteAdapter implements IDatabase {
     const values: unknown[] = [];
     if (input.nickname !== undefined) { fields.push('nickname = ?'); values.push(input.nickname); }
     if (input.age !== undefined) { fields.push('age = ?'); values.push(input.age); }
+    if (input.birthYearMonth !== undefined) { fields.push('birth_year_month = ?'); values.push(input.birthYearMonth); }
     if (input.gender !== undefined) { fields.push('gender = ?'); values.push(input.gender); }
     if (input.avatarId !== undefined) { fields.push('avatar_id = ?'); values.push(input.avatarId); }
+    if (input.avatarUrl !== undefined) { fields.push('avatar_url = ?'); values.push(input.avatarUrl); }
     if (input.petId !== undefined) { fields.push('pet_id = ?'); values.push(input.petId); }
     if (fields.length === 0) return this.findChildById(id);
     fields.push('updated_at = ?'); values.push(this.now());

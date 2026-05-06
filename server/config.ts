@@ -17,6 +17,8 @@ export const serverConfig = {
     sqlitePath: process.env.SQLITE_PATH,
     mongodbUri: process.env.MONGODB_URI,
     mongodbDb: process.env.MONGODB_DB || 'kids_game',
+    redisUri: process.env.REDIS_URI,
+    redisTls: process.env.REDIS_TLS === 'true',
   },
 
   jwt: {

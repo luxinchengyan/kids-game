@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { createInitialKnowledgeState } from '../data/learningContent';
 import {
   checkAchievements,
@@ -7,33 +8,9 @@ import {
   achievements
 } from '../data/rewards';
 import { useDailyQuestStore } from './useDailyQuestStore';
-
-// LocalStorage keys
-const PROFILE_KEY = 'kids-game-profile';
-const HISTORY_KEY = 'kids-game-history';
-const KNOWLEDGE_KEY = 'kids-game-knowledge';
-const ACHIEVEMENT_KEY = 'kids-game-achievements';
-const STREAK_KEY = 'kids-game-streak';
-
-// Helper functions
-function loadJson<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveJson(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Silently fail
-  }
-}
+import { useUserStore } from './useUserStore';
+import api from '../services/api';
+import { getEffectiveChildAge } from '../lib/learnerProfile';
 
 interface Profile {
   childName: string;
@@ -64,8 +41,10 @@ interface Stats {
   streakDays: number;
   level: number;
   xp: number;
+  xpToNextLevel: number;
   sessionStartedAt: number | null;
   history: HistoryEntry[];
+  lastCheckInDate?: string;
 }
 
 interface KnowledgeUnit {
@@ -84,6 +63,10 @@ interface KnowledgeUnit {
   correctCount: number;
   seenCount: number;
   confusionSet?: string[];
+  easinessFactor: number;
+  interval: number;
+  minAge?: number;
+  maxAge?: number;
 }
 
 interface Reward {
@@ -91,64 +74,6 @@ interface Reward {
   amount?: number;
   achievement?: any;
 }
-
-function loadKnowledgeState(): Record<string, KnowledgeUnit> {
-  const defaults = createInitialKnowledgeState();
-  const saved = loadJson(KNOWLEDGE_KEY, {});
-  return { ...defaults, ...saved };
-}
-
-function scheduleNextReview(accuracy: number, previousNextReviewAt: number): number {
-  const now = Date.now();
-  const intervals = [10 * 60 * 1000, 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000];
-  if (accuracy > 0.9 && previousNextReviewAt > now) {
-    return previousNextReviewAt + intervals[0];
-  }
-  if (accuracy > 0.85) return now + intervals[1];
-  if (accuracy > 0.6) return now + intervals[0];
-  return now + 5 * 60 * 1000;
-}
-
-function updateStreak(): number {
-  const today = new Date().toDateString();
-  const lastPlayDate = loadJson(STREAK_KEY, { date: null, count: 0 });
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-  let newStreak = lastPlayDate.count;
-  if (lastPlayDate.date === today) {
-    // Already played today
-  } else if (lastPlayDate.date === yesterday) {
-    newStreak += 1;
-  } else if (lastPlayDate.date) {
-    newStreak = 1;
-  } else {
-    newStreak = 1;
-  }
-
-  saveJson(STREAK_KEY, { date: today, count: newStreak });
-  return newStreak;
-}
-
-const defaultProfile: Profile = {
-  childName: '',
-  ageGroup: '4-5',
-  gender: 'girl',
-  focus: 'mixed',
-  language: 'zh',
-  companion: 'astro'
-};
-
-const defaultStats: Stats = {
-  completedTasks: 0,
-  correctAnswers: 0,
-  mistakes: 0,
-  stars: 0,
-  streakDays: 0,
-  level: 1,
-  xp: 0,
-  sessionStartedAt: null,
-  history: []
-};
 
 interface GameState {
   // Island navigation
@@ -159,6 +84,7 @@ interface GameState {
   
   // Profile & mission
   profile: Profile;
+  companionId: string;
   mission: any[];
   missionIndex: number;
   rewards: Reward[];
@@ -177,6 +103,7 @@ interface GameState {
   
   // Actions - Profile & Mission
   setProfile: (profile: Partial<Profile>) => void;
+  setCompanion: (id: string) => void;
   startMission: (mission: any[]) => void;
   recordTaskResult: (result: {
     taskId: string;
@@ -194,174 +121,319 @@ interface GameState {
   nextTask: () => void;
   setParentSummary: (summary: any) => void;
   resetMission: () => void;
+  syncKnowledgeWithAge: (age: number) => void;
 }
 
-export const useGameStore = create<GameState>()((set, get) => ({
-  // Initial state
-  currentIsland: 'home',
-  isGameLocked: false,
-  currentQuestion: null,
-  feedback: null,
-  profile: loadJson(PROFILE_KEY, defaultProfile),
-  mission: [],
-  missionIndex: 0,
-  rewards: [],
-  newAchievements: [],
-  parentSummary: null,
-  unlockedAchievements: loadJson(ACHIEVEMENT_KEY, []),
-  stats: {
-    ...defaultStats,
-    history: loadJson(HISTORY_KEY, []),
-    streakDays: loadJson(STREAK_KEY, { count: 0 }).count
-  },
-  knowledge: loadKnowledgeState(),
+// SM-2 Spaced Repetition Algorithm
+function calculateNextReview(unit: KnowledgeUnit, success: boolean, accuracy: number): { nextReviewAt: number; interval: number; easinessFactor: number } {
+  const now = Date.now();
   
-  // Navigation actions
-  setCurrentIsland: (currentIsland) => set({ currentIsland }),
-  setGameLocked: (isGameLocked) => set({ isGameLocked }),
-  setCurrentQuestion: (currentQuestion) => set({ currentQuestion }),
-  setFeedback: (feedback) => set({ feedback }),
-  clearGame: () => set({
-    currentIsland: 'home',
-    isGameLocked: false,
-    currentQuestion: null,
-    feedback: null,
-  }),
+  // Map accuracy to SM-2 quality (0-5)
+  // 5: perfect response
+  // 4: correct response after a hesitation
+  // 3: correct response recalled with serious difficulty
+  // 2: incorrect response; where the correct one seemed easy to recall
+  // 1: incorrect response; the correct one remembered
+  // 0: complete blackout.
+  let quality = 0;
+  if (success) {
+    if (accuracy >= 0.9) quality = 5;
+    else if (accuracy >= 0.7) quality = 4;
+    else quality = 3;
+  } else {
+    if (accuracy >= 0.3) quality = 2;
+    else if (accuracy >= 0.1) quality = 1;
+    else quality = 0;
+  }
+
+  let { interval, easinessFactor, seenCount } = unit;
   
-  // Profile & Mission actions
-  setProfile: (profile) => {
-    const nextProfile = { ...get().profile, ...profile };
-    saveJson(PROFILE_KEY, nextProfile);
-    set({ profile: nextProfile });
-  },
+  if (quality >= 3) {
+    if (seenCount <= 1) {
+      interval = 1; // 1 day
+    } else if (seenCount === 2) {
+      interval = 6; // 6 days
+    } else {
+      interval = Math.round(interval * easinessFactor);
+    }
+    
+    // Update Easiness Factor
+    easinessFactor = easinessFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    if (easinessFactor < 1.3) easinessFactor = 1.3;
+  } else {
+    // Reset interval on failure
+    interval = 1;
+    // Don't increase seenCount for SM-2 purposes on failure if you want to restart the 1, 6, ... sequence
+    // but here we just reset interval.
+  }
 
-  startMission: (mission) => {
-    const streakDays = updateStreak();
-    set((state) => ({
-      mission,
-      missionIndex: 0,
-      parentSummary: null,
-      newAchievements: [],
-      stats: {
-        ...state.stats,
-        completedTasks: 0,
-        correctAnswers: 0,
-        mistakes: 0,
-        sessionStartedAt: Date.now(),
-        streakDays
-      }
-    }));
-  },
+  // Convert day interval to milliseconds
+  const msInDay = 24 * 60 * 60 * 1000;
+  // For kids, let's make the first few intervals shorter (minutes instead of days)
+  const realNextReviewAt = now + (interval === 1 && seenCount <= 1 ? 10 * 60 * 1000 : interval * msInDay);
 
-   recordTaskResult: ({ taskId, success, stars = 0, skill, prompt, responseTime, knowledgeUnitId, response }) => {
-     useDailyQuestStore.getState().recordTaskResult(success);
-     set((state) => {
-       const completedTasks = state.stats.completedTasks + 1;
-      const correctAnswers = state.stats.correctAnswers + (success ? 1 : 0);
-      const mistakes = state.stats.mistakes + (success ? 0 : 1);
-      const earnedStars = success ? calculateStarsEarned({ success, accuracy: 1 }) : 0;
-      const totalStars = state.stats.stars + earnedStars;
-      const gainedXp = success ? 12 + earnedStars * 4 : 4;
-      const totalXp = state.stats.xp + gainedXp;
-      const levelProgress = getLevelProgress(totalXp);
+  return {
+    nextReviewAt: realNextReviewAt,
+    interval,
+    easinessFactor
+  };
+}
 
-      const historyEntry: HistoryEntry = {
-        taskId,
-        skill,
-        knowledgeUnitId,
-        prompt,
-        success,
-        stars: earnedStars,
-        response,
-        responseTime,
-        completedAt: new Date().toISOString()
-      };
-      const history = [...state.stats.history, historyEntry].slice(-50);
+const defaultProfile: Profile = {
+  childName: '',
+  ageGroup: '4-5',
+  gender: 'girl',
+  focus: 'mixed',
+  language: 'zh',
+  companion: 'aisha'
+};
 
-      const nextKnowledge = { ...state.knowledge };
+const defaultStats: Stats = {
+  completedTasks: 0,
+  correctAnswers: 0,
+  mistakes: 0,
+  stars: 0,
+  streakDays: 0,
+  level: 1,
+  xp: 0,
+  xpToNextLevel: 100,
+  sessionStartedAt: null,
+  history: []
+};
 
-      if (knowledgeUnitId && nextKnowledge[knowledgeUnitId]) {
-        const unit = nextKnowledge[knowledgeUnitId];
-        const seenCount = unit.seenCount + 1;
-        const correctCount = unit.correctCount + (success ? 1 : 0);
-        const accuracy = correctCount / seenCount;
-        nextKnowledge[knowledgeUnitId] = {
-          ...unit,
-          seenCount,
-          correctCount,
-          accuracy,
-          errorCount: unit.errorCount + (success ? 0 : 1),
-          lastReviewedAt: Date.now(),
-          nextReviewAt: scheduleNextReview(accuracy, unit.nextReviewAt)
-        };
-        saveJson(KNOWLEDGE_KEY, nextKnowledge);
-      }
-
-      saveJson(HISTORY_KEY, history);
-
-      const currentStats = {
-        ...state.stats,
-        completedTasks,
-        correctAnswers,
-        mistakes,
-        stars: totalStars,
-        xp: totalXp,
-        level: levelProgress.level,
-        history
-      };
-
-      const newAchievements = checkAchievements(
-        currentStats,
-        history,
-        state.unlockedAchievements
-      );
-
-      let updatedAchievements = [...state.unlockedAchievements];
-      if (newAchievements.length > 0) {
-        updatedAchievements = [
-          ...state.unlockedAchievements,
-          ...newAchievements.map((a: any) => a.id)
-        ];
-        saveJson(ACHIEVEMENT_KEY, updatedAchievements);
-      }
-
-      const rewards: Reward[] = [];
-      if (earnedStars > 0) {
-        rewards.push({ type: 'star', amount: earnedStars });
-      }
-      newAchievements.forEach((achievement: any) => {
-        rewards.push({ type: 'achievement', achievement });
-      });
-
-      return {
-        knowledge: nextKnowledge,
-        stats: currentStats,
-        newAchievements: [...state.newAchievements, ...newAchievements],
-        unlockedAchievements: updatedAchievements,
-        rewards: [...state.rewards, ...rewards]
-      };
-    });
-  },
-
-  queueReward: (reward) => set((state) => ({ rewards: [...state.rewards, reward] })),
-  clearRewards: () => set({ rewards: [] }),
-  clearNewAchievements: () => set({ newAchievements: [] }),
-  nextTask: () => set((state) => ({ missionIndex: Math.min(state.missionIndex + 1, state.mission.length) })),
-  setParentSummary: (parentSummary) => set({ parentSummary }),
-
-  resetMission: () =>
-    set((state) => ({
+export const useGameStore = create<GameState>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      currentIsland: 'home',
+      isGameLocked: false,
+      currentQuestion: null,
+      feedback: null,
+      profile: defaultProfile,
+      companionId: 'aisha',
       mission: [],
       missionIndex: 0,
       rewards: [],
       newAchievements: [],
       parentSummary: null,
-      stats: {
-        ...state.stats,
-        completedTasks: 0,
-        correctAnswers: 0,
-        mistakes: 0,
-        sessionStartedAt: null
+      unlockedAchievements: [],
+      stats: defaultStats,
+      knowledge: {},
+      
+      // Navigation actions
+      setCurrentIsland: (currentIsland) => set({ currentIsland }),
+      setGameLocked: (isGameLocked) => set({ isGameLocked }),
+      setCurrentQuestion: (currentQuestion) => set({ currentQuestion }),
+      setFeedback: (feedback) => set({ feedback }),
+      clearGame: () => set({
+        currentIsland: 'home',
+        isGameLocked: false,
+        currentQuestion: null,
+        feedback: null,
+      }),
+      
+      // Profile & Mission actions
+      setProfile: (profile) => {
+        set((state) => ({ profile: { ...state.profile, ...profile } }));
+      },
+      setCompanion: (companionId) => set((state) => ({ 
+        companionId, 
+        profile: { ...state.profile, companion: companionId } 
+      })),
+
+      syncKnowledgeWithAge: (age) => {
+        const currentKnowledge = get().knowledge;
+        const initialKnowledge = createInitialKnowledgeState(age);
+        
+        // Merge: keep existing progress, add new units for the age
+        const mergedKnowledge = { ...initialKnowledge, ...currentKnowledge };
+        
+        // Filter out units too advanced for current age (only if no progress made)
+        Object.keys(mergedKnowledge).forEach(id => {
+          const unit = mergedKnowledge[id];
+          if (unit.minAge && unit.minAge > age + 1 && unit.seenCount === 0) {
+            delete mergedKnowledge[id];
+          }
+        });
+
+        set({ knowledge: mergedKnowledge });
+      },
+
+      startMission: (mission) => {
+        // Update streak logic
+        const today = new Date().toISOString().slice(0, 10);
+        const stats = get().stats;
+        let streakDays = stats.streakDays;
+        
+        if (stats.lastCheckInDate !== today) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().slice(0, 10);
+          
+          if (stats.lastCheckInDate === yesterdayStr) {
+            streakDays += 1;
+          } else {
+            streakDays = 1;
+          }
+        }
+
+        set((state) => ({
+          mission,
+          missionIndex: 0,
+          parentSummary: null,
+          newAchievements: [],
+          stats: {
+            ...state.stats,
+            completedTasks: 0,
+            correctAnswers: 0,
+            mistakes: 0,
+            sessionStartedAt: Date.now(),
+            streakDays,
+            lastCheckInDate: today
+          }
+        }));
+      },
+
+      recordTaskResult: ({ taskId, success, stars: providedStars = 0, skill, prompt, responseTime, knowledgeUnitId, response }) => {
+        useDailyQuestStore.getState().recordTaskResult(success);
+        
+        set((state) => {
+          const earnedStars = success ? calculateStarsEarned({ success, accuracy: 1 }) : 0;
+          const totalStars = state.stats.stars + earnedStars;
+          const gainedXp = success ? 12 + earnedStars * 4 : 4;
+          
+          let totalXp = state.stats.xp + gainedXp;
+          let level = state.stats.level;
+          let xpToNextLevel = state.stats.xpToNextLevel;
+          
+          while (totalXp >= xpToNextLevel) {
+            totalXp -= xpToNextLevel;
+            level += 1;
+            xpToNextLevel = Math.floor(xpToNextLevel * 1.5);
+          }
+
+          const historyEntry: HistoryEntry = {
+            taskId,
+            skill,
+            knowledgeUnitId,
+            prompt,
+            success,
+            stars: earnedStars,
+            response,
+            responseTime,
+            completedAt: new Date().toISOString()
+          };
+          const history = [...state.stats.history, historyEntry].slice(-50);
+
+          const nextKnowledge = { ...state.knowledge };
+
+          if (knowledgeUnitId && nextKnowledge[knowledgeUnitId]) {
+            const unit = nextKnowledge[knowledgeUnitId];
+            const seenCount = unit.seenCount + 1;
+            const correctCount = unit.correctCount + (success ? 1 : 0);
+            const accuracy = correctCount / seenCount;
+            
+            const { nextReviewAt, interval, easinessFactor } = calculateNextReview(unit, success, accuracy);
+            
+            nextKnowledge[knowledgeUnitId] = {
+              ...unit,
+              seenCount,
+              correctCount,
+              accuracy,
+              errorCount: unit.errorCount + (success ? 0 : 1),
+              lastReviewedAt: Date.now(),
+              nextReviewAt,
+              interval,
+              easinessFactor
+            };
+          }
+
+          const currentStats: Stats = {
+            ...state.stats,
+            completedTasks: state.stats.completedTasks + 1,
+            correctAnswers: state.stats.correctAnswers + (success ? 1 : 0),
+            mistakes: state.stats.mistakes + (success ? 0 : 1),
+            stars: totalStars,
+            xp: totalXp,
+            xpToNextLevel,
+            level,
+            history
+          };
+
+          const newAchievements = checkAchievements(
+            currentStats,
+            history,
+            state.unlockedAchievements
+          );
+
+          let updatedUnlockedAchievements = [...state.unlockedAchievements];
+          if (newAchievements.length > 0) {
+            updatedUnlockedAchievements = [
+              ...state.unlockedAchievements,
+              ...newAchievements.map((a: any) => a.id)
+            ];
+          }
+
+          const rewards: Reward[] = [];
+          if (earnedStars > 0) {
+            rewards.push({ type: 'star', amount: earnedStars });
+          }
+          newAchievements.forEach((achievement: any) => {
+            rewards.push({ type: 'achievement', achievement });
+          });
+
+          return {
+            knowledge: nextKnowledge,
+            stats: currentStats,
+            newAchievements: [...state.newAchievements, ...newAchievements],
+            unlockedAchievements: updatedUnlockedAchievements,
+            rewards: [...state.rewards, ...rewards]
+          };
+        });
+
+        const currentChild = useUserStore.getState().currentChild;
+        if (currentChild?._id && skill) {
+          void api.post(`/api/progress/${currentChild._id}/task`, {
+            subject: skill,
+            correct: success,
+            minutesSpent: responseTime ? Math.max(1, Math.round(responseTime / 60000)) : 1,
+          }).catch(() => {
+            // Ignore persistence failures in local-first game flow.
+          });
+        }
+      },
+
+      queueReward: (reward) => set((state) => ({ rewards: [...state.rewards, reward] })),
+      clearRewards: () => set({ rewards: [] }),
+      clearNewAchievements: () => set({ newAchievements: [] }),
+      nextTask: () => set((state) => ({ missionIndex: Math.min(state.missionIndex + 1, state.mission.length) })),
+      setParentSummary: (parentSummary) => set({ parentSummary }),
+
+      resetMission: () =>
+        set((state) => ({
+          mission: [],
+          missionIndex: 0,
+          rewards: [],
+          newAchievements: [],
+          parentSummary: null,
+          stats: {
+            ...state.stats,
+            completedTasks: 0,
+            correctAnswers: 0,
+            mistakes: 0,
+            sessionStartedAt: null
+          }
+        }))
+    }),
+    {
+      name: 'kids-game-state-v3',
+      onRehydrateStorage: () => (state) => {
+        // Initial age-sync if needed
+        const child = useUserStore.getState().currentChild;
+        if (child && state) {
+          state.syncKnowledgeWithAge(getEffectiveChildAge(child));
+        }
       }
-    }))
-}));
+    }
+  )
+);

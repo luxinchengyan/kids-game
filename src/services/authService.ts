@@ -21,8 +21,15 @@ export interface Child {
   parentId: string;
   nickname: string;
   age: number;
+  birthYearMonth?: string;
   gender: 'boy' | 'girl';
   avatarId: string;
+  avatarUrl?: string;
+  chronologicalAge?: number;
+  inferredAge?: number;
+  inferredDifficulty?: 'easy' | 'medium' | 'hard';
+  ageSource?: 'birth' | 'birth+progress' | 'progress';
+  recommendedDifficulties?: Partial<Record<'pinyin' | 'math' | 'english' | 'stories', 'easy' | 'medium' | 'hard'>>;
   petId?: string;
   createdAt: string;
 }

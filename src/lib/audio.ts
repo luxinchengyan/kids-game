@@ -98,11 +98,28 @@ const pinyinTextMap: Record<string, string> = {
   'pi': '皮',
   'mi': '米',
   'ti': '题',
-  'li': '里'
+  'li': '里',
+  'tu': '兔',
+  'he': '喝',
+  'na': '那',
+  'le': '乐',
+  'ge': '哥',
+  'ke': '科',
+  'ga': '嘎',
+  'ka': '卡',
+  'ha': '哈',
+  'lu': '路',
+  'nu': '怒',
+  'ju': '居',
+  'qu': '区',
+  'xu': '虚'
 };
 
-function getPinyinSpeechText(text: string): string {
-  return pinyinTextMap[text] || text;
+/**
+ * 将拼音字母映射为发音接近的汉字，优化 TTS 朗读效果
+ */
+export function getPinyinSpeechText(text: string): string {
+  return pinyinTextMap[text.toLowerCase()] || text;
 }
 
 export function speak(text: string, lang: 'zh-CN' | 'en-US' = 'zh-CN'): void {
@@ -191,11 +208,31 @@ export async function playAudio(url: string, fallbackText?: string): Promise<voi
   return playSound(url, { fallbackText });
 }
 
+/**
+ * 播放成功/正确的语音提示
+ */
+export function playSuccess(): void {
+  const praises = ['太棒了！', '你真厉害！', '答对啦！', '真聪明！'];
+  const text = praises[Math.floor(Math.random() * praises.length)];
+  speak(text);
+}
+
+/**
+ * 播放失败/错误的语音提示
+ */
+export function playError(): void {
+  const encouragements = ['没关系，再试一次吧', '加油，再想一想', '差一点点就对啦'];
+  const text = encouragements[Math.floor(Math.random() * encouragements.length)];
+  speak(text);
+}
+
 export const Audio = {
   speak,
   play: playAudio,
   playSound,
   stopAudio,
+  playSuccess,
+  playError,
 };
 
 export default Audio;

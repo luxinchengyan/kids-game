@@ -11,6 +11,16 @@ export interface AuthRequest extends Request {
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
+  
+  // 本地开发模式下，如果没有 Token，允许使用 Mock 身份
+  if (!authHeader?.startsWith('Bearer ') && process.env.NODE_ENV === 'development') {
+    console.log('[Auth] Development mode: Bypassing auth with mock parentId');
+    req.parentId = 'trial-parent-1';
+    req.parentPhone = '13800000000';
+    next();
+    return;
+  }
+
   if (!authHeader?.startsWith('Bearer ')) {
     res.status(401).json({ code: 'UNAUTHORIZED', message: '请先登录' });
     return;

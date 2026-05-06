@@ -84,13 +84,16 @@ export default function LoginPage() {
         parentId: c.parentId,
         nickname: c.nickname,
         age: c.age,
+        birthYearMonth: c.birthYearMonth,
         gender: c.gender,
         avatarId: c.avatarId,
+        avatarUrl: c.avatarUrl,
+        chronologicalAge: c.chronologicalAge,
+        inferredAge: c.inferredAge,
+        inferredDifficulty: c.inferredDifficulty,
+        ageSource: c.ageSource,
+        recommendedDifficulties: c.recommendedDifficulties,
       })));
-      if (result.children.length > 0) {
-        const first = result.children[0];
-        setCurrentChild({ _id: first.id, parentId: first.parentId, nickname: first.nickname, age: first.age, gender: first.gender, avatarId: first.avatarId });
-      }
       setAuthenticated(true);
 
       if (result.isNewUser || result.children.length === 0) {
@@ -112,8 +115,32 @@ export default function LoginPage() {
       children: ['trial-child-1'],
       _id: 'trial-parent-1',
     });
-    setChildren([{ _id: 'trial-child-1', parentId: 'trial-parent-1', nickname: '试用小朋友', age: 5, gender: 'girl', avatarId: 'star_girl' }]);
-    setCurrentChild({ _id: 'trial-child-1', parentId: 'trial-parent-1', nickname: '试用小朋友', age: 5, gender: 'girl', avatarId: 'star_girl' });
+    setChildren([{
+      _id: 'trial-child-1',
+      parentId: 'trial-parent-1',
+      nickname: '试用小朋友',
+      age: 5,
+      birthYearMonth: '2020-01',
+      gender: 'girl',
+      avatarId: 'star_girl',
+      chronologicalAge: 5,
+      inferredAge: 5,
+      inferredDifficulty: 'easy',
+      ageSource: 'birth',
+    }]);
+    setCurrentChild({
+      _id: 'trial-child-1',
+      parentId: 'trial-parent-1',
+      nickname: '试用小朋友',
+      age: 5,
+      birthYearMonth: '2020-01',
+      gender: 'girl',
+      avatarId: 'star_girl',
+      chronologicalAge: 5,
+      inferredAge: 5,
+      inferredDifficulty: 'easy',
+      ageSource: 'birth',
+    });
     setAuthenticated(true);
     navigate('/', { replace: true });
   };
