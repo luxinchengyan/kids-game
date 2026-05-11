@@ -81,13 +81,14 @@ router.put('/children/:id', async (req: AuthRequest, res: Response) => {
     if (!child || child.parentId !== req.parentId) {
       return res.status(404).json({ code: 'NOT_FOUND', message: '孩子档案不存在' });
     }
-    const age = birthYearMonth
-      ? calculateAgeFromBirthYearMonth(birthYearMonth)
-      : rawAge;
-
     if (birthYearMonth !== undefined && !isValidBirthYearMonth(birthYearMonth)) {
       return res.status(400).json({ code: 'INVALID_BIRTH_YEAR_MONTH', message: '请填写正确的出生年月' });
     }
+
+    const age = birthYearMonth
+      ? calculateAgeFromBirthYearMonth(birthYearMonth) ?? undefined
+      : rawAge;
+
     if (age !== undefined && (age < 2 || age > 15)) {
       return res.status(400).json({ code: 'INVALID_AGE', message: '年龄范围 2-15' });
     }

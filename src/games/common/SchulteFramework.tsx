@@ -2,7 +2,14 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../../components/Button';
 import { track } from '../../lib/analytics';
-import { FrameworkStatGrid, CompletionPanel } from './frameworkHelpers';
+import { FrameworkStatGrid, CompletionPanel } from '../frameworks/frameworkHelpers';
+import {
+  type LevelConfig,
+  type KnowledgeScopeTag,
+  LevelSelectScreen,
+  LevelCompleteOverlay,
+  useLevelProgress,
+} from './LevelSystem';
 
 export interface SchulteStage {
   id: string;
@@ -12,6 +19,27 @@ export interface SchulteStage {
   targetMs: number;
   summary: string;
   difficultyLabel: string;
+  /** Optional knowledge scope for this stage */
+  knowledgeScope?: KnowledgeScopeTag[];
+}
+
+/** Convert a SchulteStage to a LevelConfig for LevelSystem compatibility */
+function schulteStageToLevel(stage: SchulteStage, index: number): LevelConfig {
+  return {
+    id: stage.id,
+    title: stage.title,
+    description: stage.summary,
+    difficulty: index === 0 ? 'easy' : index === 1 ? 'medium' : 'hard',
+    itemCount: stage.boards,
+    knowledgeScope: stage.knowledgeScope,
+    passingStars: 1,
+    extra: {
+      gridSize: stage.gridSize,
+      boards: stage.boards,
+      targetMs: stage.targetMs,
+      difficultyLabel: stage.difficultyLabel,
+    },
+  };
 }
 
 export interface SchulteFrameworkProps {
@@ -30,7 +58,7 @@ export interface SchulteFrameworkProps {
     xp: number;
   }) => void;
   onBack: () => void;
-  generateContent?: (size: number) => any[]; // Default is numbers 1..N
+  generateContent?: (size: number) => any[];
   renderItem?: (item: any, isFound: boolean, isFlash: boolean) => React.ReactNode;
   checkMatch?: (item: any, target: any) => boolean;
   getNextTarget?: (found: any[], items: any[]) => any;
@@ -49,13 +77,23 @@ export function SchulteFramework({
   generateContent = (size) => Array.from({ length: size * size }, (_, i) => i + 1),
   renderItem,
   checkMatch = (item, target) => item === target,
-  getNextTarget = (found, items) => {
-    // This assumes items are sorted or sequential if numbers.
-    // For general content, logic might differ.
-    return found.length + 1;
-  }
+  getNextTarget = (found, _items) => found.length + 1,
 }: SchulteFrameworkProps) {
-  const [stageIndex, setStageIndex] = useState(0);
+  // Convert stages to LevelConfig[] for LevelSystem
+  const levels = useMemo(() => stages.map(schulteStageToLevel), [stages]);
+  const { submitResult } = useLevelProgress(gameId, levels);
+
+  // Level select phase — always show stage chooser first
+  const [levelPhase, setLevelPhase] = useState<'level-select' | 'playing'>('level-select');
+  const [currentLevel, setCurrentLevel] = useState<LevelConfig | null>(null);
+  const [lastResult, setLastResult] = useState<{ stars: number; accuracy: number } | null>(null);
+
+  // Derive active stage from currentLevel
+  const currentStage = useMemo<SchulteStage | null>(() => {
+    if (!currentLevel) return null;
+    return stages.find((s) => s.id === currentLevel.id) ?? null;
+  }, [currentLevel, stages]);
+
   const [boardIndex, setBoardIndex] = useState(0);
   const [items, setItems] = useState<any[]>([]);
   const [found, setFound] = useState<any[]>([]);
@@ -65,9 +103,8 @@ export function SchulteFramework({
   const [flashItem, setFlashItem] = useState<any | null>(null);
   const [completedBoards, setCompletedBoards] = useState(0);
 
-  const currentStage = stages[stageIndex];
-  const totalBoards = useMemo(() => stages.reduce((sum, s) => sum + s.boards, 0), [stages]);
-  const totalTargetMs = useMemo(() => stages.reduce((sum, s) => sum + s.targetMs * s.boards, 0), [stages]);
+  const totalBoards = currentStage?.boards ?? 1;
+  const totalTargetMs = currentStage ? currentStage.targetMs * currentStage.boards : 1;
 
   const shuffle = (arr: any[]) => {
     const next = [...arr];
@@ -79,11 +116,22 @@ export function SchulteFramework({
   };
 
   const initBoard = useCallback(() => {
+    if (!currentStage) return;
     const content = generateContent(currentStage.gridSize);
     setItems(shuffle(content));
     setFound([]);
     setFlashItem(null);
   }, [currentStage, generateContent]);
+
+  // Reset when level changes
+  useEffect(() => {
+    setBoardIndex(0);
+    setTotalErrors(0);
+    setStartTime(null);
+    setEndTime(null);
+    setCompletedBoards(0);
+    setLastResult(null);
+  }, [currentLevel]);
 
   useEffect(() => {
     initBoard();
@@ -100,7 +148,7 @@ export function SchulteFramework({
       setFound(nextFound);
 
       if (nextFound.length === items.length) {
-        track('task_complete', { gameId, stageId: currentStage.id, boardIndex });
+        track('task_complete', { gameId, stageId: currentStage?.id, boardIndex });
         setTimeout(advance, 400);
       }
     } else {
@@ -114,40 +162,69 @@ export function SchulteFramework({
     const nextCompletedBoards = completedBoards + 1;
     setCompletedBoards(nextCompletedBoards);
 
-    if (boardIndex < currentStage.boards - 1) {
+    if (currentStage && boardIndex < currentStage.boards - 1) {
       setBoardIndex(prev => prev + 1);
-    } else if (stageIndex < stages.length - 1) {
-      setStageIndex(prev => prev + 1);
-      setBoardIndex(0);
     } else {
       const finishedAt = Date.now();
       setEndTime(finishedAt);
       const duration = finishedAt - (startTime || finishedAt);
-      
+
       let stars = 1;
       if (duration <= totalTargetMs && totalErrors === 0) stars = 3;
       else if (duration <= totalTargetMs * 1.4 && totalErrors <= 4) stars = 2;
 
-      onComplete({
-        success: true,
-        stars,
-        tasksCompleted: totalBoards,
-        accuracy: (totalBoards * items.length) / (totalBoards * items.length + totalErrors),
-        xp: 30 + (stars * 10),
-      });
+      const accuracy = (totalBoards * (currentStage?.gridSize ?? 5) ** 2) /
+        (totalBoards * (currentStage?.gridSize ?? 5) ** 2 + totalErrors);
+
+      if (currentLevel) {
+        submitResult(currentLevel.id, {
+          stars,
+          accuracy,
+          timeTakenMs: duration,
+          taskCount: totalBoards,
+        });
+        setLastResult({ stars, accuracy });
+      } else {
+        onComplete({
+          success: true,
+          stars,
+          tasksCompleted: totalBoards,
+          accuracy,
+          xp: 30 + stars * 10,
+        });
+      }
     }
   };
 
   const restart = () => {
-    setStageIndex(0);
     setBoardIndex(0);
     setTotalErrors(0);
     setStartTime(null);
     setEndTime(null);
     setCompletedBoards(0);
+    setLastResult(null);
     initBoard();
     track('game_start', { gameId });
   };
+
+  // Level select screen
+  if (levelPhase === 'level-select') {
+    return (
+      <LevelSelectScreen
+        gameId={gameId}
+        levels={levels}
+        title={title}
+        onSelectLevel={(level) => {
+          setCurrentLevel(level);
+          setLevelPhase('playing');
+          track('level_start', { gameId, levelId: level.id });
+        }}
+        onBack={onBack}
+      />
+    );
+  }
+
+  if (!currentStage) return null;
 
   return (
     <div style={{ width: '100%' }}>
@@ -155,15 +232,37 @@ export function SchulteFramework({
         accent={progressColor}
         surface="#FFFFFF"
         items={[
-          { label: '挑战进度', value: `${completedBoards + 1}/${totalBoards}`, note: '当前关卡' },
+          { label: '挑战进度', value: `${completedBoards + 1}/${totalBoards}`, note: currentStage.difficultyLabel },
           { label: '错误次数', value: String(totalErrors), note: '保持专注' },
           { label: '目标用时', value: `${Math.round(totalTargetMs / 1000)}s`, note: '速度挑战' },
         ]}
       />
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: `repeat(${currentStage.gridSize}, 1fr)`, 
+      {/* Level info bar */}
+      {currentLevel && (
+        <div style={{
+          textAlign: 'center',
+          padding: '8px',
+          marginBottom: '8px',
+          background: `${progressColor}15`,
+          borderRadius: '12px',
+          fontSize: '14px',
+          color: progressColor,
+          fontWeight: 600,
+        }}>
+          🎯 {currentLevel.title}
+          <button
+            onClick={() => { setLevelPhase('level-select'); setCurrentLevel(null); }}
+            style={{ marginLeft: '16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#999' }}
+          >
+            切换关卡
+          </button>
+        </div>
+      )}
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${currentStage.gridSize}, 1fr)`,
         gap: '12px',
         margin: '24px 0'
       }}>
@@ -192,7 +291,32 @@ export function SchulteFramework({
         })}
       </div>
 
-      {endTime && (
+      {/* Level mode complete overlay */}
+      {endTime && lastResult && currentLevel && (
+        <LevelCompleteOverlay
+          level={currentLevel}
+          stars={lastResult.stars}
+          accuracy={lastResult.accuracy}
+          onNext={() => {
+            const idx = levels.findIndex((l) => l.id === currentLevel.id);
+            if (idx < levels.length - 1) {
+              setCurrentLevel(levels[idx + 1]);
+              restart();
+            } else {
+              setLevelPhase('level-select');
+              setCurrentLevel(null);
+            }
+          }}
+          onRetry={() => restart()}
+          onBackToMap={() => {
+            setLevelPhase('level-select');
+            setCurrentLevel(null);
+          }}
+        />
+      )}
+
+      {/* Fallback free-play panel (no level selected) */}
+      {endTime && !currentLevel && (
         <CompletionPanel
           emoji="🏆"
           title="专注挑战完成！"

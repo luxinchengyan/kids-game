@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import { useUserStore } from '../stores/useUserStore';
+import { toStoreChild } from '../lib/sessionMappers';
 
 const COLORS = {
   primary: '#FF6B6B',
@@ -20,7 +21,7 @@ const AVATARS = {
 };
 
 const AVATAR_EMOJIS: Record<string, string> = {
-  star_girl: '⭐', flower_girl: '🌸', rainbow_girl: '��', moon_girl: '🌙',
+  star_girl: '⭐', flower_girl: '🌸', rainbow_girl: '🌈', moon_girl: '🌙',
   rocket_boy: '🚀', dino_boy: '🦕', ninja_boy: '🥷', dragon_boy: '🐉',
 };
 
@@ -36,6 +37,13 @@ export default function SetupChildPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+    return fallback;
+  };
+
   const handleGenderChange = (g: 'boy' | 'girl') => {
     setGender(g);
     setAvatarId(g === 'girl' ? 'star_girl' : 'rocket_boy');
@@ -50,23 +58,11 @@ export default function SetupChildPage() {
     setError('');
 
     try {
-      const res = await api.post<{ child: any }>('/api/user/children', {
+      const res = await api.post<{ child: import('../services/authService').Child }>('/api/user/children', {
         nickname: nickname.trim(), birthYearMonth, gender, avatarId, avatarUrl: avatarUrl || undefined,
       });
-      const child = res.child;
-
-      const newChildren = [...children, {
-        _id: child.id, parentId: child.parentId,
-        nickname: child.nickname, age: child.age,
-        birthYearMonth: child.birthYearMonth,
-        gender: child.gender, avatarId: child.avatarId,
-        avatarUrl: child.avatarUrl,
-        chronologicalAge: child.chronologicalAge,
-        inferredAge: child.inferredAge,
-        inferredDifficulty: child.inferredDifficulty,
-        ageSource: child.ageSource,
-        recommendedDifficulties: child.recommendedDifficulties,
-      }];
+      const nextChild = toStoreChild(res.child);
+      const newChildren = [...children, nextChild];
       setChildren(newChildren);
       if (parent) {
         setParent({
@@ -74,21 +70,10 @@ export default function SetupChildPage() {
           children: newChildren.map((item) => item._id || '').filter(Boolean),
         });
       }
-      setCurrentChild({
-        _id: child.id, parentId: child.parentId,
-        nickname: child.nickname, age: child.age,
-        birthYearMonth: child.birthYearMonth,
-        gender: child.gender, avatarId: child.avatarId,
-        avatarUrl: child.avatarUrl,
-        chronologicalAge: child.chronologicalAge,
-        inferredAge: child.inferredAge,
-        inferredDifficulty: child.inferredDifficulty,
-        ageSource: child.ageSource,
-        recommendedDifficulties: child.recommendedDifficulties,
-      });
+      setCurrentChild(nextChild);
       navigate('/', { replace: true });
-    } catch (err: any) {
-      setError(err.message || '创建失败，请重试');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, '创建失败，请重试'));
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,132 @@
+/* src/games/jigsaw/Jigsaw.css */
+
+.jigsaw-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f0f8ff; /* AliceBlue */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.jigsaw-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.jigsaw-game-info .moves,
+.jigsaw-game-info .target-number {
+  font-weight: bold;
+}
+
+.jigsaw-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.jigsaw-game-info button:hover {
+  background-color: #e55337;
+}
+
+.puzzle-complete-message {
+  margin-top: 15px;
+  font-size: 1.3em;
+  color: #28a745; /* Green for success */
+  font-weight: bold;
+}
+
+.jigsaw-main-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jigsaw-svg-canvas {
+  border: 2px solid #333;
+  background-color: #eee; /* Light gray background for the puzzle area */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.jigsaw-grid {
+  display: grid;
+  /* Grid dimensions set dynamically by JS */
+  gap: 0px; /* No gap between cells for jigsaw */
+}
+
+.jigsaw-grid-cell {
+  width: 30px; /* Matches CELL_SIZE */
+  height: 30px;
+  background-color: #ddd; /* Subtle background for grid cells */
+  box-sizing: border-box;
+}
+
+.jigsaw-piece {
+  cursor: grab;
+  transition: transform 0.1s ease-out, opacity 0.2s ease; /* Smooth movement and opacity change */
+}
+
+.jigsaw-piece.selected {
+  cursor: grabbing;
+  opacity: 0.7; /* Lower opacity when selected */
+}
+
+.jigsaw-piece rect { /* Styles for the simulated blocks */
+  stroke: #222;
+  stroke-width: 0.5px;
+}
+
+.image-preview {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  display: block; /* Prevents extra space below image */
+  margin: 0 auto; /* Center image */
+}
+
+.image-preview p {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+button { /* Basic button styling */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

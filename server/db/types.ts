@@ -161,6 +161,7 @@ export interface IDatabase {
   deleteSessionsByParent(parentId: string): Promise<void>;
 
   // ---------- 孩子信息 ----------
+  listChildren(): Promise<DBChild[]>;
   findChildrenByParent(parentId: string): Promise<DBChild[]>;
   findChildById(id: string): Promise<DBChild | null>;
   createChild(input: CreateChildInput): Promise<DBChild>;

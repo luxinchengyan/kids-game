@@ -18,6 +18,12 @@ import { track } from '../../lib/analytics';
 import { useUserStore } from '../../stores/useUserStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { getRecommendedDifficulty } from '../../lib/learnerProfile';
+import {
+  type LevelConfig,
+  LevelSelectScreen,
+  LevelCompleteOverlay,
+  useLevelProgress,
+} from './LevelSystem';
 
 // ==========================
 // 类型定义
@@ -113,7 +119,7 @@ export const DEFAULT_EXAM_DIFFICULTY: Record<ExamDifficulty, ExamDifficultyConfi
 };
 
 /** 考试阶段 */
-export type ExamPhase = 'start' | 'playing' | 'review' | 'results';
+export type ExamPhase = 'level-select' | 'start' | 'playing' | 'review' | 'results';
 
 /** 答题状态 */
 export interface AnswerStatus {
@@ -167,12 +173,19 @@ export interface ExamSystemProps {
   exam: ExamConfig;
   /** 难度配置（可选，覆盖默认配置） */
   difficultySettings?: Partial<Record<ExamDifficulty, ExamDifficultyConfig>>;
+  /**
+   * 关卡列表（可选）。
+   * 提供后进入「闯关模式」：先展示关卡选择地图，每一关的题目数/时限/知识范围
+   * 均由 LevelConfig 驱动，忽略 difficultySettings 中对应字段。
+   */
+  levels?: LevelConfig[];
 }
 
 export function ExamSystem({ 
   gameId, 
   exam,
   difficultySettings,
+  levels,
 }: ExamSystemProps) {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion(gameId);
@@ -183,8 +196,13 @@ export function ExamSystem({
     ...difficultySettings,
   };
 
+  // 关卡模式状态
+  const isLevelMode = Boolean(levels && levels.length > 0);
+  const [currentLevel, setCurrentLevel] = useState<LevelConfig | null>(null);
+  const { submitResult } = useLevelProgress(gameId, levels ?? []);
+
   // 考试状态
-  const [phase, setPhase] = useState<ExamPhase>('start');
+  const [phase, setPhase] = useState<ExamPhase>(isLevelMode ? 'level-select' : 'start');
   const [difficulty, setDifficulty] = useState<ExamDifficulty>(
     getRecommendedDifficulty(currentChild, 'easy') as ExamDifficulty
   );
@@ -226,6 +244,39 @@ export function ExamSystem({
       questionCount: selectedQuestions.length,
     });
   }, [gameId, exam, mergedDifficultySettings]);
+
+  /** 从关卡配置启动考试（关卡模式专用） */
+  const startExamFromLevel = useCallback((level: LevelConfig) => {
+    // 知识范围 → 传给 getQuestionPool
+    const scopeIds = level.knowledgeScope.map((t) => t.id).join(',');
+    const extraCategory = (level.extra?.category as string | undefined) ?? (scopeIds || undefined);
+    const pool = exam.getQuestionPool(extraCategory);
+    const selectedQuestions = shuffleArray(pool).slice(0, level.itemCount);
+
+    setCurrentLevel(level);
+    setQuestions(selectedQuestions);
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+    setSelectedAnswer('');
+    setShowFeedback(false);
+    setPhase('playing');
+    setStartTime(Date.now());
+
+    if (level.timeLimit > 0) {
+      setTimeRemaining(level.timeLimit);
+    } else {
+      setTimeRemaining(0);
+    }
+
+    track('exam_start', {
+      gameId,
+      examId: exam.examId,
+      levelId: level.id,
+      levelName: level.name,
+      difficulty: level.difficulty,
+      questionCount: selectedQuestions.length,
+    });
+  }, [gameId, exam]);
 
   // 计时器
   useEffect(() => {
@@ -323,6 +374,11 @@ export function ExamSystem({
     if (accuracy >= 0.9) stars = 3;
     else if (accuracy >= 0.7) stars = 2;
     else if (accuracy >= config.passingRate) stars = 1;
+
+    // 关卡模式：持久化当前关卡进度
+    if (isLevelMode && currentLevel) {
+      submitResult(currentLevel.id, stars, passed);
+    }
     
     const examResult: ExamResult = {
       totalQuestions: questions.length,
@@ -339,6 +395,7 @@ export function ExamSystem({
       gameId,
       examId: exam.examId,
       difficulty,
+      levelId: currentLevel?.id,
       accuracy,
       stars,
       passed,
@@ -354,22 +411,46 @@ export function ExamSystem({
     });
     
     setPhase('results');
-  }, [answers, startTime, difficulty, questions.length, gameId, exam, mergedDifficultySettings, handleGameComplete]);
+  }, [answers, startTime, difficulty, questions.length, gameId, exam, mergedDifficultySettings, handleGameComplete, isLevelMode, currentLevel, submitResult]);
 
   // 返回
   const handleBack = useCallback(() => {
-    navigate(exam.backPath);
-  }, [navigate, exam.backPath]);
+    if (isLevelMode) {
+      setPhase('level-select');
+    } else {
+      navigate(exam.backPath);
+    }
+  }, [navigate, exam.backPath, isLevelMode]);
 
   // 重新开始
   const handleRestart = useCallback(() => {
-    startExam(difficulty);
-  }, [difficulty, startExam]);
+    if (isLevelMode && currentLevel) {
+      startExamFromLevel(currentLevel);
+    } else {
+      startExam(difficulty);
+    }
+  }, [difficulty, startExam, isLevelMode, currentLevel, startExamFromLevel]);
 
   // 查看回顾
   const handleReview = useCallback(() => {
     setPhase('review');
   }, []);
+
+  // 渲染关卡选择界面（关卡模式）
+  if (phase === 'level-select' && isLevelMode && levels) {
+    return (
+      <LevelSelectScreen
+        gameId={gameId}
+        levels={levels}
+        onSelectLevel={(level) => startExamFromLevel(level)}
+        onBack={() => navigate(exam.backPath)}
+        themeColor={exam.themeColor}
+        title={exam.examName}
+        icon={exam.examIcon}
+        gradient={exam.themeGradient}
+      />
+    );
+  }
 
   // 渲染开始界面
   if (phase === 'start') {
@@ -693,6 +774,36 @@ export function ExamSystem({
     const accuracy = answers.length > 0 ? correctCount / answers.length : 0;
     const config = mergedDifficultySettings[difficulty];
     const passed = accuracy >= config.passingRate;
+    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+
+    // 计算当前星数
+    let stars = 0;
+    if (accuracy >= 0.9) stars = 3;
+    else if (accuracy >= 0.7) stars = 2;
+    else if (accuracy >= config.passingRate) stars = 1;
+
+    // 关卡模式：用 LevelCompleteOverlay 展示结算
+    if (isLevelMode && currentLevel && levels) {
+      const levelIndex = levels.findIndex((l) => l.id === currentLevel.id);
+      const hasNextLevel = levelIndex >= 0 && levelIndex < levels.length - 1;
+      const nextLevel = hasNextLevel ? levels[levelIndex + 1] : undefined;
+
+      return (
+        <div style={{ minHeight: '100vh', background: exam.themeGradient }}>
+          <LevelCompleteOverlay
+            level={currentLevel}
+            stars={stars}
+            accuracy={accuracy}
+            timeSpent={totalTime}
+            themeColor={exam.themeColor}
+            hasNextLevel={hasNextLevel}
+            onNextLevel={nextLevel ? () => startExamFromLevel(nextLevel) : undefined}
+            onRetry={() => startExamFromLevel(currentLevel)}
+            onBackToMap={() => setPhase('level-select')}
+          />
+        </div>
+      );
+    }
 
     return (
       <div
@@ -736,8 +847,8 @@ export function ExamSystem({
             {/* 星星显示 */}
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>
               {[1, 2, 3].map((star) => {
-                const config = mergedDifficultySettings[difficulty];
-                const threshold = star === 1 ? config.passingRate : star === 2 ? 0.7 : 0.9;
+                const cfg = mergedDifficultySettings[difficulty];
+                const threshold = star === 1 ? cfg.passingRate : star === 2 ? 0.7 : 0.9;
                 return (
                   <span key={star} style={{ margin: '0 4px' }}>
                     {accuracy >= threshold ? '⭐' : '☆'}

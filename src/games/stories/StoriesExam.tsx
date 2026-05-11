@@ -4,7 +4,7 @@
  */
 
 import { ExamSystem, ExamConfig, Question } from '../common/ExamSystem';
-import { defaultSpeakText } from '../common/WhackAMole';
+import { defaultSpeakText } from '../../lib/gameUtils';
 
 // ==========================
 // 故事题库

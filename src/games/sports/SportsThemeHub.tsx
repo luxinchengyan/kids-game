@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sportsData, type SportCategory } from '../../data/sports';
 import { track } from '../../lib/analytics';
-import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { APP_SHELL_MAX_WIDTH, PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { BrandPill, EmptyState, IconActionButton, SectionHeading, SurfaceCard } from '../../components/BrandPrimitives';
+import { Button } from '../../components/Button/Button';
 
 // Function to speak text using Web Speech API
 function speakText(text: string) {
@@ -20,7 +22,18 @@ function speakText(text: string) {
 // Search bar component
 function SearchBar({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
-    <div style={{ marginBottom: '24px' }}>
+    <SurfaceCard
+      borderColor="rgba(233, 30, 99, 0.18)"
+      background="linear-gradient(135deg, rgba(252,228,236,0.95), rgba(255,255,255,0.96))"
+      style={{ padding: '18px 20px', marginBottom: '24px' }}
+    >
+      <SectionHeading
+        eyebrow="Sport search"
+        title="先选一个项目，再认识明星和经典赛事"
+        description="这里统一成主题入口页的结构：搜索、选项目、看详情。"
+        accent="#C2185B"
+        style={{ marginBottom: '14px' }}
+      />
       <input
         type="text"
         value={value}
@@ -45,7 +58,7 @@ function SearchBar({ value, onChange }: { value: string; onChange: (value: strin
           e.target.style.boxShadow = 'none';
         }}
       />
-    </div>
+    </SurfaceCard>
   );
 }
 
@@ -76,63 +89,42 @@ function SportCategoryCard({
       whileHover={{ scale: 1.03, y: -5 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      style={{
-        background: 'linear-gradient(135deg, #FCE4EC, #F8BBD0)',
-        borderRadius: '20px',
-        padding: '24px',
-        cursor: 'pointer',
-        border: '3px solid #F06292',
-        boxShadow: '0 4px 12px rgba(240, 98, 146, 0.3)',
-        transition: 'all 0.2s ease',
-      }}
+      style={{ cursor: 'pointer' }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+      <SurfaceCard
+        borderColor="rgba(233, 30, 99, 0.22)"
+        background="linear-gradient(135deg, #FCE4EC, rgba(255,255,255,0.98))"
+        shadow="0 10px 24px rgba(233, 30, 99, 0.14)"
+        style={{ padding: '24px' }}
+      >
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'start', gap: '16px' }}>
         <div style={{ fontSize: '56px', lineHeight: 1 }}>{category.icon}</div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#880E4F', margin: 0 }}>
               {category.name}
             </h3>
-            <button
-              type="button"
+            <IconActionButton
+              icon="🔉"
+              activeIcon="🔊"
+              active={isSpeaking}
+              label="播放项目名称"
               onClick={handleSpeak}
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                border: 'none',
-                background: isSpeaking ? 'rgba(233, 30, 99, 0.9)' : 'rgba(233, 30, 99, 0.2)',
-                color: '#E91E63',
-                fontSize: '14px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {isSpeaking ? '🔊' : '🔉'}
-            </button>
+              background="rgba(255,255,255,0.76)"
+              activeBackground="linear-gradient(135deg, #E91E63, #F06292)"
+              color={isSpeaking ? '#FFFFFF' : '#E91E63'}
+            />
           </div>
           <p style={{ fontSize: '15px', color: '#880E4F', margin: '0 0 12px 0' }}>
             {category.description}
           </p>
-          <div
-            style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              color: '#E91E63',
-              background: '#FCE4EC',
-              padding: '4px 12px',
-              borderRadius: '12px',
-              display: 'inline-block',
-            }}
-          >
+          <BrandPill background="rgba(255,255,255,0.72)" color="#C2185B">
             {category.stars.length} 位明星运动员
-          </div>
+          </BrandPill>
         </div>
         <div style={{ fontSize: '32px', color: '#E91E63' }}>→</div>
       </div>
+      </SurfaceCard>
     </motion.div>
   );
 }
@@ -173,75 +165,48 @@ function SportDetailView({
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        style={{
-          background: 'linear-gradient(135deg, #E91E63, #F06292)',
-          borderRadius: '20px',
-          padding: '32px',
-          marginBottom: '32px',
-          color: '#FFFFFF',
-        }}
       >
+        <SurfaceCard
+          background="linear-gradient(135deg, #E91E63, #F06292)"
+          borderColor="rgba(233, 30, 99, 0.18)"
+          style={{ padding: '32px', marginBottom: '32px', color: '#FFFFFF' }}
+        >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
           <div style={{ fontSize: '64px' }}>{category.icon}</div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <h1 style={{ fontSize: '36px', fontWeight: 900, margin: 0 }}>{category.name}</h1>
-              <button
-                type="button"
+              <IconActionButton
+                icon="🔉"
+                activeIcon="🔊"
+                active={isSpeaking}
+                label="播放项目名称"
                 onClick={handleSpeak}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: isSpeaking ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)',
-                  color: '#FFFFFF',
-                  fontSize: '18px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {isSpeaking ? '🔊' : '🔉'}
-              </button>
+                background="rgba(255,255,255,0.24)"
+                activeBackground="rgba(255,255,255,0.92)"
+                color={isSpeaking ? '#E91E63' : '#FFFFFF'}
+              />
             </div>
             <p style={{ fontSize: '18px', margin: '8px 0 0 0', opacity: 0.95 }}>
               {category.description}
             </p>
           </div>
         </div>
+        </SurfaceCard>
       </motion.div>
 
       {/* Introduction */}
-      <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          padding: '24px',
-          marginBottom: '24px',
-          border: '2px solid #F8BBD0',
-        }}
-      >
+      <SurfaceCard borderColor="rgba(233, 30, 99, 0.18)" style={{ padding: '24px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#880E4F', marginBottom: '12px' }}>
           📖 项目介绍
         </h2>
         <p style={{ fontSize: '16px', color: '#6D4C41', lineHeight: 1.8, margin: 0 }}>
           {category.introduction}
         </p>
-      </div>
+      </SurfaceCard>
 
       {/* Competitions */}
-      <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          padding: '24px',
-          marginBottom: '24px',
-          border: '2px solid #F8BBD0',
-        }}
-      >
+      <SurfaceCard borderColor="rgba(233, 30, 99, 0.18)" style={{ padding: '24px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#880E4F', marginBottom: '16px' }}>
           🏆 常见赛事
         </h2>
@@ -262,18 +227,10 @@ function SportDetailView({
             </div>
           ))}
         </div>
-      </div>
+      </SurfaceCard>
 
       {/* Stars */}
-      <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          padding: '24px',
-          marginBottom: '24px',
-          border: '2px solid #F8BBD0',
-        }}
-      >
+      <SurfaceCard borderColor="rgba(233, 30, 99, 0.18)" style={{ padding: '24px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#880E4F', marginBottom: '16px' }}>
           ⭐ 著名体育明星
         </h2>
@@ -308,18 +265,9 @@ function SportDetailView({
                       {star.name}
                     </h3>
                     {star.link && (
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          background: '#FF9800',
-                          color: '#FFFFFF',
-                          padding: '2px 8px',
-                          borderRadius: '8px',
-                          fontWeight: 700,
-                        }}
-                      >
+                      <BrandPill background="#FF9800" color="#FFFFFF" style={{ minHeight: '24px', padding: '2px 8px', fontSize: '12px' }}>
                         点击了解更多
-                      </span>
+                      </BrandPill>
                     )}
                   </div>
                   <p style={{ fontSize: '14px', color: '#BF360C', margin: '0 0 8px 0' }}>
@@ -327,20 +275,9 @@ function SportDetailView({
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {star.achievements.map((ach: string, aIdx: number) => (
-                      <span
-                        key={aIdx}
-                        style={{
-                          fontSize: '12px',
-                          background: '#FFFFFF',
-                          color: '#E65100',
-                          padding: '4px 10px',
-                          borderRadius: '10px',
-                          fontWeight: 600,
-                          border: '1px solid #FFB74D',
-                        }}
-                      >
+                      <BrandPill key={aIdx} background="#FFFFFF" color="#E65100" style={{ border: '1px solid #FFB74D', minHeight: '24px', padding: '4px 10px', fontSize: '12px' }}>
                         {ach}
-                      </span>
+                      </BrandPill>
                     ))}
                   </div>
                 </div>
@@ -348,17 +285,10 @@ function SportDetailView({
             </motion.div>
           ))}
         </div>
-      </div>
+      </SurfaceCard>
 
       {/* Classic Events */}
-      <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          padding: '24px',
-          border: '2px solid #F8BBD0',
-        }}
-      >
+      <SurfaceCard borderColor="rgba(233, 30, 99, 0.18)" style={{ padding: '24px' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#880E4F', marginBottom: '16px' }}>
           🎬 经典赛事
         </h2>
@@ -380,7 +310,7 @@ function SportDetailView({
             </div>
           ))}
         </div>
-      </div>
+      </SurfaceCard>
     </motion.div>
   );
 }
@@ -407,7 +337,7 @@ export default function SportsThemeHub() {
   });
 
   return (
-    <PageLayout maxWidth="800px">
+    <PageLayout maxWidth={APP_SHELL_MAX_WIDTH}>
       <AnimatePresence mode="wait">
         {selectedCategory ? (
           <SportDetailView
@@ -455,23 +385,12 @@ export default function SportsThemeHub() {
 
             {/* Empty State */}
             {filteredCategories.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                style={{
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  color: '#8D6E63',
-                }}
-              >
-                <div style={{ fontSize: '64px', marginBottom: '16px' }}>🔍</div>
-                <p style={{ fontSize: '18px', fontWeight: 600 }}>
-                  没有找到匹配的运动项目或运动员
-                </p>
-                <p style={{ fontSize: '14px', color: '#A1887F' }}>
-                  试试其他搜索词
-                </p>
-              </motion.div>
+              <EmptyState
+                emoji="🔍"
+                title="没有找到匹配的运动项目或运动员"
+                description="试试其他搜索词"
+                accent="#E91E63"
+              />
             )}
           </motion.div>
         )}

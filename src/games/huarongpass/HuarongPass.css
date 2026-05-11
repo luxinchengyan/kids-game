@@ -1,0 +1,111 @@
+/* src/games/huarongpass/HuarongPass.css */
+
+.huarong-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.huarong-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.huarong-game-info .moves,
+.huarong-game-info .target-number {
+  font-weight: bold;
+}
+
+.huarong-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.huarong-game-info button:hover {
+  background-color: #e55337;
+}
+
+.puzzle-complete-message {
+  margin-top: 15px;
+  font-size: 1.3em;
+  color: #28a745; /* Green for success */
+  font-weight: bold;
+}
+
+.huarong-game-world {
+  position: relative; /* Needed for absolute positioning of pieces */
+  border: 2px solid #333;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.huarong-grid {
+  display: grid;
+  /* Grid dimensions set dynamically by JS */
+  gap: 1px; /* Small gap between cells */
+  background-color: #ccc; /* Grid line color */
+}
+
+.huarong-grid-cell {
+  width: 30px; /* Matches CELL_SIZE */
+  height: 30px;
+  background-color: #eee; /* Default cell background */
+  box-sizing: border-box;
+}
+
+.huarong-piece {
+  cursor: grab;
+  transition: transform 0.1s ease-out, opacity 0.2s ease; /* Smooth movement and opacity change */
+  border: 2px solid #333; /* Border for pieces */
+  border-radius: 3px;
+  z-index: 10; /* Ensure pieces are above the grid background */
+}
+
+.huarong-piece.selected {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+
+/* Placeholder for target exit styling */
+.huarong-target-exit {
+  background-color: rgba(0, 255, 0, 0.3); /* Semi-transparent green exit area */
+  border: 2px dashed #008000;
+  box-sizing: border-box;
+  z-index: 5; /* Below pieces but visible */
+}
+
+button { /* Basic button styling */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

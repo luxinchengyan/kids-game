@@ -12,26 +12,21 @@
 
 ---
 
-## 2. 数据库架构
+## 2. 数据库适配器模式 (Database Adapter Pattern)
 
-```
-kids-game (Database)
-├── parents          # 家长用户（0-AUTH.md）
-├── children         # 孩子用户（0-AUTH.md）
-├── sessions         # 会话（0-AUTH.md）
-├── learning_progress # 学习进度（核心！）
-├── rewards          # 激励数据
-├── achievements      # 激励数据
-├── content_pinyin      # 拼音内容库
-├── content_math      # 数学内容库
-├── content_english   # 英语内容库
-├── content_stories   # 故事内容库
-└── audit_logs      # 审计日志
-```
+为了支持插件化和多环境适配，服务器端采用适配器机制：
+
+- **统一接口 (`IDatabase`)**: 定义了所有数据操作（家长、孩子、进度、奖励、OTP、会话等）的标准方法。
+- **SQLite 适配器 (`SQLiteAdapter`)**: 基于 `node:sqlite`。用于**本地开发和测试**。数据存储在 `data/kids-game.sqlite`。
+- **MongoDB 适配器 (`MongoDBAdapter`)**: 基于官方驱动。用于**生产环境**。支持高性能查询和水平扩展。
+
+**环境变量控制**:
+- `DB_DRIVER=sqlite` (默认)
+- `DB_DRIVER=mongodb`
 
 ---
 
-## 3. 核心数据模型
+## 3. 数据库架构 (Collection/Table Structure)
 
 ### 3.1 parents（家长用户）
 详见 0-AUTH.md，这里补充索引策略：email/phone 唯一索引
@@ -453,6 +448,26 @@ export class LocalDatabaseService implements DatabaseService {
 ---
 
 ## 7. 缓存策略（Redis）
+
+用于 Session 存储、高频访问数据缓存（如学习排行榜、AI 建议临时缓存）。
+
+### 7.1 Redis 配置
+
+```bash
+# 环境变量
+REDIS_URI=redis://default:<password>@tender-tomcat-98364.upstash.io:6379
+REDIS_TLS=true
+```
+
+### 7.2 适配器示例 (ioredis)
+
+```typescript
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URI, {
+  tls: process.env.REDIS_TLS === 'true' ? {} : undefined
+});
+```
 热点数据缓存：
 - 内容库（content_*）
 - 学习进度缓存（5分钟 TTL）

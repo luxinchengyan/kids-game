@@ -1,0 +1,112 @@
+/* src/games/angrybirds/AngryBirds.css */
+
+.angrybirds-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
+  background-color: #87ceeb; /* Sky blue background */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative; /* For absolute positioning of game elements */
+  overflow: hidden; /* Hide overflow content */
+  width: 1200px; /* Match WORLD_WIDTH */
+  height: 800px; /* Match WORLD_HEIGHT */
+  border: 3px solid #5a3a22; /* Wood-like border */
+}
+
+.angrybirds-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  z-index: 100; /* Ensure info is above game elements */
+}
+
+.angrybirds-game-info div {
+  font-weight: bold;
+}
+
+.angrybirds-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.angrybirds-game-info button:hover {
+  background-color: #e55337;
+}
+
+.game-over-message {
+  color: #d9534f; /* Red for game over */
+  font-size: 2em;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  margin-top: 20px;
+}
+
+.angrybirds-game-world {
+  position: relative; /* Needed for absolute positioning of objects */
+  border: 2px solid #5a3a22; /* Wood-like border */
+  background-color: #87ceeb; /* Sky blue background */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* Ensures objects don't render outside the world bounds */
+}
+
+/* Styling for individual game objects */
+.game-object {
+  border-radius: 5px; /* Default slight rounding */
+  box-sizing: border-box;
+  /* Transition for smooth visual updates if not relying solely on physics rendering */
+  /* transition: transform 0.05s linear; */
+}
+
+.bird {
+  border-radius: 50%; /* Birds are circular */
+}
+
+.pig {
+  border-radius: 50%; /* Pigs are circular */
+  border: 3px solid #333; /* Dark outline */
+}
+
+.block {
+  /* Blocks might have different wood textures or variations */
+  border: 1px solid #3e2717; /* Darker wood outline */
+}
+
+.ground {
+  background-color: #8B4513; /* Brown for ground */
+  border-top: 3px solid #5a3a22; /* Darker top edge */
+}
+
+.slingshot {
+  /* Basic styling for slingshot base */
+  background-color: #5a3a22; /* Dark brown */
+  border-radius: 3px;
+  z-index: 10; /* Ensure it's above other elements */
+}
+
+/* Placeholder for aiming controls - would need more complex UI */
+.slingshot-controls {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 20;
+}

@@ -21,7 +21,25 @@
 4. **家长伙伴**：尊重家长的知情权和控制权
 5. **科学严谨**：基于学习科学，不追求花哨的伪创新
 
-### 1.2 技术原则
+### 1.2 核心架构原则（Pedagogical & Technical Iron Rules）
+1. **统一成长引擎 (Unified Learning Engine)**：`useGameStore` 是所有进度、奖励、勋章和知识点掌握度的唯一事实来源。禁止在其他地方独立维护这些状态。`useRewardStore` 必须作为 `useGameStore` 的代理。
+2. **科学复习 (SM-2 Algorithm)**：所有知识点的复习必须遵循 SM-2 间隔重复算法。利用 `easinessFactor` 和 `interval` 动态计算 `nextReviewAt`。严禁使用固定间隔。
+3. **年龄自适应 (Age-Adaptive Filtering)**：所有学习内容在初始化或切换孩子 Profile 时，必须根据孩子的 `age` 进行过滤。3 岁孩子不应看到 6 岁的挑战。
+4. **闭环任务 (Mission Continuity)**：游戏流程必须遵循 `Warmup (复习) -> Core (新知) -> Checkpoint (挑战)` 的闭环。严禁纯随机抽题。
+5. **数据库适配器机制 (Database Adapter)**：服务器端必须使用插件化适配器机制。本地环境强制使用 `SQLite` (node:sqlite)，生产环境强制使用 `MongoDB`。
+
+### 1.3 教学实现模式（Pedagogical Implementation Patterns）
+1. **拼音朗读规范 (Pinyin TTS Mapping)**：禁止直接调用原生 `SpeechSynthesis` 朗读拼音字母。必须统一使用 `src/lib/audio.ts` 中的 `Audio.speak`。该工具会自动通过“音近字”映射（如 `b` -> `波`）纠正 TTS 读成英文字母的错误。
+2. **多级难度设计 (Tiered Difficulty)**：新开发的互动游戏必须支持至少三个难度等级（如入门、进阶、挑战）。禁止在代码中硬编码固定数量的关卡或静态题目。
+3. **知识图谱联动 (Content Orchestration)**：题目生成必须从 `src/data/learningContent.js` 的全量库中动态抽取。必须支持 `childAge` 过滤，确保低龄孩子不遇到超纲内容。
+4. **即时表现反馈 (Instant Mastery Tracking)**：游戏内的关键交互（如翻牌配对成功）必须即时调用 `recordTaskResult`，而不仅仅是等待游戏结束。
+5. **UI 儿童化适配 (Child-Friendly UI Adaptation)**：
+   - **拼音标注**：所有游戏标题、关键操作按钮及核心描述必须通过 `PinyinText` 组件标注汉语拼音，辅助认读。
+   - **交互显性化**：关键入口必须使用醒目的“播放/开始”按钮（带图标，如 ▶️），并配合 3D 拟物化阴影或缩放动画。
+   - **内容极简化**：单张信息卡片的正文不应超过两行，避免大量文字堆砌造成的认知负担。
+   - **视觉层次**：使用高饱和度色彩区分不同学科，利用圆角（≥ 20px）和软阴影营造安全、亲和的视觉感。
+
+### 1.4 技术原则
 1. **渐进式迭代**：不重写整个项目，在现有结构上修改
 2. **小步快跑**：每次只完成一个小任务，可验证、可回滚
 3. **可运行优先**：所有代码提交时必须可运行

@@ -1,0 +1,108 @@
+/* src/games/hiddenobjects/HiddenObjects.css */
+
+.hidden-objects-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f0f8ff; /* AliceBlue background */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative; /* For absolute positioning of game elements */
+  overflow: hidden; /* Hide overflow content */
+}
+
+.hidden-objects-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px; /* Adjust as needed */
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.hidden-objects-game-info div {
+  font-weight: bold;
+}
+
+.hidden-objects-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hidden-objects-game-info button:hover {
+  background-color: #e55337;
+}
+
+.hidden-objects-scene {
+  position: relative; /* Needed for absolute positioning of objects */
+  border: 2px solid #5a3a22; /* Wood-like border */
+  background-color: #d2b48c; /* Tan background */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Styling for individual game objects */
+.game-object {
+  box-sizing: border-box;
+  /* Basic styling for found objects */
+}
+
+.hidden-object.found {
+  opacity: 0.3;
+  border: 2px dashed #ccc;
+}
+
+.hidden-object.target {
+  /* Highlight for the currently targeted object if applicable */
+  border: 2px solid #ffff00; /* Yellow outline */
+}
+
+/* Object List Styling */
+.object-list {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+.object-list h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.object-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  display: inline-block; /* Center the list */
+}
+
+.object-list li {
+  margin-bottom: 8px;
+  font-size: 1.1em;
+  color: #555;
+}
+
+.object-list li.found {
+  text-decoration: line-through;
+  color: #aaa;
+}

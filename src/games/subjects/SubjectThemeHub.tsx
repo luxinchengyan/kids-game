@@ -11,13 +11,14 @@ import { motion } from 'framer-motion';
 import { getGameByPath, getGamesByTheme, type GameConfig } from '../registry';
 import { getExpandedSubjects } from '../../data/homeLearningJourney';
 import { track } from '../../lib/analytics';
-import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { APP_SHELL_MAX_WIDTH, PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { BrandPill, EmptyState, SectionHeading, SurfaceCard, type BrandPalette } from '../../components/BrandPrimitives';
+import { ThemeHubGameCard } from '../../components/ThemeHubPage';
 
 // Per-subject color palette
-const subjectPalette: Record<
-  string,
-  { primary: string; secondary: string; bg: string; border: string; gradient: string }
-> = {
+type SubjectPalette = BrandPalette & { bg: string };
+
+const subjectPalette: Record<string, SubjectPalette> = {
   geography: {
     primary: '#4CAF50',
     secondary: '#81C784',
@@ -71,81 +72,6 @@ const subjectPalette: Record<
 
 const fallbackPalette = subjectPalette.encyclopedia;
 
-function SubjectGameCard({
-  game,
-  onClick,
-  index,
-  palette,
-}: {
-  game: GameConfig;
-  onClick: () => void;
-  index: number;
-  palette: (typeof subjectPalette)[string];
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.45 }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      whileTap={{ scale: 0.97 }}
-      onClick={onClick}
-      style={{
-        background: 'linear-gradient(135deg, #FAFAFA, #FFFFFF)',
-        borderRadius: '20px',
-        padding: '22px',
-        cursor: 'pointer',
-        border: `2px solid ${palette.border}`,
-        boxShadow: `0 6px 18px ${palette.primary}22`,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '18px',
-      }}
-    >
-      <div style={{ fontSize: '52px', lineHeight: 1, flexShrink: 0 }}>{game.icon}</div>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#3E2723', margin: '0 0 8px 0' }}>
-          {game.name}
-        </h3>
-        <p style={{ fontSize: '14px', color: '#6D4C41', margin: '0 0 12px 0', lineHeight: 1.65 }}>
-          {game.description}
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-          {game.learningPath?.levelLabel && (
-            <span
-              style={{
-                background: palette.bg,
-                color: palette.primary,
-                borderRadius: '999px',
-                padding: '4px 12px',
-                fontSize: '13px',
-                fontWeight: 700,
-              }}
-            >
-              {game.learningPath.levelLabel}
-            </span>
-          )}
-          {game.minAge && game.maxAge && (
-            <span style={{ fontSize: '13px', color: '#8D6E63', fontWeight: 600 }}>
-              {game.minAge}-{game.maxAge}岁
-            </span>
-          )}
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: '24px',
-          color: palette.primary,
-          flexShrink: 0,
-          alignSelf: 'center',
-        }}
-      >
-        →
-      </div>
-    </motion.div>
-  );
-}
-
 export default function SubjectThemeHub() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -169,7 +95,7 @@ export default function SubjectThemeHub() {
   );
 
   return (
-    <PageLayout maxWidth="800px">
+    <PageLayout maxWidth={APP_SHELL_MAX_WIDTH}>
       <GamePageHeader
         title={hub?.name ?? subject?.title ?? '学习主题'}
         icon={hub?.icon ?? subject?.icon ?? '📚'}
@@ -185,31 +111,25 @@ export default function SubjectThemeHub() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.45 }}
-          style={{
-            background: palette.bg,
-            borderRadius: '20px',
-            padding: '20px 22px',
-            marginBottom: '28px',
-            border: `2px solid ${palette.border}`,
-          }}
         >
+          <SurfaceCard
+            borderColor={palette.border}
+            background={`linear-gradient(135deg, ${palette.bg}, rgba(255,255,255,0.95))`}
+            style={{ padding: '24px 26px', marginBottom: '28px' }}
+          >
+            <SectionHeading
+              eyebrow="Subject hub"
+              title={subject.title}
+              description={subject.summary}
+              accent={palette.primary}
+              style={{ marginBottom: '16px' }}
+            />
           {/* Skills */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
             {subject.skills.map((skill) => (
-              <span
-                key={skill}
-                style={{
-                  background: '#FFFFFF',
-                  color: palette.primary,
-                  borderRadius: '999px',
-                  padding: '5px 12px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-                }}
-              >
+              <BrandPill key={skill} background="rgba(255,255,255,0.82)" color={palette.primary}>
                 {skill}
-              </span>
+              </BrandPill>
             ))}
           </div>
           <p style={{ margin: '0 0 10px 0', color: '#5D4037', fontWeight: 600, lineHeight: 1.7 }}>
@@ -234,6 +154,7 @@ export default function SubjectThemeHub() {
               安全提示：{subject.safetyNote}
             </div>
           )}
+          </SurfaceCard>
         </motion.div>
       )}
 
@@ -268,20 +189,9 @@ export default function SubjectThemeHub() {
                   marginBottom: '10px',
                 }}
               >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    background: palette.bg,
-                    color: palette.primary,
-                    fontSize: '13px',
-                    fontWeight: 800,
-                  }}
-                >
+                <BrandPill background={palette.bg} color={palette.primary}>
                   {step.phase}
-                </span>
+                </BrandPill>
                 <span style={{ color: '#8D6E63', fontSize: '13px', fontWeight: 700 }}>AI 学习路线</span>
               </div>
               <h3 style={{ margin: '0 0 10px 0', fontSize: '24px', color: '#3E2723' }}>{step.title}</h3>
@@ -290,20 +200,9 @@ export default function SubjectThemeHub() {
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
                 {step.activities.map((activity) => (
-                  <span
-                    key={activity}
-                    style={{
-                      background: '#FFFFFF',
-                      color: '#4E342E',
-                      borderRadius: '999px',
-                      padding: '8px 14px',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      border: `1.5px solid ${palette.border}`,
-                    }}
-                  >
+                  <BrandPill key={activity} background="#FFFFFF" color="#4E342E" style={{ border: `1.5px solid ${palette.border}`, padding: '8px 14px' }}>
                     {activity}
-                  </span>
+                  </BrandPill>
                 ))}
               </div>
               <div style={{ color: '#6D4C41', fontSize: '14px', fontWeight: 700, lineHeight: 1.7 }}>
@@ -356,21 +255,9 @@ export default function SubjectThemeHub() {
                 boxShadow: `0 8px 20px ${palette.primary}12`,
               }}
             >
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '6px 12px',
-                  borderRadius: '999px',
-                  background: palette.bg,
-                  color: palette.primary,
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  marginBottom: '10px',
-                }}
-              >
-                原理分组 · {collection.principle}
-              </div>
+               <BrandPill background={palette.bg} color={palette.primary} style={{ marginBottom: '10px' }}>
+                 原理分组 · {collection.principle}
+               </BrandPill>
               <div
                 style={{
                   marginBottom: '10px',
@@ -387,22 +274,11 @@ export default function SubjectThemeHub() {
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                 {collection.experiments.map((experiment) => (
-                  <span
-                    key={experiment}
-                    style={{
-                      background: '#FFFFFF',
-                      color: '#4E342E',
-                      borderRadius: '999px',
-                      padding: '8px 14px',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      border: `1.5px solid ${palette.border}`,
-                    }}
-                  >
-                    {experiment}
-                  </span>
-                ))}
-              </div>
+                   <BrandPill key={experiment} background="#FFFFFF" color="#4E342E" style={{ border: `1.5px solid ${palette.border}`, padding: '8px 14px' }}>
+                     {experiment}
+                   </BrandPill>
+                 ))}
+               </div>
               <div
                 style={{
                   display: 'grid',
@@ -440,7 +316,7 @@ export default function SubjectThemeHub() {
       {games.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {games.map((game, index) => (
-            <SubjectGameCard
+            <ThemeHubGameCard
               key={game.id}
               game={game}
               index={index}
@@ -455,29 +331,13 @@ export default function SubjectThemeHub() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
-          style={{
-            textAlign: 'center',
-            padding: '56px 24px',
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: '28px',
-            border: `2px solid ${palette.border}`,
-            boxShadow: '0 12px 28px rgba(0,0,0,0.06)',
-          }}
         >
-          <div style={{ fontSize: '72px', marginBottom: '20px' }}>{subject?.icon ?? '🎮'}</div>
-          <p
-            style={{
-              fontSize: '22px',
-              fontWeight: 900,
-              color: '#3E2723',
-              marginBottom: '10px',
-            }}
-          >
-            {subject?.title ?? ''}精彩游戏即将上线！
-          </p>
-          <p style={{ fontSize: '16px', fontWeight: 600, color: '#6D4C41', marginBottom: '20px' }}>
-            {subject?.summary}
-          </p>
+          <EmptyState
+            emoji={subject?.icon ?? '🎮'}
+            title={`${subject?.title ?? ''}精彩游戏即将上线！`}
+            description={subject?.summary ?? '敬请期待'}
+            accent={palette.primary}
+          />
           <div
             style={{
               display: 'flex',
@@ -487,20 +347,9 @@ export default function SubjectThemeHub() {
             }}
           >
             {subject?.sampleTopics.map((topic) => (
-              <span
-                key={topic}
-                style={{
-                  background: palette.bg,
-                  color: palette.primary,
-                  borderRadius: '999px',
-                  padding: '8px 18px',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  border: `1.5px solid ${palette.border}`,
-                }}
-              >
+              <BrandPill key={topic} background={palette.bg} color={palette.primary} style={{ padding: '8px 18px', border: `1.5px solid ${palette.border}` }}>
                 {topic}
-              </span>
+              </BrandPill>
             ))}
           </div>
         </motion.div>

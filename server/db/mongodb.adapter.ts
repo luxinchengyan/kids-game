@@ -166,6 +166,11 @@ export class MongoDBAdapter implements IDatabase {
   }
 
   // ---- Children ----
+  async listChildren(): Promise<DBChild[]> {
+    const docs = await this.col('children').find({}).sort({ createdAt: 1 }).toArray();
+    return docs.map((doc) => this.docToChild(doc as Record<string, unknown>));
+  }
+
   async findChildrenByParent(parentId: string): Promise<DBChild[]> {
     const docs = await this.col('children').find({ parentId } as any).sort({ createdAt: 1 }).toArray();
     return docs.map(d => this.docToChild(d as Record<string, unknown>));

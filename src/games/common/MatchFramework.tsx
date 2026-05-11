@@ -1,9 +1,15 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from './Button';
-import { track } from '../lib/analytics';
-import { FrameworkStatGrid, CompletionPanel } from '../games/frameworks/frameworkHelpers';
-import { playSuccess, playError, speak } from '../lib/audio';
+import { Button } from '../../components/Button';
+import { track } from '../../lib/analytics';
+import { FrameworkStatGrid, CompletionPanel } from '../frameworks/frameworkHelpers';
+import { playSuccess, playError, speak } from '../../lib/audio';
+import {
+  type LevelConfig,
+  LevelSelectScreen,
+  LevelCompleteOverlay,
+  useLevelProgress,
+} from './LevelSystem';
 
 export interface MatchPair {
   id: string;
@@ -22,6 +28,7 @@ export interface MatchPair {
 export interface MatchFrameworkProps {
   gameId: string;
   title: string;
+  /** 全量配对数据（关卡模式或自由模式均可提供） */
   pairs: MatchPair[];
   onComplete: (result: {
     success: boolean;
@@ -34,6 +41,12 @@ export interface MatchFrameworkProps {
   themeColor: string;
   gradient: string;
   gridCols?: number;
+  /**
+   * 关卡列表（可选）。
+   * 提供后进入「闯关模式」：每关通过 LevelConfig.extra.pairCount 控制本关对数，
+   * 通过 LevelConfig.extra.pairIds 过滤特定配对子集（字符串数组）。
+   */
+  levels?: LevelConfig[];
 }
 
 export const MatchFramework: React.FC<MatchFrameworkProps> = ({
@@ -45,7 +58,28 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
   themeColor,
   gradient,
   gridCols = 3,
+  levels,
 }) => {
+  // 关卡模式
+  const isLevelMode = Boolean(levels && levels.length > 0);
+  const [currentLevel, setCurrentLevel] = useState<LevelConfig | null>(null);
+  const [phase, setPhase] = useState<'level-select' | 'playing' | 'results'>(
+    isLevelMode ? 'level-select' : 'playing'
+  );
+  const { submitResult } = useLevelProgress(gameId, levels ?? []);
+
+  // 当前关卡实际使用的配对列表
+  const activePairs = useMemo(() => {
+    if (!isLevelMode || !currentLevel) return pairs;
+    const extra = currentLevel.extra ?? {};
+    const pairIds = extra.pairIds as string[] | undefined;
+    const pairCount = (extra.pairCount as number | undefined) ?? currentLevel.itemCount ?? pairs.length;
+    let filtered = pairIds ? pairs.filter((p) => pairIds.includes(p.id)) : pairs;
+    // 随机截取
+    const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(pairCount, shuffled.length));
+  }, [isLevelMode, currentLevel, pairs]);
+
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [selectedRight, setSelectedRight] = useState<string | null>(null);
   const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
@@ -53,16 +87,27 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
   const [attempts, setAttempts] = useState(0);
   const [startTime] = useState(Date.now());
   const [isCompleted, setIsCompleted] = useState(false);
+  const [lastResult, setLastResult] = useState<{ stars: number; accuracy: number } | null>(null);
 
   const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
-  const leftItems = useMemo(() => shuffle(pairs), [pairs]);
-  const rightItems = useMemo(() => shuffle(pairs), [pairs]);
+  const leftItems = useMemo(() => shuffle(activePairs), [activePairs]);
+  const rightItems = useMemo(() => shuffle(activePairs), [activePairs]);
+
+  // Reset when activePairs change (new level started)
+  useEffect(() => {
+    setMatchedIds(new Set());
+    setSelectedLeft(null);
+    setSelectedRight(null);
+    setAttempts(0);
+    setIsCompleted(false);
+    setLastResult(null);
+  }, [activePairs]);
 
   const handleLeftClick = (id: string) => {
     if (matchedIds.has(id)) return;
     setSelectedLeft(id);
-    const item = pairs.find(p => p.id === id);
+    const item = activePairs.find(p => p.id === id);
     if (item?.left.audio) speak(item.left.audio);
     else if (item?.left.type === 'text') speak(item.left.content);
     
@@ -74,7 +119,7 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
   const handleRightClick = (id: string) => {
     if (matchedIds.has(id)) return;
     setSelectedRight(id);
-    const item = pairs.find(p => p.id === id);
+    const item = activePairs.find(p => p.id === id);
     if (item?.right.audio) speak(item.right.audio);
     else if (item?.right.type === 'text') speak(item.right.content);
 
@@ -94,9 +139,9 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
       setSelectedLeft(null);
       setSelectedRight(null);
       
-      if (newMatched.size === pairs.length) {
+      if (newMatched.size === activePairs.length) {
         track('game_complete', { gameId, attempts: attempts + 1 });
-        setTimeout(() => finishGame(), 600);
+        setTimeout(() => finishGame(newMatched.size), 600);
       }
     } else {
       // Error
@@ -110,28 +155,80 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
     }
   };
 
-  const finishGame = () => {
-    setIsCompleted(true);
-    const accuracy = pairs.length / Math.max(attempts, pairs.length);
+  const finishGame = (matchedCount: number) => {
+    const accuracy = matchedCount / Math.max(attempts + 1, matchedCount);
     const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : 1;
+    const passed = stars >= 1;
+
+    setLastResult({ stars, accuracy });
+    setIsCompleted(true);
+
+    // 关卡模式：持久化进度
+    if (isLevelMode && currentLevel) {
+      submitResult(currentLevel.id, stars, passed);
+    }
+
     onComplete({
-      success: true,
+      success: passed,
       stars,
-      tasksCompleted: pairs.length,
+      tasksCompleted: matchedCount,
       accuracy,
-      xp: pairs.length * 5 + stars * 5,
+      xp: matchedCount * 5 + stars * 5,
     });
   };
 
+  // 关卡选择界面
+  if (phase === 'level-select' && isLevelMode && levels) {
+    return (
+      <LevelSelectScreen
+        gameId={gameId}
+        levels={levels}
+        onSelectLevel={(level) => {
+          setCurrentLevel(level);
+          setPhase('playing');
+        }}
+        onBack={onBack}
+        themeColor={themeColor}
+        title={title}
+        gradient={gradient}
+      />
+    );
+  }
+
   return (
     <div style={{ width: '100%' }}>
+      {/* 关卡信息条（关卡模式时显示） */}
+      {isLevelMode && currentLevel && (
+        <div style={{
+          background: `${themeColor}18`,
+          borderRadius: '14px',
+          padding: '10px 16px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <span style={{ fontSize: '22px' }}>{currentLevel.icon ?? '🗺️'}</span>
+          <div>
+            <div style={{ fontWeight: 800, color: themeColor, fontSize: '15px' }}>
+              第 {currentLevel.order} 关 · {currentLevel.name}
+            </div>
+            {currentLevel.knowledgeScope.length > 0 && (
+              <div style={{ fontSize: '12px', color: '#757575' }}>
+                {currentLevel.knowledgeScope.map(t => t.label).join(' · ')}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <FrameworkStatGrid
         accent={themeColor}
         surface="#FFFFFF"
         items={[
-          { label: '已配对', value: `${matchedIds.size}/${pairs.length}`, note: '进度' },
+          { label: '已配对', value: `${matchedIds.size}/${activePairs.length}`, note: '进度' },
           { label: '尝试次数', value: String(attempts), note: '细心观察' },
-          { label: '准确率', value: `${Math.round((pairs.length / Math.max(attempts, 1)) * 100)}%`, note: '挑战自我' },
+          { label: '准确率', value: `${Math.round((activePairs.length / Math.max(attempts, 1)) * 100)}%`, note: '挑战自我' },
         ]}
       />
 
@@ -214,11 +311,35 @@ export const MatchFramework: React.FC<MatchFrameworkProps> = ({
         </div>
       </div>
 
-      {isCompleted && (
+      {/* 关卡完成弹窗（关卡模式） */}
+      {isCompleted && isLevelMode && currentLevel && levels && lastResult && (
+        <LevelCompleteOverlay
+          level={currentLevel}
+          stars={lastResult.stars}
+          accuracy={lastResult.accuracy}
+          themeColor={themeColor}
+          hasNextLevel={levels.findIndex((l) => l.id === currentLevel.id) < levels.length - 1}
+          onNextLevel={() => {
+            const idx = levels.findIndex((l) => l.id === currentLevel.id);
+            if (idx < levels.length - 1) {
+              setCurrentLevel(levels[idx + 1]);
+              setPhase('playing');
+            }
+          }}
+          onRetry={() => {
+            setCurrentLevel({ ...currentLevel });
+            setPhase('playing');
+          }}
+          onBackToMap={() => setPhase('level-select')}
+        />
+      )}
+
+      {/* 自由模式完成面板 */}
+      {isCompleted && !isLevelMode && (
         <CompletionPanel
           emoji="🎯"
           title="完美配对！"
-          summary={`你完成了 ${pairs.length} 组配对，太棒了！`}
+          summary={`你完成了 ${activePairs.length} 组配对，太棒了！`}
           accent={themeColor}
           background={gradient}
         >

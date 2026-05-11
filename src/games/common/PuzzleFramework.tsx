@@ -2,7 +2,13 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/Button';
 import { track } from '../../lib/analytics';
-import { FrameworkStatGrid, CompletionPanel } from './frameworkHelpers';
+import { FrameworkStatGrid, CompletionPanel } from '../frameworks/frameworkHelpers';
+import {
+  type LevelConfig,
+  LevelSelectScreen,
+  LevelCompleteOverlay,
+  useLevelProgress,
+} from './LevelSystem';
 
 export interface PuzzleRound {
   id: string;
@@ -30,6 +36,12 @@ export interface PuzzleFrameworkProps {
   }) => void;
   onBack: () => void;
   renderPiece?: (piece: any, isSelected: boolean) => React.ReactNode;
+  /**
+   * 关卡列表（可选）。
+   * 提供后进入「闯关模式」：每关通过 LevelConfig.extra.roundIds 过滤本关子集，
+   * 或取全部 rounds 的前 itemCount 个。
+   */
+  levels?: LevelConfig[];
 }
 
 export function PuzzleFramework({
@@ -43,15 +55,35 @@ export function PuzzleFramework({
   onComplete,
   onBack,
   renderPiece,
+  levels,
 }: PuzzleFrameworkProps) {
+  // 关卡模式
+  const isLevelMode = Boolean(levels && levels.length > 0);
+  const [currentLevel, setCurrentLevel] = useState<LevelConfig | null>(null);
+  const [levelPhase, setLevelPhase] = useState<'level-select' | 'playing'>(
+    isLevelMode ? 'level-select' : 'playing'
+  );
+  const { submitResult } = useLevelProgress(gameId, levels ?? []);
+
+  // 当前关卡实际使用的 rounds
+  const activeRounds = useMemo(() => {
+    if (!isLevelMode || !currentLevel) return rounds;
+    const extra = currentLevel.extra ?? {};
+    const roundIds = extra.roundIds as string[] | undefined;
+    const count = (extra.roundCount as number | undefined) ?? currentLevel.itemCount ?? rounds.length;
+    let filtered = roundIds ? rounds.filter((r) => roundIds.includes(r.id)) : rounds;
+    return filtered.slice(0, Math.min(count, filtered.length));
+  }, [isLevelMode, currentLevel, rounds]);
+
   const [roundIndex, setRoundIndex] = useState(0);
   const [currentPieces, setCurrentPieces] = useState<any[]>([]);
   const [placedPieces, setPlacedPieces] = useState<any[]>([]);
   const [errors, setErrors] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [lastResult, setLastResult] = useState<{ stars: number; accuracy: number } | null>(null);
   const [startTime, setStartTime] = useState(Date.now());
 
-  const currentRound = rounds[roundIndex];
+  const currentRound = activeRounds[roundIndex];
 
   const shuffle = (arr: any[]) => {
     const next = [...arr];
@@ -67,6 +99,15 @@ export function PuzzleFramework({
     setCurrentPieces(shuffle(currentRound.pieces));
     setPlacedPieces([]);
   }, [currentRound]);
+
+  // Reset game state when level changes
+  useEffect(() => {
+    setRoundIndex(0);
+    setErrors(0);
+    setCompleted(false);
+    setLastResult(null);
+    setStartTime(Date.now());
+  }, [currentLevel]);
 
   useEffect(() => {
     initRound();
@@ -87,27 +128,35 @@ export function PuzzleFramework({
       }
     } else {
       setErrors(prev => prev + 1);
-      // Visual feedback for error?
     }
   };
 
   const advance = () => {
-    if (roundIndex < rounds.length - 1) {
+    if (roundIndex < activeRounds.length - 1) {
       setRoundIndex(prev => prev + 1);
     } else {
-      const duration = Date.now() - startTime;
-      setCompleted(true);
-      
-      const accuracy = rounds.length / (rounds.length + errors);
+      const accuracy = activeRounds.length / (activeRounds.length + errors);
       const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : 1;
 
-      onComplete({
-        success: true,
-        stars,
-        tasksCompleted: rounds.length,
-        accuracy,
-        xp: rounds.length * 8,
-      });
+      if (isLevelMode && currentLevel) {
+        submitResult(currentLevel.id, {
+          stars,
+          accuracy,
+          timeTakenMs: Date.now() - startTime,
+          taskCount: activeRounds.length,
+        });
+        setLastResult({ stars, accuracy });
+        setCompleted(true);
+      } else {
+        setCompleted(true);
+        onComplete({
+          success: true,
+          stars,
+          tasksCompleted: activeRounds.length,
+          accuracy,
+          xp: activeRounds.length * 8,
+        });
+      }
     }
   };
 
@@ -115,10 +164,28 @@ export function PuzzleFramework({
     setRoundIndex(0);
     setErrors(0);
     setCompleted(false);
+    setLastResult(null);
     setStartTime(Date.now());
     initRound();
     track('game_start', { gameId });
   };
+
+  // Level select screen
+  if (isLevelMode && levelPhase === 'level-select') {
+    return (
+      <LevelSelectScreen
+        gameId={gameId}
+        levels={levels!}
+        title={title}
+        onSelectLevel={(level) => {
+          setCurrentLevel(level);
+          setLevelPhase('playing');
+          track('level_start', { gameId, levelId: level.id });
+        }}
+        onBack={onBack}
+      />
+    );
+  }
 
   if (!currentRound) return null;
 
@@ -128,7 +195,7 @@ export function PuzzleFramework({
         accent={progressColor}
         surface="#FFFFFF"
         items={[
-          { label: '关卡', value: `${roundIndex + 1}/${rounds.length}`, note: '拼图挑战' },
+          { label: '关卡', value: `${roundIndex + 1}/${activeRounds.length}`, note: '拼图挑战' },
           { label: '错误', value: String(errors), note: '细心观察' },
           { label: '已放置', value: `${placedPieces.length}/${currentRound.solution.length}`, note: '拼图进度' },
         ]}
@@ -197,11 +264,36 @@ export function PuzzleFramework({
         </div>
       </div>
 
-      {completed && (
+      {/* Level mode complete overlay */}
+      {isLevelMode && completed && lastResult && currentLevel && (
+        <LevelCompleteOverlay
+          level={currentLevel}
+          stars={lastResult.stars}
+          accuracy={lastResult.accuracy}
+          onNext={() => {
+            const idx = levels!.findIndex((l) => l.id === currentLevel.id);
+            if (idx < levels!.length - 1) {
+              setCurrentLevel(levels![idx + 1]);
+              restart();
+            } else {
+              setLevelPhase('level-select');
+              setCurrentLevel(null);
+            }
+          }}
+          onRetry={() => restart()}
+          onBackToMap={() => {
+            setLevelPhase('level-select');
+            setCurrentLevel(null);
+          }}
+        />
+      )}
+
+      {/* Free-play complete panel */}
+      {!isLevelMode && completed && (
         <CompletionPanel
           emoji="🧩"
           title="拼图达人！"
-          summary={`挑战成功！共完成 ${rounds.length} 个拼图。`}
+          summary={`挑战成功！共完成 ${activeRounds.length} 个拼图。`}
           accent={progressColor}
           background="#FFFFFF"
         >

@@ -379,6 +379,11 @@ export class SQLiteAdapter implements IDatabase {
   }
 
   // ---- Children ----
+  async listChildren(): Promise<DBChild[]> {
+    const rows = this.db.prepare('SELECT * FROM children ORDER BY created_at').all() as Record<string, unknown>[];
+    return rows.map((row) => this.rowToChild(row));
+  }
+
   async findChildrenByParent(parentId: string): Promise<DBChild[]> {
     const rows = this.db.prepare('SELECT * FROM children WHERE parent_id = ? ORDER BY created_at').all(parentId) as Record<string, unknown>[];
     return rows.map(r => this.rowToChild(r));

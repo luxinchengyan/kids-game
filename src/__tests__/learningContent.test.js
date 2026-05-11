@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createKnowledgeMap, createMission, getLearningContentSummary, getWeakKnowledgePoints } from '../data/learningContent'
+import { createKnowledgeMap, createMission, getLearningContentSummary, getWeakKnowledgePoints, storyData } from '../data/learningContent'
 
 describe('Knowledge Map', () => {
   it('should create initial knowledge state with all units', () => {
@@ -164,6 +164,137 @@ describe('Learning content coverage', () => {
     expect(summary.pinyin).toBeGreaterThan(40)
     expect(summary.math).toBeGreaterThan(15)
     expect(summary.english).toBeGreaterThan(20)
+    expect(summary.stories).toBeGreaterThan(20)
     expect(summary.total).toBeGreaterThan(80)
+  })
+
+  it('keeps a rich pool of idiom and myth stories in story kingdom', () => {
+    const mythTitles = storyData.filter((story) => story.type === 'myth').map((story) => story.title)
+    const idiomTitles = storyData.filter((story) => story.type === 'idiom').map((story) => story.title)
+    const coreMyths = [
+      '盘古开天地',
+      '女娲补天',
+      '女娲造人',
+      '后羿射日',
+      '嫦娥奔月',
+      '牛郎织女',
+      '精卫填海',
+      '夸父逐日',
+      '哪吒闹海',
+      '大禹治水',
+      '宝莲灯',
+      '八仙过海',
+      '白蛇传',
+      '孙悟空大闹天宫',
+      '年兽的传说',
+      '十二生肖的来历',
+    ]
+    const coreIdioms = [
+      '守株待兔',
+      '亡羊补牢',
+      '揠苗助长',
+      '掩耳盗铃',
+      '狐假虎威',
+      '毛遂自荐',
+      '老马识途',
+      '伯乐相马',
+      '自相矛盾',
+      '刻舟求剑',
+      '画蛇添足',
+      '画龙点睛',
+      '入木三分',
+      '对牛弹琴',
+      '井底之蛙',
+      '滥竽充数',
+      '盲人摸象',
+      '惊弓之鸟',
+      '洛阳纸贵',
+      '纸上谈兵',
+      '凿壁偷光',
+      '程门立雪',
+      '破釜沉舟',
+      '四面楚歌',
+      '草船借箭',
+    ]
+
+    expect(mythTitles.length).toBeGreaterThanOrEqual(34)
+    expect(idiomTitles.length).toBeGreaterThanOrEqual(50)
+    expect(new Set(mythTitles).size).toBe(mythTitles.length)
+    expect(new Set(idiomTitles).size).toBe(idiomTitles.length)
+    expect(mythTitles).toEqual(expect.arrayContaining(coreMyths))
+    expect(idiomTitles).toEqual(expect.arrayContaining(coreIdioms))
+  })
+
+  it('keeps a rich pool of fable and history stories in story kingdom', () => {
+    const fableTitles = storyData.filter((story) => story.type === 'fable').map((story) => story.title)
+    const historyTitles = storyData.filter((story) => story.type === 'history').map((story) => story.title)
+    const coreFables = [
+      '乌鸦喝水',
+      '狐狸和葡萄',
+      '龟兔赛跑',
+      '狼来了',
+      '小马过河',
+      '郑人买履',
+      '南辕北辙',
+      '杞人忧天',
+      '朝三暮四',
+      '黔驴技穷',
+      '邯郸学步',
+      '螳臂当车',
+      '曲突徙薪',
+      '智子疑邻',
+      '按图索骥',
+      '农夫与蛇',
+      '鹬蚌相争',
+      '狐狸和乌鸦',
+      '狼和小羊',
+      '老鼠开会',
+      '东郭先生和狼',
+      '螳螂捕蝉',
+      '买椟还珠',
+    ]
+    const coreHistory = [
+      '孔融让梨',
+      '司马光砸缸',
+      '曹冲称象',
+      '花木兰',
+      '岳母刺字',
+      '黄香温席',
+      '孔子拜师',
+      '祖冲之算圆周率',
+      '王羲之吃墨',
+      '孔子周游列国',
+      '苏秦刺股',
+      '李密牛角挂书',
+      '孟母三迁',
+      '孟母断机',
+      '王戎识李',
+      '孔子学琴',
+      '司马迁写史记',
+      '苏武牧羊',
+      '鉴真东渡',
+      '张骞出使西域',
+      '郑和下西洋',
+      '海瑞退礼',
+      '狄仁杰公正断案',
+      '徐霞客远游',
+      '文天祥留取丹心',
+      '张仲景坐堂行医',
+      '蔡伦造纸',
+      '毕昇发明活字印刷',
+      '车胤囊萤',
+      '孙康映雪',
+      '李时珍尝药',
+      '文成公主入藏',
+      '玄奘西行',
+      '张衡和地动仪',
+    ]
+
+    expect(fableTitles.length).toBeGreaterThanOrEqual(55)
+    expect(historyTitles.length).toBeGreaterThanOrEqual(60)
+    expect(new Set(fableTitles).size).toBe(fableTitles.length)
+    expect(new Set(historyTitles).size).toBe(historyTitles.length)
+    expect(fableTitles).toEqual(expect.arrayContaining(coreFables))
+    expect(historyTitles).toEqual(expect.arrayContaining(coreHistory))
   })
 })

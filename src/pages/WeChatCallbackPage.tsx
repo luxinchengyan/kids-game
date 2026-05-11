@@ -5,11 +5,12 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import authService from '../services/authService';
 import { useUserStore } from '../stores/useUserStore';
+import { toStoreChild, toStoreParent } from '../lib/sessionMappers';
 
 export default function WeChatCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { setAuthenticated, setParent, setChildren } = useUserStore();
+  const { setAuthenticated, setParent, setChildren, setCurrentChild } = useUserStore();
 
   useEffect(() => {
     const { isNewUser } = authService.handleWechatCallback(searchParams);
@@ -18,36 +19,15 @@ export default function WeChatCallbackPage() {
     // 刷新用户信息并同步到 Store
     authService.getMe().then(({ parent, children }) => {
       setParent({
-        phone: parent.phone,
+        ...toStoreParent(parent, children),
         wechatOpenId: parent.wechatOpenId,
         wechatNickname: parent.wechatNickname,
         wechatAvatarUrl: parent.wechatAvatarUrl,
-        settings: {
-          dailyTimeLimit: parent.dailyTimeLimit,
-          soundEnabled: parent.soundEnabled,
-          musicEnabled: parent.musicEnabled,
-          notificationsEnabled: parent.notificationsEnabled,
-        },
-        children: children.map(c => c.id),
-        _id: parent.id,
       });
 
-      const mappedChildren = children.map(c => ({
-        _id: c.id,
-        parentId: c.parentId,
-        nickname: c.nickname,
-        age: c.age,
-        birthYearMonth: c.birthYearMonth,
-        gender: c.gender,
-        avatarId: c.avatarId,
-        avatarUrl: c.avatarUrl,
-        chronologicalAge: c.chronologicalAge,
-        inferredAge: c.inferredAge,
-        inferredDifficulty: c.inferredDifficulty,
-        ageSource: c.ageSource,
-        recommendedDifficulties: c.recommendedDifficulties,
-      }));
+      const mappedChildren = children.map(toStoreChild);
       setChildren(mappedChildren);
+      setCurrentChild(mappedChildren[0] ?? null);
 
       if (isNewUser || children.length === 0) {
         navigate('/setup-child', { replace: true });

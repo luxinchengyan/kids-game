@@ -103,7 +103,6 @@ export default function StoryList({ onSelectStory, onBack }) {
   return (
     <div style={{ 
       width: '100%', 
-      maxWidth: '700px', 
       margin: '0 auto' 
     }}>
       <div style={{ 

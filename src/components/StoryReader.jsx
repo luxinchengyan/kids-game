@@ -118,7 +118,6 @@ export default function StoryReader({ story, onComplete, onBack }) {
   return (
     <div style={{ 
       width: '100%', 
-      maxWidth: '700px', 
       margin: '0 auto' 
     }}>
       <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

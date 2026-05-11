@@ -181,8 +181,11 @@ export default function MathSlideGame() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${settings.size}, minmax(0, 1fr))`,
-                gap: '12px',
+                gap: '10px',
                 marginBottom: '20px',
+                maxWidth: settings.size === 3 ? '320px' : '400px',
+                width: '100%',
+                margin: '0 auto 20px',
               }}
             >
               {board.map((value, index) => (
@@ -196,7 +199,7 @@ export default function MathSlideGame() {
                     border: value === 0 ? '2px dashed #90CAF9' : '3px solid #64B5F6',
                     background: value === 0 ? 'rgba(144, 202, 249, 0.18)' : 'linear-gradient(135deg, #FFFFFF, #BBDEFB)',
                     color: '#1565C0',
-                    fontSize: settings.size === 4 ? '26px' : '34px',
+                    fontSize: settings.size === 4 ? '22px' : '28px',
                     fontWeight: 900,
                     cursor: value === 0 ? 'default' : 'pointer',
                     boxShadow: value === 0 ? 'none' : '0 8px 16px rgba(33, 150, 243, 0.12)',

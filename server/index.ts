@@ -11,6 +11,7 @@ import authRouter from './routes/auth';
 import userRouter from './routes/user';
 import progressRouter from './routes/progress';
 import rewardsRouter from './routes/rewards';
+import leaderboardRouter from './routes/leaderboard';
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/rewards', rewardsRouter);
+app.use('/api/leaderboard', leaderboardRouter);
 
 // 404
 app.use((_req, res) => res.status(404).json({ code: 'NOT_FOUND', message: '接口不存在' }));

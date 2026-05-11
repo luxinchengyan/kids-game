@@ -101,13 +101,9 @@ const pinyinTextMap: Record<string, string> = {
   'li': '里',
   'tu': '兔',
   'he': '喝',
-  'na': '那',
   'le': '乐',
   'ge': '哥',
   'ke': '科',
-  'ga': '嘎',
-  'ka': '卡',
-  'ha': '哈',
   'lu': '路',
   'nu': '怒',
   'ju': '居',
@@ -226,6 +222,15 @@ export function playError(): void {
   speak(text);
 }
 
+/**
+ * 播放点击/通用的反馈音效
+ */
+export function playClick(): void {
+  // 这里可以播放一个清脆的点击声，目前先简单调用 TTS 或预留
+  // 如果有 asset 可以用 playSound('/audio/click.mp3')
+  // 为了不报错，先提供一个空实现或简单的视觉反馈辅助音
+}
+
 export const Audio = {
   speak,
   play: playAudio,
@@ -233,6 +238,7 @@ export const Audio = {
   stopAudio,
   playSuccess,
   playError,
+  playClick,
 };
 
 export default Audio;

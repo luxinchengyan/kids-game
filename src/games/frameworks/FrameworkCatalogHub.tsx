@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { PageLayout, GamePageHeader } from '../../components/PageLayout';
@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { frameworkCatalog } from '../../data/gameFrameworkCatalog';
 import { getGameSeriesSnapshot } from '../../data/gameSeriesCatalog';
 import { track } from '../../lib/analytics';
+import PinyinText from '../../components/PinyinText';
 
 function StatusBadge({ playable }: { playable: boolean }) {
   return (
@@ -13,19 +14,66 @@ function StatusBadge({ playable }: { playable: boolean }) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '6px',
-        padding: '6px 12px',
+        gap: '4px',
+        padding: '4px 8px',
         borderRadius: '999px',
-        fontSize: '12px',
+        fontSize: '11px',
         fontWeight: 800,
-        color: playable ? '#1B5E20' : '#6A1B9A',
+        color: playable ? '#2E7D32' : '#7B1FA2',
         background: playable ? '#E8F5E9' : '#F3E5F5',
+        whiteSpace: 'nowrap',
       }}
     >
-      {playable ? '✅ 可体验' : '🧩 框架已定义'}
+      {playable ? '✅ 可玩' : '🧩 框架'}
     </span>
   );
 }
+
+// 辅助函数：为常见的游戏名提供拼音映射（实际项目中应从数据层提供）
+const getPinyin = (text: string) => {
+  const pinyinMap: Record<string, string> = {
+    '拼音打地鼠': 'pīn yīn dǎ dì shǔ',
+    '拼音翻翻乐': 'pīn yīn fān fān lè',
+    '拼音连连看': 'pīn yīn lián lián kàn',
+    '拼音拼图': 'pīn yīn pīn tú',
+    '拼音节奏大师': 'pīn yīn jié zòu dà shī',
+    '找规律填数': 'zhǎo guī lǜ tián shù',
+    '数独儿童版': 'shù dú ér tóng bǎn',
+    '数学打地鼠': 'shù xué dǎ dì shǔ',
+    '数字华容道': 'shù zì huá róng dào',
+    '比大小跷跷板': 'bǐ dà xiǎo qiāo qiāo bǎn',
+    '单词翻翻乐': 'dān cí fān fān lè',
+    '字母拼图': 'zì mǔ pīn tú',
+    '英语打地鼠': 'yīng yǔ dǎ dì shǔ',
+    '英语宾果': 'yīng yǔ bīn guǒ',
+    '英语角色扮演': 'yīng yǔ jué sè bàn yǎn',
+    '故事排序': 'gù shì pái xù',
+    '故事阅读': 'gù shì yuè dú',
+    '汉字打地鼠': 'hàn zì dǎ dì shǔ',
+    '故事问答转盘': 'gù shì wèn dá zhuàn pán',
+    '故事创作工坊': 'gù shì chuàng zuò gōng fǎng',
+    '舒尔特方格': 'shū ěr tè fāng gé',
+    '反应测试': 'fǎn yìng cè shì',
+    '记忆翻牌': 'jì yì fān pái',
+    '找规律': 'zhǎo guī lǜ',
+    '迷宫探险': 'mí gōng tàn xiǎn',
+    '五子棋': 'wǔ zǐ qí',
+    '扫雷大冒险': 'sǎo léi dà mào xiǎn',
+    '中国象棋': 'zhōng guó xiàng qí',
+    '国际象棋': 'guó jì xiàng qí',
+    '围棋入门': 'wéi qí rù mén',
+    '军棋大战': 'jūn qí dà zhàn',
+    '趣味牌类': 'qù wèi pái lèi',
+    '跳棋': 'tiào qí',
+    '拼音冒险岛': 'pīn yīn mào xiǎn dǎo',
+    '数字小镇': 'shù zì xiǎo zhèn',
+    '英语游乐园': 'yīng yǔ yóu lè yuán',
+    '故事王国': 'gù shì wáng guó',
+    '跨学科综合游戏': 'kuà xué kē zōng hé yóu xì',
+    '智趣棋牌中心': 'zhì qù qí pái zhōng xīn',
+  };
+  return pinyinMap[text] || '';
+};
 
 export default function FrameworkCatalogHub() {
   const navigate = useNavigate();
@@ -48,212 +96,134 @@ export default function FrameworkCatalogHub() {
   );
 
   return (
-    <PageLayout maxWidth="1080px">
+    <PageLayout maxWidth="1120px">
       <GamePageHeader
         title="游戏设计工坊"
         icon="🛠️"
-        subtitle="把 GAMES 设计文档拆成一套可复用、可扩展、可直接玩的游戏框架。"
+        subtitle="把设计变成好玩的游戏框架"
         gradient="linear-gradient(135deg, #E91E63, #FF9800, #2196F3)"
         progressColor="#E91E63"
         onBack={handleBack}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{
-          background: 'linear-gradient(135deg, #FFF8E1, #FFFFFF)',
-          borderRadius: '24px',
-          padding: '24px',
-          border: '3px solid #FFE082',
-          boxShadow: '0 12px 30px rgba(255, 152, 0, 0.12)',
-          marginBottom: '24px',
-        }}
-      >
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-          {[
-            '单次时长 3-8 分钟',
-            '200ms 内反馈',
-            '统一奖励接入',
-            '低认知负担',
-            '一套框架多主题复用',
-            `已可玩 ${playableCount}/${totalCount}`,
-          ].map(
-            (chip) => (
-              <span
-                key={chip}
-                style={{
-                  background: '#FFFFFF',
-                  color: '#5D4037',
-                  borderRadius: '999px',
-                  padding: '8px 14px',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  border: '2px solid #FFE0B2',
-                }}
-              >
-                {chip}
-              </span>
-            )
-          )}
-        </div>
-        <p style={{ margin: 0, color: '#6D4C41', lineHeight: 1.8, fontWeight: 600 }}>
-          这里不是静态清单，而是把文档里的玩法拆成“打地鼠 / 翻翻乐 / 规律挑战 / 顺序重建 /
-          专注训练 / 反应训练”等基础框架。后续新增主题时，只需替换题库、配色和反馈语气即可继续扩展。
-        </p>
-      </motion.div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '24px' }}>
         {frameworkCatalog.map((section, sectionIndex) => (
           <motion.section
             key={section.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: sectionIndex * 0.06 }}
-            style={{
-              background: '#FFFFFF',
-              borderRadius: '24px',
-              padding: '24px',
-              border: `3px solid ${section.color}30`,
-              boxShadow: '0 10px 24px rgba(0, 0, 0, 0.06)',
-            }}
+            transition={{ delay: sectionIndex * 0.05 }}
           >
-            <div style={{ marginBottom: '18px' }}>
-              <h2
-                style={{
-                  margin: '0 0 8px 0',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  color: section.color,
-                }}
-              >
-                {section.icon} {section.title}
-              </h2>
-              <p style={{ margin: 0, color: '#6D4C41', fontWeight: 600, lineHeight: 1.7 }}>
-                {section.description}
-              </p>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '20px', padding: '0 8px' }}>
+              <div style={{ fontSize: '42px' }}>{section.icon}</div>
+              <div>
+                <PinyinText text={section.title} pinyin={getPinyin(section.title)} />
+                <div style={{ height: '4px', background: section.color, borderRadius: '2px', marginTop: '4px', width: '60px' }} />
+              </div>
             </div>
 
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '16px',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '20px',
               }}
-              >
-                {section.games.map((item) => {
-                  const playable = item.status === 'playable' && !!item.playPath;
-                  const series = getGameSeriesSnapshot(item.id);
-                  return (
-                    <motion.div
+            >
+              {section.games.map((item) => {
+                const playable = item.status === 'playable' && !!item.playPath;
+                return (
+                  <motion.div
                     key={item.id}
-                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileHover={{ y: -6, boxShadow: '0 12px 24px rgba(0,0,0,0.1)' }}
                     style={{
-                      borderRadius: '20px',
-                      padding: '18px',
-                      background: `${section.color}10`,
-                      border: `2px solid ${section.color}25`,
+                      borderRadius: '24px',
+                      padding: '20px',
+                      background: '#FFFFFF',
+                      border: `3px solid ${playable ? section.color + '40' : '#EEEEEE'}`,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '12px',
-                      minHeight: '100%',
+                      gap: '16px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                      <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#3E2723' }}>
-                        {item.name}
-                      </h3>
+                    {!playable && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '-30px',
+                        background: '#9E9E9E',
+                        color: 'white',
+                        padding: '4px 40px',
+                        transform: 'rotate(45deg)',
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        zIndex: 1
+                      }}>
+                        开发中
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <div style={{ flex: 1 }}>
+                        <PinyinText text={item.name} pinyin={getPinyin(item.name)} />
+                      </div>
                       <StatusBadge playable={playable} />
                     </div>
 
-                    <p style={{ margin: 0, color: '#5D4037', lineHeight: 1.7, fontWeight: 600 }}>
+                    <p style={{ 
+                      margin: 0, 
+                      color: '#5D4037', 
+                      lineHeight: 1.5, 
+                      fontSize: '14px', 
+                      fontWeight: 600,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      height: '42px'
+                    }}>
                       {item.description}
                     </p>
 
-                    <div
-                      style={{
-                        background: '#FFFFFF',
-                        borderRadius: '14px',
-                        padding: '12px',
-                        color: '#6D4C41',
-                        fontWeight: 700,
-                      }}
-                    >
-                      教育目标：{item.goal}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {item.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} style={{
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          padding: '4px 10px',
+                          borderRadius: '999px',
+                          background: section.color + '15',
+                          color: section.color
+                        }}>#{tag}</span>
+                      ))}
                     </div>
 
-                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                       {item.tags.map((tag) => (
-                         <span
-                          key={tag}
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 800,
-                            borderRadius: '999px',
-                            padding: '6px 10px',
-                            color: section.color,
-                            background: '#FFFFFF',
-                          }}
-                        >
-                           #{tag}
-                          </span>
-                        ))}
-                        {series && (
-                          <>
-                            <span
-                              style={{
-                                fontSize: '12px',
-                                fontWeight: 800,
-                                borderRadius: '999px',
-                                padding: '6px 10px',
-                                color: section.color,
-                                background: '#FFFFFF',
-                              }}
-                            >
-                              {series.stageLabel}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: '12px',
-                                fontWeight: 800,
-                                borderRadius: '999px',
-                                padding: '6px 10px',
-                                color: section.color,
-                                background: '#FFFFFF',
-                              }}
-                            >
-                              {series.bankLabel}
-                            </span>
-                          </>
-                        )}
-                     </div>
-
-                     {series && (
-                       <div
-                         style={{
-                           background: '#FFFFFF',
-                           borderRadius: '14px',
-                           padding: '12px',
-                           color: '#6D4C41',
-                           fontWeight: 700,
-                           lineHeight: 1.7,
-                         }}
-                       >
-                         系列路线：{series.ladderLabel}
-                       </div>
-                     )}
-
-                     <div style={{ marginTop: 'auto' }}>
+                    <div style={{ marginTop: 'auto', paddingTop: '8px' }}>
                       {playable ? (
                         <Button
+                          size="large"
                           onClick={() => handlePlay(section.id, item.id, item.playPath as string)}
+                          style={{
+                            width: '100%',
+                            background: section.color,
+                            fontSize: '18px',
+                            fontWeight: 900,
+                            boxShadow: `0 6px 0 ${section.color}88`,
+                            transform: 'translateY(-2px)'
+                          }}
                         >
-                          立即体验
+                          ▶️ 开始玩
                         </Button>
                       ) : (
-                        <div style={{ color: '#7B1FA2', fontWeight: 700, fontSize: '14px' }}>
-                          当前卡片仍是预研设计项，可继续按题库接入。
-                        </div>
+                        <Button
+                          variant="secondary"
+                          disabled
+                          style={{ width: '100%', opacity: 0.6 }}
+                        >
+                          🧩 完善中
+                        </Button>
                       )}
                     </div>
                   </motion.div>

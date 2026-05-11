@@ -1,0 +1,163 @@
+/* src/games/kakuro/Kakuro.css */
+
+.kakuro-table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.kakuro-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.kakuro-game-info div {
+  font-weight: bold;
+}
+
+.kakuro-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.kakuro-game-info button:hover {
+  background-color: #e55337;
+}
+
+.kakuro-grid {
+  display: grid;
+  border: 2px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.kakuro-cell, .kakuro-clue-cell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  background-color: #fff; /* Default background for number cells */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.kakuro-cell.selected {
+  background-color: #a0d4ff; /* Light blue for selected cell */
+}
+
+.kakuro-cell.pre-filled {
+  background-color: #e0e0e0; /* Gray for pre-filled numbers */
+  color: #333;
+  cursor: default;
+  font-weight: bold;
+}
+
+.kakuro-cell.filled {
+  color: #007bff; /* Blue for user-entered numbers */
+}
+
+.kakuro-cell.invalid {
+  background-color: #ffdddd; /* Light red for invalid entries */
+  color: #d9534f; /* Red text for invalid */
+}
+
+.kakuro-cell:not(.pre-filled):hover {
+  background-color: #f0f8ff; /* Alice blue on hover */
+}
+
+.kakuro-clue-cell {
+  background-color: #333; /* Dark background for clue cells */
+  color: white;
+  font-size: 0.8em;
+  flex-direction: column; /* Arrange clue numbers vertically if needed */
+  align-items: flex-start; /* Align clue text to top-left */
+  padding: 2px;
+}
+
+.kakuro-clue-cell .clue-across {
+  text-align: right;
+  width: 100%;
+}
+
+.kakuro-clue-cell .clue-down {
+  text-align: left;
+  width: 100%;
+}
+
+.cell-value {
+  color: #333;
+}
+
+/* Thick borders for 3x3 boxes */
+.border-bottom-thick {
+  border-bottom: 2px solid #333 !important;
+}
+
+.border-right-thick {
+  border-right: 2px solid #333 !important;
+}
+
+.number-palette {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.palette-number,
+.palette-erase {
+  width: 45px;
+  height: 45px;
+  font-size: 1.3em;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.palette-number:hover,
+.palette-erase:hover {
+  background-color: #e8e8e8;
+}
+
+.palette-number.selected,
+.palette-erase.selected {
+  background-color: #007bff; /* Blue for selected */
+  color: white;
+  border-color: #0056b3;
+}
+
+.palette-erase {
+  font-size: 1em;
+  font-weight: normal;
+}
+
+.puzzle-complete-message {
+  margin-top: 20px;
+  font-size: 1.5em;
+  color: #28a745; /* Green for success */
+  font-weight: bold;
+}

@@ -1,0 +1,78 @@
+/* src/games/tetris/Tetris.css */
+
+.tetris-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tetris-game-info {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tetris-game-info div {
+  font-weight: bold;
+}
+
+.game-over-message {
+  color: #d9534f; /* Red for game over */
+  font-size: 1.5em;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.tetris-grid-container {
+  display: grid;
+  border: 3px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: #1a1a1a; /* Dark background for the grid */
+}
+
+.tetris-cell {
+  width: 30px; /* Matches cellSize in TetriminoComponent and renderGrid */
+  height: 30px;
+  box-sizing: border-box;
+  /* Border applied by grid, but can add if needed for individual cells */
+}
+
+.tetris-cell.occupied {
+  /* Background color is set inline by TetrisEngine */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for occupied cells */
+}
+
+.tetris-cell.piece-block {
+  border: 1px solid rgba(0, 0, 0, 0.3); /* Slightly darker border for blocks of falling piece */
+}
+
+.next-piece-preview {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.next-piece-preview h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.next-piece-preview svg {
+  border: 1px solid #ccc;
+  background-color: #1a1a1a;
+}

@@ -9,6 +9,7 @@ import WeChatCallbackPage from './pages/WeChatCallbackPage';
 import authService from './services/authService';
 import { useUserStore } from './stores/useUserStore';
 import { config } from './config';
+import { toStoreChild, toStoreParent } from './lib/sessionMappers';
 
 // Auth guard — 未登录时重定向到登录页；本地试用模式下直接放行
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,7 @@ import './games/geography';
 import './games/subjects';
 import './games/history';
 import './games/typing';
+import './games/board';
 
 const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
 
@@ -69,37 +71,12 @@ const App: React.FC = () => {
   // 启动时检查 token 并恢复会话
   useEffect(() => {
     if (authService.isLoggedIn()) {
-      authService.getMe()
-        .then(({ parent, children }) => {
-          setParent({
-            _id: parent.id,
-            phone: parent.phone,
-            settings: {
-              dailyTimeLimit: parent.dailyTimeLimit,
-              soundEnabled: parent.soundEnabled,
-              musicEnabled: parent.musicEnabled,
-              notificationsEnabled: parent.notificationsEnabled,
-            },
-            children: children.map(c => c.id),
-          });
-          const mapped = children.map(c => ({
-            _id: c.id,
-            parentId: c.parentId,
-            nickname: c.nickname,
-            age: c.age,
-            birthYearMonth: c.birthYearMonth,
-            gender: c.gender,
-            avatarId: c.avatarId,
-            avatarUrl: c.avatarUrl,
-            chronologicalAge: c.chronologicalAge,
-            inferredAge: c.inferredAge,
-            inferredDifficulty: c.inferredDifficulty,
-            ageSource: c.ageSource,
-            recommendedDifficulties: c.recommendedDifficulties,
-          }));
-          setChildren(mapped);
-          setAuthenticated(true);
-        })
+        authService.getMe()
+          .then(({ parent, children }) => {
+            setParent(toStoreParent(parent, children));
+            setChildren(children.map(toStoreChild));
+            setAuthenticated(true);
+          })
         .catch(() => {
           // token 过期或无效，清除本地状态
           setAuthenticated(false);

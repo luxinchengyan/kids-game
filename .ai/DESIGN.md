@@ -527,50 +527,39 @@ All spacing uses 8px multiples: 4, 8, 16, 24, 32, 48, 64
 
 ## 10. Data Flow & State Management
 
-### 10.1 Architecture Overview
+### 10.1 架构概览 (Architecture Overview)
 
-**State Management**: Zustand (lightweight, performant)
+**状态管理 (State Management)**: Zustand (轻量、高性能)
 
-| Store | File | Purpose |
-|-------|------|---------|
-| **useUserStore** | `src/stores/useUserStore.ts` | Child profiles, preferences, settings |
-| **useRewardStore** | `src/stores/useRewardStore.ts` | Stars, levels, badges, streaks |
-| **useGameStore** | `src/stores/useGameStore.ts` | Current game, progress, rewards queue |
+| Store | 文件 | 用途 |
+|-------|------|------|
+| **useUserStore** | `src/stores/useUserStore.ts` | 孩子档案、家长设置、年龄同步触发器 |
+| **useGameStore** | `src/stores/useGameStore.ts` | **核心引擎**：统一管理进度、奖励、SM-2 算法、知识图谱 |
+| **useRewardStore** | `src/stores/useRewardStore.ts` | **兼容代理**：代理 `useGameStore` 状态，确保旧组件可用 |
 
-### 10.2 Data Flow Pattern
-
-```
-User Action → Store Update → UI Re-render → Analytics Track
-```
-
-**Example Flow**:
-```typescript
-// 1. User clicks button
-<Button onClick={() => addStars(1)} />
-
-// 2. Store updates
-const addStars = useRewardStore((s) => s.addStars)
-
-// 3. UI re-renders automatically
-const stars = useRewardStore((s) => s.rewards.stars)
-
-// 4. Analytics tracked
-track('add_stars', { count: 1 })
-```
-
-### 10.3 Game Flow
+### 10.2 数据流模式 (Data Flow Pattern)
 
 ```
-Home → Game Select → Task 1 → Task 2 → Task 3 → Complete → Reward → Home
+用户行为 → Store 更新 (含 SM-2 计算) → UI 自动重渲染 → 埋点上报
 ```
 
-**Implementation**:
-- Game selection: `gameRegistry` in `src/games/registry.ts`
-- Task progression: `currentTaskIndex` state in game components
-- Completion: `useGameCompletion` hook
-- Reward display: `RewardToast` component
+**自适应循环 (Adaptive Loop)**:
+1. **初始化/切换孩子**: 根据 `child.age` 调用 `syncKnowledgeWithAge` 过滤知识点。
+2. **任务生成**: `createMission` 结合 SM-2 `nextReviewAt` 编排闭环任务。
+3. **记录结果**: `recordTaskResult` 更新 SM-2 参数 (`easinessFactor`, `interval`)。
 
-### 10.4 Reward System
+### 10.3 游戏闭环 (Pedagogical Loop)
+
+```
+热身 (Warmup/复习) → 主线 (Core/新知) → 挑战 (Checkpoint/迁移) → 奖励 (Reward)
+```
+
+**实现细节**:
+- **复习**: SM-2 算法到期任务优先。
+- **新知**: 符合 `minAge/maxAge` 的未学知识点。
+- **挑战**: 针对 `accuracy < 0.7` 的薄弱点进行变体练习。
+
+### 10.4 激励系统 (Reward System)
 
 | Reward Type | Trigger | Frequency | Storage |
 |------------|---------|-----------|---------|

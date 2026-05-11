@@ -1,0 +1,153 @@
+/* src/games/sudoku/Sudoku.css */
+
+.sudoku-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+.game-info {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  align-items: center;
+}
+
+.game-info button {
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.game-info button:hover {
+  background-color: #e0e0e0;
+}
+
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 40px);
+  grid-template-rows: repeat(9, 40px);
+  border: 2px solid #333;
+  margin-bottom: 20px;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 1.4em;
+  font-weight: bold;
+  box-sizing: border-box; /* Include border in element's total width and height */
+}
+
+.cell.selected {
+  background-color: #a0d4ff; /* Light blue for selected cell */
+}
+
+.cell.pre-filled {
+  background-color: #e0e0e0; /* Gray for pre-filled numbers */
+  color: #333;
+  cursor: default;
+  font-weight: bold;
+}
+
+.cell.user-filled {
+  color: #007bff; /* Blue for user-entered numbers */
+}
+
+.cell.invalid {
+  background-color: #ffdddd; /* Light red for invalid entries */
+  color: #d9534f; /* Red text for invalid */
+}
+
+.cell:not(.pre-filled):hover {
+  background-color: #f0f8ff; /* Alice blue on hover for non-pre-filled cells */
+}
+
+.cell-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell-number {
+  color: #333;
+}
+
+.cell-candidates {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  font-size: 0.7em;
+  color: #999;
+  box-sizing: border-box;
+}
+
+.candidate-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Thick borders for 3x3 boxes */
+.border-bottom-thick {
+  border-bottom: 2px solid #333 !important;
+}
+
+.border-right-thick {
+  border-right: 2px solid #333 !important;
+}
+
+
+.number-palette {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.palette-number,
+.palette-erase {
+  width: 45px;
+  height: 45px;
+  font-size: 1.3em;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.palette-number:hover,
+.palette-erase:hover {
+  background-color: #e8e8e8;
+}
+
+.palette-number.selected,
+.palette-erase.selected {
+  background-color: #007bff; /* Blue for selected */
+  color: white;
+  border-color: #0056b3;
+}
+
+.palette-erase {
+  font-size: 1em;
+  font-weight: normal;
+}

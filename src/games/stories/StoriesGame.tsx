@@ -1,15 +1,24 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { track } from '../../lib/analytics';
-import { PageLayout, GamePageHeader } from '../../components/PageLayout';
+import { APP_SHELL_MAX_WIDTH, PageLayout, GamePageHeader } from '../../components/PageLayout';
 import { getGamesByTheme } from '../registry';
 import type { GameConfig } from '../registry';
-import { getGameSeriesSnapshot } from '../../data/gameSeriesCatalog';
+import { SectionHeading, SurfaceCard } from '../../components/BrandPrimitives';
+import { ThemeHubGameCard } from '../../components/ThemeHubPage';
 
 const StoryList = lazy(() => import('../../components/StoryList'));
 const StoryReader = lazy(() => import('../../components/StoryReader'));
+
+interface StorySelection {
+  id?: string;
+}
+
+interface StoryCompletionResult {
+  success: boolean;
+  stars?: number;
+}
 
 function LazyFallback() {
   return (
@@ -32,18 +41,18 @@ function LazyFallback() {
 export default function StoriesGame() {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion('stories');
-  const [selectedStory, setSelectedStory] = useState<any>(null);
+  const [selectedStory, setSelectedStory] = useState<StorySelection | null>(null);
   const [currentView, setCurrentView] = useState<'list' | 'reader'>('list');
   const storyGames = getGamesByTheme('stories-hub');
 
-  const handleSelectStory = useCallback((story: any) => {
+  const handleSelectStory = useCallback((story: StorySelection) => {
     track('story_select', { storyId: story?.id ?? '' });
     setSelectedStory(story);
     setCurrentView('reader');
   }, []);
 
   const handleStoryComplete = useCallback(
-    (result: any) => {
+      (result: StoryCompletionResult) => {
       track('story_complete', { success: !!result.success, stars: result.stars ?? 0 });
       
       handleGameComplete({
@@ -79,7 +88,7 @@ export default function StoriesGame() {
 
   if (currentView === 'reader' && selectedStory) {
     return (
-      <PageLayout maxWidth="700px">
+      <PageLayout maxWidth={APP_SHELL_MAX_WIDTH}>
         <GamePageHeader
           title="故事王国"
           icon="📚"
@@ -100,7 +109,7 @@ export default function StoriesGame() {
   }
 
   return (
-    <PageLayout maxWidth="700px">
+    <PageLayout maxWidth={APP_SHELL_MAX_WIDTH}>
       <GamePageHeader
         title="故事王国"
         icon="📚"
@@ -110,88 +119,36 @@ export default function StoriesGame() {
         onBack={handleBack}
       />
 
-      <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '20px',
-          padding: '20px',
-          marginBottom: '20px',
-          boxShadow: '0 10px 24px rgba(0,0,0,0.06)',
-        }}
+      <SurfaceCard
+        borderColor="rgba(156, 39, 176, 0.22)"
+        background="linear-gradient(135deg, #F3E5F5, rgba(255,255,255,0.98))"
+        style={{ padding: '24px 26px', marginBottom: '24px' }}
       >
-        <h3 style={{ margin: '0 0 8px 0', color: '#6A1B9A', fontSize: '24px' }}>🎮 故事小游戏</h3>
-        <p style={{ margin: '0 0 16px 0', color: '#7B1FA2', fontWeight: 600 }}>
-          先读故事，也可以直接进入排序、打地鼠和测试小挑战。
-        </p>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '12px',
-          }}
-        >
+        <SectionHeading
+          eyebrow="Story world"
+          title="先读故事，也可以切到互动挑战"
+          description="把阅读、排序、闯关和测验放在同一入口里，让故事学习更像连续探索，而不是孤立功能。"
+          accent="#7B1FA2"
+          style={{ marginBottom: '18px' }}
+        />
+        <div style={{ display: 'grid', gap: '16px' }}>
           {storyGames.map((game, index) => (
-            <motion.button
+            <ThemeHubGameCard
               key={game.id}
-              type="button"
-              whileHover={{ y: -3, scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleGameSelect(game)}
-              style={{
-                border: 'none',
-                borderRadius: '18px',
-                padding: '16px',
-                background: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)',
-                textAlign: 'left',
-                cursor: 'pointer',
-                boxShadow: '0 8px 16px rgba(156, 39, 176, 0.12)',
-                animationDelay: `${index * 80}ms`,
+              game={game}
+              index={index}
+              palette={{
+                primary: '#9C27B0',
+                secondary: '#CE93D8',
+                soft: '#F3E5F5',
+                border: 'rgba(156, 39, 176, 0.22)',
+                gradient: 'linear-gradient(135deg, #9C27B0, #CE93D8)',
               }}
-            >
-              {(() => {
-                const series = getGameSeriesSnapshot(game.id);
-                return (
-                  <>
-                    <div style={{ fontSize: '30px', marginBottom: '8px' }}>{game.icon}</div>
-                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#4A148C', marginBottom: '6px' }}>{game.name}</div>
-                    <div style={{ color: '#6A1B9A', fontWeight: 600, lineHeight: 1.6, marginBottom: '10px' }}>
-                      {game.description}
-                    </div>
-                    {series && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                        <span
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 800,
-                            color: '#6A1B9A',
-                            background: '#FFFFFF',
-                            borderRadius: '999px',
-                            padding: '6px 10px',
-                          }}
-                        >
-                          {series.stageLabel}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 800,
-                            color: '#6A1B9A',
-                            background: '#FFFFFF',
-                            borderRadius: '999px',
-                            padding: '6px 10px',
-                          }}
-                        >
-                          {series.bankLabel}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </motion.button>
+              onClick={() => handleGameSelect(game)}
+            />
           ))}
         </div>
-      </div>
+      </SurfaceCard>
 
       <Suspense fallback={<LazyFallback />}>
         <StoryList onSelectStory={handleSelectStory} onBack={handleBack} />

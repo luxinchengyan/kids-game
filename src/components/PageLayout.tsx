@@ -4,6 +4,7 @@
  * 用于保证全站风格一致
  */
 import type { ReactNode, CSSProperties } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -242,6 +243,8 @@ interface PageLayoutProps {
   style?: CSSProperties;
 }
 
+export const APP_SHELL_MAX_WIDTH = '1200px';
+
 /**
  * 统一页面包裹组件：
  * - 全屏暖色背景
@@ -274,6 +277,63 @@ export function PageLayout({ children, maxWidth = '800px', style }: PageLayoutPr
         <LearningJourneyDock />
       </div>
     </div>
+  );
+}
+
+// =========================================
+// 规则朗读按钮
+// =========================================
+
+function RulesAudioButton({ text, lang = 'zh-CN' }: { text: string; lang?: string }) {
+  const [speaking, setSpeaking] = useState(false);
+
+  const handleSpeak = useCallback(() => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+
+    if (speaking) {
+      setSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 0.82;
+    utterance.pitch = 1.1;
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  }, [text, lang, speaking]);
+
+  if (!('speechSynthesis' in window)) return null;
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.12 }}
+      whileTap={{ scale: 0.92 }}
+      onClick={handleSpeak}
+      title={speaking ? '停止朗读' : '朗读规则'}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '38px',
+        height: '38px',
+        borderRadius: '50%',
+        border: `2px solid ${speaking ? '#FF9800' : '#B0BEC5'}`,
+        background: speaking
+          ? 'linear-gradient(135deg, #FFF8E1, #FFE0B2)'
+          : 'linear-gradient(135deg, #F5F5F5, #ECEFF1)',
+        cursor: 'pointer',
+        fontSize: '18px',
+        boxShadow: speaking ? '0 0 0 4px rgba(255,152,0,0.18)' : '0 2px 6px rgba(0,0,0,0.08)',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        flexShrink: 0,
+      }}
+    >
+      {speaking ? '⏹' : '🔊'}
+    </motion.button>
   );
 }
 
@@ -375,16 +435,27 @@ export function GamePageHeader({
           {icon && `${icon} `}{title}
         </motion.h1>
         {subtitle && (
-          <p
+          <div
             style={{
-              fontSize: 'var(--font-size-lg)',
-              color: 'var(--color-text-secondary)',
-              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
               marginBottom: 'var(--spacing-md)',
             }}
           >
-            {subtitle}
-          </p>
+            <p
+              style={{
+                fontSize: 'var(--font-size-lg)',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+                margin: 0,
+              }}
+            >
+              {subtitle}
+            </p>
+            <RulesAudioButton text={subtitle} />
+          </div>
         )}
       </div>
 

@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import authService from '../services/authService';
 import { useUserStore } from '../stores/useUserStore';
 import { config } from '../config';
+import { toStoreChild, toStoreParent } from '../lib/sessionMappers';
 
 type LoginStep = 'phone' | 'otp';
 
@@ -31,13 +32,26 @@ export default function LoginPage() {
 
   const startCountdown = useCallback(() => {
     setCountdown(60);
-    const timer = setInterval(() => {
-      setCountdown(c => {
-        if (c <= 1) { clearInterval(timer); return 0; }
-        return c - 1;
-      });
-    }, 1000);
   }, []);
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCountdown((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [countdown]);
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+    return fallback;
+  };
 
   const handleSendOtp = async () => {
     if (!/^1[3-9]\d{9}$/.test(phone)) {
@@ -51,8 +65,8 @@ export default function LoginPage() {
       if (res.debugCode) setDebugCode(res.debugCode);
       setStep('otp');
       startCountdown();
-    } catch (err: any) {
-      setError(err.message || '发送失败，请重试');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, '发送失败，请重试'));
     } finally {
       setLoading(false);
     }
@@ -67,33 +81,8 @@ export default function LoginPage() {
     setError('');
     try {
       const result = await authService.verifyOtp(phone, otp);
-      // 同步到全局状态
-      setParent({
-        phone: result.parent.phone,
-        settings: {
-          dailyTimeLimit: result.parent.dailyTimeLimit,
-          soundEnabled: result.parent.soundEnabled,
-          musicEnabled: result.parent.musicEnabled,
-          notificationsEnabled: result.parent.notificationsEnabled,
-        },
-        children: result.children.map(c => c.id),
-        _id: result.parent.id,
-      });
-      setChildren(result.children.map(c => ({
-        _id: c.id,
-        parentId: c.parentId,
-        nickname: c.nickname,
-        age: c.age,
-        birthYearMonth: c.birthYearMonth,
-        gender: c.gender,
-        avatarId: c.avatarId,
-        avatarUrl: c.avatarUrl,
-        chronologicalAge: c.chronologicalAge,
-        inferredAge: c.inferredAge,
-        inferredDifficulty: c.inferredDifficulty,
-        ageSource: c.ageSource,
-        recommendedDifficulties: c.recommendedDifficulties,
-      })));
+      setParent(toStoreParent(result.parent, result.children));
+      setChildren(result.children.map(toStoreChild));
       setAuthenticated(true);
 
       if (result.isNewUser || result.children.length === 0) {
@@ -101,8 +90,8 @@ export default function LoginPage() {
       } else {
         navigate('/', { replace: true });
       }
-    } catch (err: any) {
-      setError(err.message || '验证失败，请检查验证码');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, '验证失败，请检查验证码'));
     } finally {
       setLoading(false);
     }
@@ -233,13 +222,15 @@ export default function LoginPage() {
               )}
 
               <label style={{ display: 'block', marginBottom: 8, color: COLORS.text, fontWeight: 600, fontSize: 14 }}>输入验证码</label>
-              <input
-                type="number"
-                maxLength={6}
-                value={otp}
-                onChange={e => { setOtp(e.target.value.slice(0, 6)); setError(''); }}
-                onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
-                placeholder="6 位数字验证码"
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={otp}
+                  onChange={e => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setError(''); }}
+                  onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
+                  placeholder="6 位数字验证码"
                 style={{
                   width: '100%', border: `2px solid ${otp ? COLORS.secondary : '#E2E8F0'}`,
                   borderRadius: 12, padding: '14px 16px', fontSize: 24, fontWeight: 700,

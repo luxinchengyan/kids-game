@@ -1,0 +1,101 @@
+/* src/games/schultetable/SchulteTable.css */
+
+.schulte-table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f0f8ff; /* AliceBlue */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.schulte-game-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.schulte-game-info div {
+  font-weight: bold;
+}
+
+.schulte-game-info button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6347; /* Tomato red */
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.schulte-game-info button:hover {
+  background-color: #e55337;
+}
+
+.schulte-grid {
+  display: grid;
+  border: 2px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.schulte-cell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 1.4em;
+  font-weight: bold;
+  box-sizing: border-box;
+  background-color: #fff; /* Default background */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.schulte-cell.tapped {
+  background-color: #d3d3d3; /* Light gray when tapped */
+  color: #888; /* Faded color for tapped numbers */
+}
+
+.schulte-cell.target {
+  background-color: #a0d4ff; /* Light blue for the target number */
+  color: #000; /* Black text for target */
+}
+
+.schulte-cell:not(.tapped):hover {
+  background-color: #f0f8ff; /* Alice blue on hover */
+}
+
+.cell-value {
+  color: #333;
+}
+
+/* Thick borders for 3x3 boxes */
+.border-bottom-thick {
+  border-bottom: 2px solid #333 !important;
+}
+
+.border-right-thick {
+  border-right: 2px solid #333 !important;
+}
+
+.game-complete-message {
+  margin-top: 20px;
+  font-size: 1.5em;
+  color: #28a745; /* Green for success */
+  font-weight: bold;
+}

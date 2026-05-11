@@ -4,7 +4,7 @@
  */
 
 import type { GameThemeConfig, MoleItem } from '../common/WhackAMole';
-import { defaultSpeakText, shuffle } from '../common/WhackAMole';
+import { defaultSpeakText, shuffle } from '../../lib/gameUtils';
 
 // ==========================
 // 拼音主题

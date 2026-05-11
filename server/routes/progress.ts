@@ -4,11 +4,12 @@
 import { Router, Response } from 'express';
 import { getDatabase } from '../db/factory';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import type { IDatabase } from '../db/types';
 
 const router = Router();
 router.use(requireAuth);
 
-async function assertChildOwner(db: any, childId: string, parentId: string, res: Response): Promise<boolean> {
+async function assertChildOwner(db: IDatabase, childId: string, parentId: string, res: Response): Promise<boolean> {
   const child = await db.findChildById(childId);
   if (!child || child.parentId !== parentId) {
     res.status(404).json({ code: 'NOT_FOUND', message: '孩子档案不存在' });

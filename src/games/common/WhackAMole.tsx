@@ -16,6 +16,12 @@ import { Button } from '../../components/Button';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { track } from '../../lib/analytics';
 import { PageLayout } from '../../components/PageLayout';
+import {
+  type LevelConfig,
+  LevelSelectScreen,
+  LevelCompleteOverlay,
+  useLevelProgress,
+} from './LevelSystem';
 
 // ==========================
 // 类型定义
@@ -98,7 +104,7 @@ interface Feedback {
 }
 
 /** 游戏阶段 */
-export type GamePhase = 'start' | 'playing' | 'results';
+export type GamePhase = 'level-select' | 'start' | 'playing' | 'results';
 
 /** 难度级别 */
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
@@ -135,28 +141,6 @@ export const DEFAULT_DIFFICULTY_SETTINGS: Record<DifficultyLevel, DifficultyConf
 // 工具函数
 // ==========================
 
-/** 数组随机打乱 */
-export function shuffle<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-/** 默认语音合成 */
-export function defaultSpeakText(text: string, lang: string = 'zh-CN') {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.85;
-    utterance.pitch = 1.1;
-    window.speechSynthesis.speak(utterance);
-  }
-}
-
 // ==========================
 // 通用打地鼠游戏组件
 // ==========================
@@ -174,13 +158,20 @@ export interface WhackAMoleProps {
     moleColor?: string;
     targetColor?: string;
   };
+  /**
+   * 关卡列表（可选）。
+   * 提供后进入「闯关模式」，每一关的 dataPool/moleCount/roundCount
+   * 由 LevelConfig.extra 字段驱动。
+   */
+  levels?: LevelConfig[];
 }
 
 export function WhackAMole({ 
   gameId, 
   theme, 
   difficultySettings,
-  customStyles 
+  customStyles,
+  levels,
 }: WhackAMoleProps) {
   const navigate = useNavigate();
   const { handleGameComplete } = useGameCompletion(gameId);
@@ -190,8 +181,13 @@ export function WhackAMole({
     ...difficultySettings,
   };
 
+  // 关卡模式
+  const isLevelMode = Boolean(levels && levels.length > 0);
+  const [currentLevel, setCurrentLevel] = useState<LevelConfig | null>(null);
+  const { submitResult } = useLevelProgress(gameId, levels ?? []);
+
   // 游戏状态
-  const [phase, setPhase] = useState<GamePhase>('start');
+  const [phase, setPhase] = useState<GamePhase>(isLevelMode ? 'level-select' : 'start');
   const [difficulty, setDifficulty] = useState<DifficultyLevel>('easy');
   const [score, setScore] = useState(0);
   const [currentRound, setCurrentRound] = useState(0);
@@ -220,6 +216,47 @@ export function WhackAMole({
     setTotalRounds(mergedDifficultySettings[selectedDifficulty].roundCount);
     
     track('game_start', { gameId, difficulty: selectedDifficulty });
+  }, [gameId, mergedDifficultySettings]);
+
+  /** 从关卡配置启动游戏（关卡模式专用） */
+  const startGameFromLevel = useCallback((level: LevelConfig) => {
+    const extra = level.extra ?? {};
+    const roundCount = (extra.roundCount as number | undefined) ?? level.itemCount ?? 8;
+    const moleCount = (extra.moleCount as number | undefined) ?? 3;
+    const showTime = (extra.showTime as number | undefined) ?? 4000;
+    const spawnInterval = (extra.spawnInterval as number | undefined) ?? 2000;
+    const gridSize = (extra.gridSize as number | undefined) ?? 3;
+    const dataPool = (extra.dataPool as string | undefined);
+
+    // 覆写当前难度配置（在 mergedDifficultySettings 中临时替换 easy 以复用 spawnMoles）
+    // 实际上通过 difficulty state + mergedDifficultySettings['easy'] 传递，但更简单的是
+    // 我们直接把 level-derived 配置注入到 difficulty='easy' 的 slot，游戏内部读 difficulty
+    mergedDifficultySettings['easy'] = {
+      moleCount,
+      showTime,
+      spawnInterval,
+      roundCount,
+      gridSize,
+      dataPool,
+    };
+
+    setCurrentLevel(level);
+    setDifficulty('easy');
+    setPhase('playing');
+    setScore(0);
+    setCurrentRound(1);
+    setCorrectHits(0);
+    setWrongHits(0);
+    setCombo(0);
+    setMaxCombo(0);
+    setTotalRounds(roundCount);
+
+    track('game_start', {
+      gameId,
+      levelId: level.id,
+      levelName: level.name,
+      difficulty: level.difficulty,
+    });
   }, [gameId, mergedDifficultySettings]);
 
   // 生成地鼠
@@ -346,10 +383,17 @@ export function WhackAMole({
 
     const accuracy = correctHits + wrongHits > 0 ? correctHits / (correctHits + wrongHits) : 0;
     const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : accuracy >= 0.5 ? 1 : 0;
+    const passed = accuracy >= 0.5;
+
+    // 关卡模式：持久化当前关卡进度
+    if (isLevelMode && currentLevel) {
+      submitResult(currentLevel.id, stars, passed);
+    }
 
     track('game_complete', {
       gameId,
       difficulty,
+      levelId: currentLevel?.id,
       score,
       accuracy,
       stars,
@@ -357,13 +401,13 @@ export function WhackAMole({
     });
 
     handleGameComplete({
-      success: accuracy >= 0.5,
+      success: passed,
       stars,
       xp: score,
       tasksCompleted: totalRounds,
       accuracy,
     });
-  }, [correctHits, wrongHits, score, maxCombo, difficulty, totalRounds, gameId, handleGameComplete]);
+  }, [correctHits, wrongHits, score, maxCombo, difficulty, totalRounds, gameId, handleGameComplete, isLevelMode, currentLevel, submitResult]);
 
   // 回合变化时生成地鼠
   useEffect(() => {
@@ -382,18 +426,44 @@ export function WhackAMole({
   }, []);
 
   const handleBack = useCallback(() => {
-    navigate(theme.backPath);
-  }, [navigate, theme.backPath]);
+    if (isLevelMode) {
+      setPhase('level-select');
+    } else {
+      navigate(theme.backPath);
+    }
+  }, [navigate, theme.backPath, isLevelMode]);
 
   const handleReplay = useCallback(() => {
-    startGame(difficulty);
-  }, [difficulty, startGame]);
+    if (isLevelMode && currentLevel) {
+      startGameFromLevel(currentLevel);
+    } else {
+      startGame(difficulty);
+    }
+  }, [difficulty, startGame, isLevelMode, currentLevel, startGameFromLevel]);
 
   // 计算星级
   const accuracy = correctHits + wrongHits > 0 ? correctHits / (correctHits + wrongHits) : 0;
   const stars = accuracy >= 0.9 ? 3 : accuracy >= 0.7 ? 2 : accuracy >= 0.5 ? 1 : 0;
   const gridSize = mergedDifficultySettings[difficulty].gridSize || 3;
   const totalHoles = gridSize * gridSize;
+
+  // ==========================
+  // 渲染：关卡选择界面（关卡模式）
+  // ==========================
+  if (phase === 'level-select' && isLevelMode && levels) {
+    return (
+      <LevelSelectScreen
+        gameId={gameId}
+        levels={levels}
+        onSelectLevel={(level) => startGameFromLevel(level)}
+        onBack={() => navigate(theme.backPath)}
+        themeColor={theme.themeColor}
+        title={theme.gameName}
+        icon={theme.gameIcon}
+        gradient={theme.themeGradient}
+      />
+    );
+  }
 
   // ==========================
   // 渲染：开始界面
@@ -463,6 +533,27 @@ export function WhackAMole({
   // 渲染：结果界面
   // ==========================
   if (phase === 'results') {
+    // 关卡模式：用 LevelCompleteOverlay 展示结算
+    if (isLevelMode && currentLevel && levels) {
+      const levelIndex = levels.findIndex((l) => l.id === currentLevel.id);
+      const hasNextLevel = levelIndex >= 0 && levelIndex < levels.length - 1;
+      const nextLevel = hasNextLevel ? levels[levelIndex + 1] : undefined;
+      return (
+        <PageLayout maxWidth="700px">
+          <LevelCompleteOverlay
+            level={currentLevel}
+            stars={stars}
+            accuracy={accuracy}
+            themeColor={theme.themeColor}
+            hasNextLevel={hasNextLevel}
+            onNextLevel={nextLevel ? () => startGameFromLevel(nextLevel) : undefined}
+            onRetry={() => startGameFromLevel(currentLevel)}
+            onBackToMap={() => setPhase('level-select')}
+          />
+        </PageLayout>
+      );
+    }
+
     return (
       <PageLayout maxWidth="700px">
         <motion.div

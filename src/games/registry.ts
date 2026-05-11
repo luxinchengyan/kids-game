@@ -1,5 +1,10 @@
 import type { LazyExoticComponent, ComponentType } from 'react';
 
+// New imports for the game components
+import { FutoshikiComponent } from './futoshiki';
+import { SokobanComponent } from './sokoban';
+import { IdiomFillInComponent } from './idiom_fill_in';
+
 export interface LearningPathMeta {
   routeOrder: number;
   levelLabel: string;
@@ -26,6 +31,8 @@ export interface GameConfig {
   themeId?: string; // Groups games into themes
   isThemeHub?: boolean; // Marks theme hub entries
   learningPath?: LearningPathMeta;
+  /** Tags describing what knowledge this game covers — used for filtering and knowledge scope selection */
+  knowledgeScope?: string[];
 }
 
 export const gameRegistry: GameConfig[] = [];
@@ -39,6 +46,36 @@ export function registerGame(config: GameConfig): void {
     gameRegistry.push(config);
   }
 }
+
+// Adding the new game registrations
+registerGame({
+  id: 'futoshiki',
+  name: 'Futoshiki',
+  icon: '?', // Placeholder
+  description: 'Logic puzzle where you must fill a grid with numbers respecting inequalities.',
+  path: '/games/futoshiki',
+  component: FutoshikiComponent,
+  category: 'math',
+});
+
+registerGame({
+  id: 'sokoban',
+  name: 'Sokoban',
+  icon: '?', // Placeholder
+  description: 'Push the boxes to their destination spots in this spatial reasoning puzzle.',
+  path: '/games/sokoban',
+  component: SokobanComponent,
+  category: 'other',
+});
+
+registerGame({
+  id: 'idiom_fill_in',
+  name: '成语填字', // Using Chinese name as in prompt
+  description: 'Fill in the missing characters to form Chinese idioms.',
+  path: '/games/idiom_fill_in',
+  component: IdiomFillInComponent,
+  category: 'english',
+});
 
 export function getGameById(id: string): GameConfig | undefined {
   return gameRegistry.find((g) => g.id === id);
